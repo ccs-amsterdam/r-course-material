@@ -14,9 +14,9 @@ The goal is to organize relevant material into modular components, for more effi
 
 # Data mangling in the tidyverse
 
-* [dplyr](tutorials/R_tidyverse_1_data.md) ([Assignment template](practise/R_basics_2_data_practise.Rmd))
+* [dplyr](tutorials/R_tidyverse_1_dplyr.md) ([practise template](practise/R_tidyverse_1_dplyr_practise.Rmd))
 
 
 # Miscellaneous
 
-* [R Markdown codeblock parameters (.Rmd)](miscellaneous/RMarkdown_parameters.Rmd)
+* [R Markdown codeblock parameters](miscellaneous/RMarkdown_parameters.Rmd)
