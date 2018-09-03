@@ -1,7 +1,7 @@
 R tidyverse: dplyr
 ================
 Kasper Welbers & Wouter van Atteveldt
-2017
+2018-09-03
 
 -   [This tutorial](#this-tutorial)
     -   [About library()](#about-library)

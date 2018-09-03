@@ -1,7 +1,7 @@
 R basics: Data
 ================
 Kasper Welbers & Wouter van Atteveldt
-2017
+2018-09-03
 
 -   [This tutorial](#this-tutorial)
     -   [Structure of this lab exercise](#structure-of-this-lab-exercise)

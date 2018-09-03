@@ -1,7 +1,7 @@
 ---
 title: 'R basics: Getting started'
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2017"
+date: "2018-09-03"
 output: 
   github_document:
     toc: yes
@@ -171,7 +171,6 @@ The entire DTM is pretty big, so we cannot visualize it entirely. Here we print 
  
 ```{r}
 m[1:10,1:10]
-docvars(m)
 ```
 
 For example, we see here that the word "senat", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.

@@ -1,7 +1,7 @@
 R basics: Getting started
 ================
 Kasper Welbers & Wouter van Atteveldt
-2017
+2018-09-03
 
 -   [Working with R](#working-with-r)
     -   [What is R and why should you learn it?](#what-is-r-and-why-should-you-learn-it)
@@ -279,70 +279,6 @@ m[1:10,1:10]
     ##   1817-Monroe        1     4    0
     ##   1821-Monroe        2     4    0
     ##   1825-Adams         1     1    0
-
-``` r
-docvars(m)
-```
-
-    ##                 Year  President       FirstName
-    ## 1789-Washington 1789 Washington          George
-    ## 1793-Washington 1793 Washington          George
-    ## 1797-Adams      1797      Adams            John
-    ## 1801-Jefferson  1801  Jefferson          Thomas
-    ## 1805-Jefferson  1805  Jefferson          Thomas
-    ## 1809-Madison    1809    Madison           James
-    ## 1813-Madison    1813    Madison           James
-    ## 1817-Monroe     1817     Monroe           James
-    ## 1821-Monroe     1821     Monroe           James
-    ## 1825-Adams      1825      Adams     John Quincy
-    ## 1829-Jackson    1829    Jackson          Andrew
-    ## 1833-Jackson    1833    Jackson          Andrew
-    ## 1837-VanBuren   1837  Van Buren          Martin
-    ## 1841-Harrison   1841   Harrison   William Henry
-    ## 1845-Polk       1845       Polk      James Knox
-    ## 1849-Taylor     1849     Taylor         Zachary
-    ## 1853-Pierce     1853     Pierce        Franklin
-    ## 1857-Buchanan   1857   Buchanan           James
-    ## 1861-Lincoln    1861    Lincoln         Abraham
-    ## 1865-Lincoln    1865    Lincoln         Abraham
-    ## 1869-Grant      1869      Grant      Ulysses S.
-    ## 1873-Grant      1873      Grant      Ulysses S.
-    ## 1877-Hayes      1877      Hayes   Rutherford B.
-    ## 1881-Garfield   1881   Garfield        James A.
-    ## 1885-Cleveland  1885  Cleveland          Grover
-    ## 1889-Harrison   1889   Harrison        Benjamin
-    ## 1893-Cleveland  1893  Cleveland          Grover
-    ## 1897-McKinley   1897   McKinley         William
-    ## 1901-McKinley   1901   McKinley         William
-    ## 1905-Roosevelt  1905  Roosevelt        Theodore
-    ## 1909-Taft       1909       Taft  William Howard
-    ## 1913-Wilson     1913     Wilson         Woodrow
-    ## 1917-Wilson     1917     Wilson         Woodrow
-    ## 1921-Harding    1921    Harding       Warren G.
-    ## 1925-Coolidge   1925   Coolidge          Calvin
-    ## 1929-Hoover     1929     Hoover         Herbert
-    ## 1933-Roosevelt  1933  Roosevelt     Franklin D.
-    ## 1937-Roosevelt  1937  Roosevelt     Franklin D.
-    ## 1941-Roosevelt  1941  Roosevelt     Franklin D.
-    ## 1945-Roosevelt  1945  Roosevelt     Franklin D.
-    ## 1949-Truman     1949     Truman        Harry S.
-    ## 1953-Eisenhower 1953 Eisenhower       Dwight D.
-    ## 1957-Eisenhower 1957 Eisenhower       Dwight D.
-    ## 1961-Kennedy    1961    Kennedy         John F.
-    ## 1965-Johnson    1965    Johnson   Lyndon Baines
-    ## 1969-Nixon      1969      Nixon Richard Milhous
-    ## 1973-Nixon      1973      Nixon Richard Milhous
-    ## 1977-Carter     1977     Carter           Jimmy
-    ## 1981-Reagan     1981     Reagan          Ronald
-    ## 1985-Reagan     1985     Reagan          Ronald
-    ## 1989-Bush       1989       Bush          George
-    ## 1993-Clinton    1993    Clinton            Bill
-    ## 1997-Clinton    1997    Clinton            Bill
-    ## 2001-Bush       2001       Bush       George W.
-    ## 2005-Bush       2005       Bush       George W.
-    ## 2009-Obama      2009      Obama          Barack
-    ## 2013-Obama      2013      Obama          Barack
-    ## 2017-Trump      2017      Trump       Donald J.
 
 For example, we see here that the word "senat", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
 
