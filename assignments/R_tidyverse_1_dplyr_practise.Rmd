@@ -1,0 +1,61 @@
+---
+title: 'Practise R tidyverse: dplyr'
+output:
+  html_document:
+  toc: true
+  theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+# Completing your assignment in RMarkdown
+
+For this week's assignment (see separate tutorial on Canvas) you will again be using RMarkdown. If you need to refresh your memory about how to use RMarkdown and this template, please revisit the document from last week.
+
+One addition, is that this time you will be loading a package while working in RMarkdown. This is not a problem, but by default, RMarkdown will also generate all the message that you receive, including those when opening a package. This is, well... ugly. So there are ways to suppress these message. Notice that in the following code block we have added `, message = FALSE` to the first line. This suppresses the messages.
+
+```{r, message=FALSE}
+library(dplyr)
+```
+
+There are many such options to determine whether and how RMarkdown displays output from the code blocks. You do not need to use them yourself, but it's good to be aware of. For now, make sure to include this code block (with `library(dplyr)`) in your RMarkdown file so that you can use the `dplyr` functions.
+
+
+# Assignment: Working with dplyr
+
+For this assignment, we will first download data and create a tibble. Keep the following code block intact.
+
+```{r}
+url = 'https://raw.githubusercontent.com/fivethirtyeight/data/master/daily-show-guests/daily_show_guests.csv'
+d = read.csv(url)
+d = as_data_frame(d)
+```
+
+This data contains all the guests John Stewart received in the Daily show.
+
+### A
+
+Given the following analysis:
+
+* Rewrite the code using pipes (`%>%`)
+* Interpret the results (answer below the code block)
+
+```{r}
+ds = d
+ds = filter(ds, Group == 'Acting')
+ds = group_by(ds, YEAR)
+ds = summarize(ds, N = n())
+plot(ds, type='l')
+```
+
+### B
+
+Do something interesting (within the context of analytics and this data). 
+
+* Use piping to write a clear piece of code
+* Interpret the results
+
+```{r}
+
+```
+

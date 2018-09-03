@@ -1,0 +1,166 @@
+---
+title: 'Practise R basics: Data'
+output:
+  html_document:
+  toc: true
+  theme: united
+---
+
+# Completing your assignment in RMarkdown
+
+For this week's assignment (see separate tutorial on Canvas) you will be using RMarkdown. The file that you are currently reading is an RMarkdown file (.Rmd). This is type of file that combines two things:
+
+* **Regular text**, such as the text you are reading now. RMarkdown is a [markup language](https://en.wikipedia.org/wiki/Markup_language), which means that we type certain instructions for how the text should be presented. For example, the hashtag before "Completing your assignment in RMarkdown" indicates that this is a level 1 header, and the asterisk in front of this paragraph indicates that this is a bulletpoint. The advantage is that this enables you to quickly type a document without worrying about lay-out, and afterwards we can create a pretty document (e.g., in html, docx or pdf) where we can still specify what layout we want to use (e.g., detemining the size of a level one header).   
+* **Code blocks**, in which you can type R code. If you *Knit* the file (we'll show how in a minute), this code will also be evaluated, and both the code and results will be printed in the document. 
+
+Together, these components make it easy to create reports. Since we are only storing the text in a markup language and the analysis in R syntax, we can easily update the document, or redo an analysis with new data. To use RMarkdown, you will first have to install the RMarkdown package, and it is recommended to get the latest version of knitr. For this, run the following commands (in your console, in an R script, or directly from within the following codeblock):
+
+```{r, eval=F}
+install.packages('rmarkdown')
+install.packages('knitr')
+```
+
+You can do many things with RMarkdown, but for this assignment we'll stick to the basics. Below you will find templates for completing your assignments. For each assignment, you will have to enter your code in the designated code blocks. Eventually, you will *Knit* your file to a .html or .doc file and hand it in on Canvas. We'll start with an example.
+
+# Example of assignment template
+
+For each assignment you'll get a codeblock, which looks like this:
+
+```{r}
+x = 5
+x
+```
+
+The R code that you will put into the codeblock will automatically be executed when you Knit the document. Any lines of code that produce output in your console, such as the single x at the end of the above codeblock, will now produce output in you document. If you have installed RMarkdown as instructed above, you will see a button *Knit* at the top of this window. Press this button now to *Knit* the current .Rmd file. You can also click on the dropdown button just right of *Knit* to select an output format.
+
+When working on your assignments, it is recommended to *Knit* regularly to see if your code works. If your code produces errors the document won't be generated, and its easier to fix mistake immediatly than to trace back where it went wrong (though the error messages will point you in the right direction).
+
+# Assignment 1: Data types
+
+### 1.A
+Complete the steps in the bulletpoints in the codeblock directly below.
+
+* Assign the number `50` to the name `x`
+* Assign the number `30` to the name `y`
+* Add `x` to `y`
+
+```{r}
+
+
+
+```
+
+### 1.B
+The following line of code assigns the number `100` as a character value to the name `x`. Add code in which you: 
+
+* Transform x to a numerical value
+* Multiply x by 2 
+
+```{r}
+x = "100"
+
+
+```
+
+### 1.C
+You are given a character vector `name`. Now:
+
+* Transform `name` to a `factor` type
+* Show the levels/labels of `name`  
+
+
+```{r}
+name = c('Alice','Alice','Alice','Bob','Bob','Carol')
+
+
+```
+
+### 1.D
+You are given a numeric vector `age`, that contains the ages of 10 people, that conveniently happens to count up from 15 to 24. Use comparisons to create a logical vector that shows:
+
+* People older than 18
+* People younger than 21
+* People older than 18 and younger than 21
+* People younger than 18 or older than 21
+
+```{r}
+age = c(15,16,17,18,19,20,21,22,23,24)
+age >= 20  ## example
+```
+
+
+### 1.E
+Fill in the format argument in the following `strptime()` functions to parse the date properly. 
+
+```{r}
+strptime('1961-12-24', format='%Y-%m-%d')   ## example
+strptime('25 12, 1961', format='')
+strptime('1961-12-26T19:00:00', format='')
+```
+
+### 1.F
+
+Fill in the format in the following `strftime()` functions to tell:
+
+* The year
+* The year and day
+* The time
+
+```{r}
+x = strptime('2012/01/01 20:15:00', format='%Y/%m/%d %H:%M:%S')
+strftime(x, format='')
+strftime(x, format='')
+strftime(x, format='')
+```
+
+
+# Assignment 2: Data structures
+
+
+### 2.A
+
+Given the character vector `x`, use selection to return the following subsets.
+
+* All elements in the positions three to twenty
+* All elements except for those in the positions three to twenty
+* The elements in reversed order
+
+```{r}
+x = letters   ## built-in vector of alphabet letters
+x[1:5]        ## example
+
+
+
+```
+
+### 2.B
+
+You are given a numeric vector `x`, and are shown how to calculate the mean and standard deviation.
+
+* Calculate the [Z-score](https://en.wikipedia.org/wiki/Standard_score) for all values of x.
+
+```{r}
+x = c(20,10,35,23,27,16,29,35,27,35,25,16,5,12,34,16,25,34,17,37,24,29)
+mean(x)
+sd(x)
+
+```
+
+
+### 2.C
+
+R has some built-in data.frames for testing, such as the famous [iris](https://en.wikipedia.org/wiki/Iris_flower_data_set) data, about the length and width of the sepals and petals of three species of Iris. Use this data.frame, named `iris`, and:
+
+* show the rows for which the sepal length is smaller than 4.5
+* show the rows for which the petals are at least 8 times longer than they are wide
+* show the sepal width column for the species "setosa" and "versicolor"
+* Find the setosa flowers with a sepal length of at most 4.4, and rename them to "sad setosa"
+
+
+```{r}
+head(iris)       ## shows the top 6 rows of the iris data.frame
+
+
+
+# tip: changing factors can be difficult, remember that changing them to character-vectors using "as.character()" is an easy way out
+```

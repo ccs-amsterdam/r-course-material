@@ -1,0 +1,69 @@
+---
+title: 'Practice R basics: functions'
+output:
+  html_document:
+  toc: true
+  theme: united
+editor_options: 
+  chunk_output_type: console
+---
+
+# Completing your assignment in RMarkdown
+
+For this week's assignment (see separate tutorial on Canvas) you will again be using RMarkdown. If you need to refresh your memory about how to use RMarkdown and this template, please revisit the document from last week.
+
+One addition, is that this time you will be loading a package while working in RMarkdown. This is not a problem, but by default, RMarkdown will also generate all the message that you receive, including those when opening a package. This is, well... ugly. So there are ways to suppress these message. Notice that in the following code block we have added `, message = FALSE` to the first line. This suppresses the messages.
+
+```{r, message=FALSE}
+library(dplyr)
+```
+
+There are many such options to determine whether and how RMarkdown displays output from the code blocks. You do not need to use them yourself, but it's good to be aware of. For now, make sure to include this code block (with `library(dplyr)`) in your RMarkdown file so that you can use the `dplyr` functions.
+
+
+# Functions
+
+
+### A
+
+Use the `data.frame()` function to:
+
+* Create a data.frame using the V1 and V2 vectors as columns, where V1 is named "age" and V2 is named "gender" 
+* Create the same data.frame, but this time use arguments to prevent R from converting strings (in the "gender" variable) to factors
+
+```{r}
+V1 = floor(rnorm(10, mean = 21, sd = 3))            ## random age
+V2 = sample(c('Male','Female'), 10, replace=T)   ## random gender
+
+```
+
+### B
+
+This time, you will be using a new function, so we recommend looking up the documentation. Given the iris data (as used last week), use the `cor.test()` function to calculate:
+
+* The correlation between Petal.Length and Petal.Width, using the default settings.
+* The correlation between Petal.Length and Petal.Width, but this time using the "spearman" correlation method.
+
+```{r}
+head(iris)         ## shows top 6 rows, for reference
+## reminder: use iris$... to get a column vector
+
+
+```
+
+### C
+
+Use the `paste()` function to:
+
+* Paste the vectors `x` and `y` together, separated by a dot (1.a, 2.b, etc.)
+* Collapse the elements in y, separated by  
+
+In addition, look at the documentation of the `paste()` function and explain (answer below the codeblock) what the difference is between `paste` and `paste0`.  
+
+```{r}
+x = 1:5
+y = c('a','b','c','d','e')
+
+
+```
+

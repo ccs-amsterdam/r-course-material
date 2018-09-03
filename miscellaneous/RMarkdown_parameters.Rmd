@@ -1,0 +1,72 @@
+# RMarkdown parameters
+
+RMarkdown has many features, as can be seen on this convenient [cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
+Here we'll discuss some usefull *codeblock parameters*.
+
+Paremeters are given between the curly brackets above a codeblock, just after the r (see below for examples). There are many usefull parameters, but for now we'll focus on:
+
+| parameter   | effect                                                         |
+|-------------|----------------------------------------------------------------|
+| eval = F    | don't evaluate (i.e. execute/run) the code, but do show output |
+| echo = F    | don't show code, but do show output                            |
+| message = F | don't show messages                                            |
+| warning = F | don't show warnings                                            |  
+| cache = T   | remember output, so it doensn't need to be evaluated the next  time. Resets when the code is changed |
+
+### eval = F
+
+The following code is not evaluated. This is for instance usefull to show that a certain package needs to be installed, without actually installing it. The following package does not exist, but the code is not evaluated so there is no error.
+
+```{r, eval=F}
+install.packages('not_even_a_real_package')
+```
+
+### echo = F
+
+The code is 10*10, but only the output (100) is shown. This is usefull for actual reports, where the code is not important but the output is.
+!!! NOTE: for the lab reports, do not use this, because I do want to see the code
+
+```{r, echo=F}
+10*10
+```
+
+### message = F
+
+R operations can return messages (red text that is not a warning or error). This is usefull when working with code, but not pretty in reports. With message = F you can turn it off.
+
+In the following 2 blocks, we'll first run the code normally, and the second time with message = F
+
+```{r}
+message("message example")
+```
+
+```{r, message=F}
+message("You won't see me")
+```
+
+### warning = F
+
+Like message = F, but for warnings.
+
+```{r}
+warning("warning!!")
+```
+
+```{r, message=F, warning=F}
+warning("You won't see me")
+```
+
+### cache = T
+
+If cache is TRUE, the output is stored, so that the next time you perform knitr, it does not have to be calculated/downloaded/etc. again. 
+If you change the code (even a little bit) it forgets the results, and re-calculates on the next run.
+
+In this example, the Sys.sleep() function let's R sleep for 10 seconds.
+After knitting this RMarkdown file the first time, do it again to see that it now returns the output immediately.
+
+```{r, cache=T}
+Sys.sleep(10)
+
+
+print('I fell asleep for 10 seconds')
+```
