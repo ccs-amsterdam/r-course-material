@@ -1,7 +1,7 @@
 R basics: Getting started
 ================
 Kasper Welbers & Wouter van Atteveldt
-2018-09-03
+2018-09
 
 -   [Working with R](#working-with-r)
     -   [What is R and why should you learn it?](#what-is-r-and-why-should-you-learn-it)

@@ -1,9 +1,10 @@
 R tidyverse: dplyr
 ================
-Kasper Welbers & Wouter van Atteveldt
-2018-09-03
+Kasper Welbers & Wouter van Attevedlt
+2018-09
 
 -   [This tutorial](#this-tutorial)
+    -   [Exercise](#exercise)
     -   [About library()](#about-library)
     -   [Working with data.frames using dplyr](#working-with-data.frames-using-dplyr)
         -   [From data.frame to tibble](#from-data.frame-to-tibble)
@@ -26,6 +27,13 @@ install.packages('dplyr')
 ``` r
 library(dplyr)
 ```
+
+Exercise
+--------
+
+This document contains a tutorial, and there is an excercise that you can find and complete in the separate **R\_tidyverse\_1\_practise.Rmd** file. You need to open this file in RStudio.
+
+If you want to learn more about the Tidyverse, the free, online book [R for Data Science](http://r4ds.had.co.nz/) offers an excellent introduction and overview.
 
 About library()
 ---------------

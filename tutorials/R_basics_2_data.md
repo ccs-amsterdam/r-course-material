@@ -1,10 +1,10 @@
 R basics: Data
 ================
 Kasper Welbers & Wouter van Atteveldt
-2018-09-03
+2018-09
 
 -   [This tutorial](#this-tutorial)
-    -   [Structure of this lab exercise](#structure-of-this-lab-exercise)
+    -   [Exercise](#exercise)
 -   [Data types](#data-types)
     -   [Numeric](#numeric)
     -   [Character](#character)
@@ -31,15 +31,15 @@ However, data science is not always smooth sailing. You will often find yourself
 
 In this week's lab you will learn about the most basic R data types and structures. You can consider these as the main building blocks for working with R data. Learning about these basics might be less exciting compared to using the advanced features, but in the long run it will save you time and frustration.
 
-Structure of this lab exercise
-------------------------------
+Exercise
+--------
 
-This week's lab consists of two parts:
+This tutorial consists of two parts:
 
 -   Data types
 -   Data structures
 
-Each parts has an assignment, that you can find and complete in the separate **Lab\_week2\_assignment\_template.Rmd** file on Canvas. You need to open this file in RStudio.
+Each parts has an excercise, that you can find and complete in the separate **Lab\_week2\_assignment\_template.Rmd** file on Canvas. You need to open this file in RStudio.
 
 If you want to learn more about the basics of R in addition to this lab tutorial, we recommend taking one of the many (free) online introductions, such as the ones offered at [DataCamp](https://www.datacamp.com/courses/free-introduction-to-r/) or [Code School](http://tryr.codeschool.com/). Also, a good way to jog your memory after learning the basics, is to grab some of the [nice cheatsheets](https://www.rstudio.com/resources/cheatsheets/) collected on the RStudio website. For the basics of R, the cheatsheet [Base R](http://github.com/rstudio/cheatsheets/raw/master/base-r.pdf) is particularly usefull.
 

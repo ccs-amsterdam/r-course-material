@@ -1,7 +1,7 @@
 ---
 title: 'R tidyverse: dplyr'
-author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09-03"
+author: "Kasper Welbers & Wouter van Attevedlt"
+date: "2018-09"
 output: 
   github_document:
     toc: yes
@@ -30,6 +30,13 @@ install.packages('dplyr')
 ```{r}
 library(dplyr)
 ```
+
+## Exercise
+
+This document contains a tutorial, and there is an excercise that you can find and complete in the separate **R_tidyverse_1_practise.Rmd** file. You need to open this file in RStudio. 
+
+If you want to learn more about the Tidyverse, the free, online book [R for Data Science](http://r4ds.had.co.nz/) offers an excellent introduction and overview.
+
 
 ## About library()
 
