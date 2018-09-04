@@ -16,7 +16,6 @@ Kasper Welbers & Wouter van Atteveldt
 -   [Your first project](#your-first-project)
     -   [Creating a new RStudio project](#creating-a-new-rstudio-project)
     -   [Installing and using the quanteda package](#installing-and-using-the-quanteda-package)
--   [Assignment](#assignment)
 
 Working with R
 ==============
@@ -40,10 +39,10 @@ Installing R and RStudio
 
 For the current course material, you will need to install two pieces of software.
 
--   *R* is the actual R software, that is required to run R code.
+-   *R* is the actual R software, that is used to run R code.
 -   *RStudio* is a graphical user interface (GUI) that makes working with R much easier. While it is not required to use R, and there are other GUI's available, using RStudio is highly recommended.
 
-R and RStudio are installed on the VU computers, but it's highly recommended that you install the software on your own device. Both can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
+Both progrems can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
 
 ### Installing R
 
@@ -239,11 +238,11 @@ When we create a DTM there are some standard techniques for **preprocessing** th
 For this example, we'll use make terms lowercase, remove english stopwords, remove punctuation, and use stemming. We will use the `dfm` function from the quanteda package. DFM stands for document-feature matrix, which is a more general form of a document-term matrix (a feature can be a term, but also other things). In our case, the DFM is a DTM.
 
 ``` r
-m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE, stem = TRUE)
+m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE)
 m
 ```
 
-    ## Document-feature matrix of: 58 documents, 5,405 features (89.2% sparse).
+    ## Document-feature matrix of: 58 documents, 9,205 features (92.6% sparse).
 
 We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2% sparse, which means that 89.2% of the cells in the DTM have the value zero. In general, DTM's are very sparse, because individual documents (rows) contain only a small portion of all the words in the vocabulary (columns).
 
@@ -253,32 +252,32 @@ The entire DTM is pretty big, so we cannot visualize it entirely. Here we print 
 m[1:10,1:10]
 ```
 
-    ## Document-feature matrix of: 10 documents, 10 features (53% sparse).
+    ## Document-feature matrix of: 10 documents, 10 features (60% sparse).
     ## 10 x 10 sparse Matrix of class "dfm"
     ##                  features
-    ## docs              fellow-citizen senat hous repres among vicissitud incid
-    ##   1789-Washington              1     1    2      2     1          1     1
-    ##   1793-Washington              0     0    0      0     0          0     0
-    ##   1797-Adams                   3     1    3      3     4          0     0
-    ##   1801-Jefferson               2     0    0      1     1          0     0
-    ##   1805-Jefferson               0     0    0      0     7          0     0
-    ##   1809-Madison                 1     0    0      1     0          1     0
-    ##   1813-Madison                 1     0    0      0     1          0     0
-    ##   1817-Monroe                  5     0    0      1     3          0     2
-    ##   1821-Monroe                  1     0    0      2     1          0     0
-    ##   1825-Adams                   0     0    0      2     3          1     0
+    ## docs              fellow-citizens senate house representatives among
+    ##   1789-Washington               1      1     2               2     1
+    ##   1793-Washington               0      0     0               0     0
+    ##   1797-Adams                    3      1     0               2     4
+    ##   1801-Jefferson                2      0     0               0     1
+    ##   1805-Jefferson                0      0     0               0     7
+    ##   1809-Madison                  1      0     0               0     0
+    ##   1813-Madison                  1      0     0               0     1
+    ##   1817-Monroe                   5      0     0               1     3
+    ##   1821-Monroe                   1      0     0               0     1
+    ##   1825-Adams                    0      0     0               1     3
     ##                  features
-    ## docs              life event fill
-    ##   1789-Washington    1     2    1
-    ##   1793-Washington    0     0    0
-    ##   1797-Adams         2     0    0
-    ##   1801-Jefferson     1     0    0
-    ##   1805-Jefferson     2     1    0
-    ##   1809-Madison       1     0    1
-    ##   1813-Madison       1     0    0
-    ##   1817-Monroe        1     4    0
-    ##   1821-Monroe        2     4    0
-    ##   1825-Adams         1     1    0
+    ## docs              vicissitudes incident life event filled
+    ##   1789-Washington            1        1    1     2      1
+    ##   1793-Washington            0        0    0     0      0
+    ##   1797-Adams                 0        0    2     0      0
+    ##   1801-Jefferson             0        0    1     0      0
+    ##   1805-Jefferson             0        0    2     0      0
+    ##   1809-Madison               0        0    1     0      1
+    ##   1813-Madison               0        0    1     0      0
+    ##   1817-Monroe                0        2    1     3      0
+    ##   1821-Monroe                0        0    2     1      0
+    ##   1825-Adams                 1        0    1     0      0
 
 For example, we see here that the word "senat", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
 
@@ -290,17 +289,24 @@ To get a basic idea of what presidents talk about, we can create a wordcloud wit
 textplot_wordcloud(m, min_count = 50)
 ```
 
-![](R_basics_1_getting_started_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](R_basics_1_getting_started_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-10-1.png)
 
-OK, that's decent, but we can do better. In particular, it would be nice to use some colors in addition to wordsize to complement the differences in wordfrequency. In the quanteda documentation we see that you can pass multiple colors to the function to achieve this.
+OK, that's decent, but we can do better. One thing we can do is take a /subset/ of the speeches, for example only speeches after 1945 or only speeches by Obama:
 
 ``` r
-textplot_wordcloud(m, min_count = 50, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+m_obama = dfm_subset(m, President=="Obama")
+m_postwar = dfm_subset(m, Year > 1945)
 ```
 
-![](R_basics_1_getting_started_files/figure-markdown_github/unnamed-chunk-11-1.png)
+Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this
 
-Alright, that'll do for now. Try to play around a bit. If you want to use a better color combination (which shouldn't be too hard), you can get a list of the available colors.
+``` r
+textplot_wordcloud(m_postwar, max_words = 100, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+```
+
+![](R_basics_1_getting_started_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-12-1.png)
+
+Alright, that'll do for now. Try to play around a bit. If you want to use a better color combination (which shouldn't be too hard), you can get a list of the available colors, or see [this page](https://www.r-graph-gallery.com/42-colors-names/) for an overview of colors.
 
 ``` r
 colors()     ## output not printed in this document
@@ -325,11 +331,6 @@ tk = textstat_keyness(m, docvars(m, 'President') == "Obama")
 textplot_keyness(tk, show_legend = F)
 ```
 
-![](R_basics_1_getting_started_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](R_basics_1_getting_started_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-15-1.png)
 
 In the plot we see 20 terms that are overrepresented in Obama's speeches. These are the top 20 terms with the blue bars. Most strongly overrepresented are the terms "journey", "generat(ion)", "job" and "creed". The 20 terms with the grey bars are the underrepresented terms, meaning that Obama used them relatively less often than the average president. Again, we could plug these words into a keyword-in-context listing to get some context.
-
-Assignment
-==========
-
-Your assignment for this tutorial is simply to play around a bit with the **quanteda** code. Try to get a feel for typing or pasting syntax in R, and running lines of code.

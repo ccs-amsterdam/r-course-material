@@ -29,10 +29,10 @@ The focus of this tutorial is to get you started with R, and to see how easy it 
 
 For the current course material, you will need to install two pieces of software.
 
-* *R* is the actual R software, that is required to run R code. 
+* *R* is the actual R software, that is used to run R code. 
 * *RStudio* is a graphical user interface (GUI) that makes working with R much easier. While it is not required to use R, and there are other GUI's available, using RStudio is highly recommended.  
 
-R and RStudio are installed on the VU computers, but it's highly recommended that you install the software on your own device. Both can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
+Both progrems can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
 
 ### Installing R
 
@@ -161,7 +161,7 @@ When we create a DTM there are some standard techniques for **preprocessing** th
 For this example, we'll use make terms lowercase, remove english stopwords, remove punctuation, and use stemming. We will use the `dfm` function from the quanteda package. DFM stands for document-feature matrix, which is a more general form of a document-term matrix (a feature can be a term, but also other things). In our case, the DFM is a DTM.
 
 ```{r}
-m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE, stem = TRUE)
+m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE)
 m
 ```
 
@@ -183,13 +183,21 @@ To get a basic idea of what presidents talk about, we can create a wordcloud wit
 textplot_wordcloud(m, min_count = 50)
 ```
 
-OK, that's decent, but we can do better. In particular, it would be nice to use some colors in addition to wordsize to complement the differences in wordfrequency. In the quanteda documentation we see that you can pass multiple colors to the function to achieve this. 
+OK, that's decent, but we can do better. One thing we can do is take a /subset/ of the speeches, for example only speeches after 1945 or only speeches by Obama:
 
 ```{r, message=F, warning=F}
-textplot_wordcloud(m, min_count = 50, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+m_obama = dfm_subset(m, President=="Obama")
+m_postwar = dfm_subset(m, Year > 1945)
 ```
 
-Alright, that'll do for now. Try to play around a bit. If you want to use a better color combination (which shouldn't be too hard), you can get a list of the available colors.
+Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. 
+Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this 
+
+```{r, message=F, warning=F}
+textplot_wordcloud(m_postwar, max_words = 100, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+```
+
+Alright, that'll do for now. Try to play around a bit. If you want to use a better color combination (which shouldn't be too hard), you can get a list of the available colors, or see [this page](https://www.r-graph-gallery.com/42-colors-names/) for an overview of colors. 
 
 ```{r, eval=F}
 colors()     ## output not printed in this document
@@ -215,8 +223,3 @@ textplot_keyness(tk, show_legend = F)
 ```
 
 In the plot we see 20 terms that are overrepresented in Obama's speeches. These are the top 20 terms with the blue bars. Most strongly overrepresented are the terms "journey", "generat(ion)", "job" and "creed". The 20 terms with the grey bars are the underrepresented terms, meaning that Obama used them relatively less often than the average president. Again, we could plug these words into a keyword-in-context listing to get some context. 
-
-
-# Assignment
-
-Your assignment for this tutorial is simply to play around a bit with the **quanteda** code. Try to get a feel for typing or pasting syntax in R, and running lines of code.
