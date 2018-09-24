@@ -1,47 +1,33 @@
-R basics: Data
+R basics: data and functions
 ================
 Kasper Welbers & Wouter van Atteveldt
 2018-09
 
 -   [This tutorial](#this-tutorial)
-    -   [Exercise](#exercise)
 -   [Data types](#data-types)
-    -   [Numeric](#numeric)
-    -   [Character](#character)
-    -   [Factor](#factor)
-    -   [Logical](#logical)
-        -   [Comparisons](#comparisons)
-        -   [Logical operators](#logical-operators)
-    -   [Date](#date)
 -   [Data structures](#data-structures)
-    -   [Vector](#vector)
-        -   [Selecting elements](#selecting-elements)
-    -   [Data.frame](#data.frame)
-        -   [Selecting rows, columns and elements](#selecting-rows-columns-and-elements)
-        -   [Subsetting, adding and modifying data](#subsetting-adding-and-modifying-data)
-    -   [Matrix](#matrix)
-    -   [List](#list)
+-   [Functions](#functions)
+-   [Further reading](#further-reading)
 
 This tutorial
 =============
 
-In the first tutorial you immediately started using advanced features in R, utilizing specialized packages for obtaining data and performing text analysis. For many purposes, you can use R purely as a way to get stuff done with these kinds of convenient packages. Many of these packages also contain detailed instructions, often called vignettes, that show you step-by-step how to use them.
+In the first tutorial you immediately started using advanced features in R, utilizing specialized packages for performing text analysis. For many purposes, you can use R purely as a way to get stuff done with these kinds of convenient packages. Many of these packages also contain detailed instructions, often called vignettes, that show you step-by-step how to use them.
 
-However, data science is not always smooth sailing. You will often find yourself willing to do something specific that is not directly supported by a package, or you have to work with data that first needs to be cleaned and prepared in order to use a certain function. It is therefore important to learn some of the basics for working with data in R.
+However, data science is not always smooth sailing. You will often find yourself willing to do something specific that is not directly supported by a package, or you have to work with data that first needs to be cleaned and prepared in order to use a certain function. It is therefore important to learn some of the basics.
 
-In this week's lab you will learn about the most basic R data types and structures. You can consider these as the main building blocks for working with R data. Learning about these basics might be less exciting compared to using the advanced features, but in the long run it will save you time and frustration.
+In this week's lab you will learn about basic R data types, data structures and functions. You can consider these as the main building blocks for working with R data. Learning about these basics might be less exciting compared to using the advanced features, but in the long run it will save you time and frustration.
 
 Exercise
 --------
 
-This tutorial consists of two parts:
+This tutorial consists of three parts:
 
 -   Data types
 -   Data structures
+-   Functions
 
-Each parts has an excercise, that you can find and complete in the separate **Lab\_week2\_assignment\_template.Rmd** file on Canvas. You need to open this file in RStudio.
-
-If you want to learn more about the basics of R in addition to this lab tutorial, we recommend taking one of the many (free) online introductions, such as the ones offered at [DataCamp](https://www.datacamp.com/courses/free-introduction-to-r/) or [Code School](http://tryr.codeschool.com/). Also, a good way to jog your memory after learning the basics, is to grab some of the [nice cheatsheets](https://www.rstudio.com/resources/cheatsheets/) collected on the RStudio website. For the basics of R, the cheatsheet [Base R](http://github.com/rstudio/cheatsheets/raw/master/base-r.pdf) is particularly usefull.
+Each parts has an excercise (not to be handed in), that you can find and complete in the separate **R\_basics\_2\_data\_and\_functions\_practise.Rmd** file on Canvas. You need to open this file in RStudio. We recommend first reading through the entire tutorial and then completing the exercise.
 
 Data types
 ==========
@@ -68,8 +54,8 @@ class(x)   ## view the class of the value assigned to x
 
 x + 3
 x / 2
-log(x)
-sqrt(x)
+log(x)     ## logarithm
+sqrt(x)    ## square root
 ```
 
 For those who have experience with low-level programming languages, it is nice to know that you do not need to think about different types for representing numbers (int, double, float, etc.).
@@ -77,14 +63,19 @@ For those who have experience with low-level programming languages, it is nice t
 Character
 ---------
 
-Textual data, either as single characters, entire words, or even full texts. R supports various ways to manipulate texts, but in this course we won't use them. Still, you will often have textual data in your dataset, so be sure to know how to recognize it.
+Textual data, either as single characters, entire words, or even full texts.
 
 ``` r
 x = "Some text"  ## assign text to the name x
 class(x)         ## view the class of the value assigned to x
 ```
 
-It's important to recognize the distinction between names (x) and character values ("Some text").
+It's important to recognize the distinction between names and character values. In the above example, x is the name to which the text "some text" has been assigned. Whether a word is a name or a character value is indicated with quotes.
+
+``` r
+x       ## get value assigned to the name x
+"x"     ## the text "x"
+```
 
 Naturally, you cannot perform math with character data. Using the wrong data type will generally yield an error, as seen here.
 
@@ -110,14 +101,14 @@ z = as.numeric(z)     ## tries to convert character to numeric, but fails
 z
 ```
 
-R has decent built-in support for working with character values, but for more advanced techniques for working with **strings** (essentially, how texts are represented in computers) it is recommended to use a dedicated packages such as [stringr](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf).
+R has decent built-in support for working with character values, but for more advanced techniques for working with **strings** it is recommended to use a dedicated package such as [stringr](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf).
 
 Factor
 ------
 
-The *factor* data type is the stuff many R nightmares are made of, but it's easy to deal with if you take a minute to understand it. Technically, a *factor* in R is a series of labeled numbers. This is particularly usefull if you have a categorical variable, such as education level (in surveys) or medium type (in content analysis). If you are familiar with SPSS, this is comparable to using *value labels*.
+A *factor* in R is a series of labeled numbers. This is usefull if you have a categorical variable, such as education level (in surveys) or medium type (in content analysis). If you are familiar with SPSS, this is comparable to using *value labels*.
 
-To demonstrate how factors work, we have to use a sequence of values, called a *vector*. We will discuss vectors in more detail below. For now, just see that we combine multiple values in a particular order by putting them between parentheses with a *c* in front. Also, Note that despite the somewhat similar name, *factors* and *vectors* are different things).
+To demonstrate how factors work, we have to use a sequence of values, called a *vector*. We will discuss vectors in more detail below. For now, just see that we combine multiple values in a particular order by putting them between parentheses with a *c* in front. Also, note that despite the somewhat similar name, *factors* and *vectors* are different things.
 
 ``` r
 x = c('De Volkskrant','De Volkskrant','NRC Handelsblad',
@@ -143,7 +134,7 @@ levels(x)     ## show the levels / labels.
 
 If this confuses you, you're still perfectly healthy. The benefits of factors become more apparent later on when you start working with certain types of analysis, visualizations, and when you use very large data (numeric values require less memory than character values).
 
-You might think: well, until then, I don't really see why I should use factors, so I'll keep it simple by sticking to characters. This is a valid strategy, except that R tends to force factors upon you, for example when you import data or make a data.frame, and R thinks that your character column is better of as a factor. There are ways to ask R not to do this, but really, you're better of just accepting factors. It's better on the long run.
+You might have concluded that factors are only a hassle, and you'll simply stick to character values. This is a valid strategy, except that R tends to force factors on you, for example when you import data or make a data.frame, and R thinks that your character column is better of as a factor. There are ways to ask R not to do this, but really, you're better of just accepting factors. It's better on the long run.
 
 Still, if you ever run into trouble with factors and really prefer to use character values, you can simply convert them into "character" type, using **as.character()**
 
@@ -378,18 +369,17 @@ d = data.frame(id =        1:10,
 d
 ```
 
-|   id| condition | gender |  age|  score\_t1|  score\_t2|
-|----:|:----------|:-------|----:|----------:|----------:|
-|    1| E         | M      |   17|        8.0|        8.3|
-|    2| E         | M      |   19|        6.0|        6.4|
-|    3| C         | F      |   22|        7.5|        7.7|
-|    4| C         | M      |   18|        6.8|        6.3|
-|    5| C         | F      |   16|        8.0|        7.5|
-|    6| E         | F      |   21|        6.4|        6.4|
-|    7| E         | F      |   18|        6.0|        6.2|
-|    8| E         | M      |   17|        3.2|        3.6|
-|    9| C         | M      |   26|        7.3|        7.0|
-|   10| C         | F      |   18|        6.8|        6.5|
+    ##    id condition gender age score_t1 score_t2
+    ## 1   1         E      M  17      8.0      8.3
+    ## 2   2         E      M  19      6.0      6.4
+    ## 3   3         C      F  22      7.5      7.7
+    ## 4   4         C      M  18      6.8      6.3
+    ## 5   5         C      F  16      8.0      7.5
+    ## 6   6         E      F  21      6.4      6.4
+    ## 7   7         E      F  18      6.0      6.2
+    ## 8   8         E      M  17      3.2      3.6
+    ## 9   9         C      M  26      7.3      7.0
+    ## 10 10         C      F  18      6.8      6.5
 
 Now, the data structure clearly implies that there is a relation between the elements in the *column vectors*. In other words, that each row represents a *case*. In our example, these cases are participants, and the columns represent:
 
@@ -505,34 +495,182 @@ d$score_t2 = d$score_t2 * 10
 d
 ```
 
-Matrix
-------
+Other common data structures
+----------------------------
 
-We will not discuss the matrix data structure in-dept here, because most of the time you will likely be working with data.frames. Still, it is good to have a rough idea of what a matrix is, and for some purposes you simply can't beat a matrix.
+There are other common data structures, such as the `matrix` and `list`. Packages can also provide new classes for organizing and manipulating data, such as quanteda's document-feature matrix (dfm).
 
-A matrix is similar to a data.frame in that it is a collection of vectors of the same length. The difference is that in a matrix all these vectors have to be of the same data type. This is less flexible than a data.frame, but it opens up interesting posibilities (hooray for matrix algebra).
+Functions
+=========
 
-That being said, if you encounter a matrix and have no specific purpose for it, you can force it into a data.frame with the `as.data.frame()` function.
+Where data types and structures concern how data is respresented in R, functions are the tools that you use to read, create, manage, manipulate, analyze and visualize data.
 
-List
-----
+There are many correct and formal ways to define what functions are, but for the sake of simplicity we will focus on an informal description of how you can think of functions in R:
 
-Lists are very flexible data structures, that can basically contain everything. You can have a list that contains vectors and data.frames of different sizes, and even lists that contain lists (that contain lists that contain lists...). This makes lists common for complex and nested data. At this point, knowing about lists is above all important for cases where you need to get your data out of a list.
+-   A function has the form: `output = function_name(argument1, argument2, ...)`
+    -   **function\_name** is a name to indicate which function you want to use. It is followed by parentheses.
+    -   **arguments** are the input of the function, and are inserted within the parentheses. Arguments can be any R object, such as numbers, strings, vectors and data.frames. Multiple arguments can be given, separated by commas.
+    -   **output** is anything that is returned by the function, such as vectors, data.frames or the results of a statistical analysis. Some functions do not have output, but produce a visualization or write data to disk.
+-   The purpose of a function is to make it easy to perform a (large) set of (complex) operations. This is crucial, because
+    -   It makes code easier to understand. You don't need to see the operations, just the name of the function that performs them
+    -   You don't need to understand the operations, just how to use the function
 
-We'll focus on the two main ways to select data in a list. One is to use the dollar sign. The other is to give the index (position) in double square brackets `[[ ]]`. Using the dollar sign is only possible if the values in the list are `named`, so it's good to now about both.
-
-Here we make a list where the first two values (10 and 20) are named (a and b), and the third value (30) doesn't have a name. We can select a and b with the dollar sign, but for the third value we need to give the position,
-
-``` r
-l = list(a = 10, b = 20, 30)
-l$a        ## first element by name
-l[[1]]     ## first element by position
-l[[3]]     ## third element by position
-```
-
-If a list contains lists, you need to keep digging.
+For example, say that you need to calculate the square root of a number. This is a very common thing to do in statistical analysis, but it actually requires a quite complicated set of operations to perform. This is when you want to use a function, in this case the `sqrt` (square root) function.
 
 ``` r
-l = list(l2 = list(l3 = list(a = 'finally!')))
-l$l2$l3$a
+sqrt(5)
 ```
+
+In this example, the function name is `sqrt`. The input is the single argument `5`. If you run this code, it produces the output `2.236068`. Currently, R will simply print this output in your Console, but as you learned before, we can assign this output to a name.
+
+``` r
+square_root = sqrt(5)
+```
+
+This simple process of input -&gt; function -&gt; output is essentially how you work with R most of the times. You have data in some form. You provide this data as input to a function, and R generates output. You can assign the output to a name to use it in the next steps, or the output is a table with results or a visualization that you want to interpret.
+
+Using functions
+---------------
+
+Above you saw the simple function `sqrt()`, that given a single number as input returned a single number as output. As you have also seen in the first week, functions can have multiple arguments as input. Recall the following function from the `quanteda` package. You don't have to run the code this time, just try to recognize the arguments.
+
+``` r
+dfm(x = "some text", tolower = TRUE, stem=TRUE)
+```
+
+This function, with the name `dfm`, is given several arguments here: `x`, `tolower` and `stem`. Given this input, many operations are performed behind the scenes to create a document-term matrix.
+
+By now we hope you have realized just how broad the use of functions is. The *R syntax* for performing basic mathematical operations such as `sqrt()` is essentially the same as the syntax for creating a document-term matrix, performing advances statistical analysis or creating powerfull visualizations. Accordingly, if you understand this syntax, you can do almost anything in R.
+
+The many R packages that you can install are mostly just collections of functions (some also provide new **classes**, which we'll save for later). We will now show how you can learn how to use each function by knowing how to view and interpret it's documentation page.
+
+### Viewing and interpreting function documentation
+
+You can access the documentation of a function by typing a question mark in front of the function name, and running the line of code. Let's do this to view the documentation of the `sqrt()` function
+
+``` r
+?sqrt
+```
+
+If you run this in RStudio, the help page will pop-up in the bottom-right corner, under the *Help* tab page. Sometimes, if the name of a documentation page is used in multiple packages, you will first receive a list of these packages from which you will have to select the page.
+
+For the `sqrt()` function, the help page has the **title** "Miscellaneous Mathematical Functions". Just below the title, you see the **Description**, in which the author of a function briefly describes what the function is for. Here we see that there are two functions that are grouped under "Miscellaneous Mathematical Functions", the `abs()` function for computing the absolute value of a number `x`, and the `sqrt()` function for the square root.
+
+Under description, the **Usage** is shown. This is simply the name of the function or functions, and the possible arguments that you can use. Here the Usage is extremely simple: both functions only take one argument named `x`. In a minute, we'll discuss functions with multiple arguments.
+
+Below usage, the **Arguments** section explains how to use each argument. Here, the only argument is `x`, and it is explained that x is "a numeric or complex vector or array". For now, let's focus only on the case of a numeric vector. It appears that in addition to giving a single value like above (recall that in R this is actually a vector of length 1) we can give a vector with multiple numbers.
+
+``` r
+sqrt(c(1,2,3,4,5))
+```
+
+There are more parts to the documentation that we'll ignore for now. Notable parts to look into for yourself are **Details**, that provides more information, and the **Examples** section at the very bottom, which is a great starting point to see a function in action.
+
+### Understanding multi-argument functions
+
+Now, let's move to a function with multiple arguments. We'll again look at the `dfm()` function from the `quanteda` package. To access this function, we first run `library(quanteda)`, to tell R that we want to be able to access the functions in this package. Note that you have to have the package installed as well. This should still be the case from a prior tutorial, but if you changed computers, you will have to run the line `install.packages('quanteda')` first.
+
+``` r
+library(quanteda)
+?dfm
+```
+
+First note that the title and description nicely summarize what this function is for: creating a document-feature matrix. Now, when we look at the **Usage** section, we see that there are multiple arguments given between the parentheses, and all these arguments are explained in the **Arguments** section.
+
+An important part of the usage syntax, that we haven't seen in the `sqrt()` function, is that all arguments other than `x` have a value assigned to them, in the form `argument = value`. The argument `tolower` has the value `TRUE`, `stem` has the value `FALSE`, etc.
+
+These are the default values for these argument, that are used if the user does not specify them. This way, We can use the `dfm()` function with the default settings by only entering the `x` argument.
+
+``` r
+example_texts = c("Some example text", "Some more text")
+dfm(example_texts)
+```
+
+If we run this line of code, it returns a matrix with the frequencies of each word for each text. Note that the word "Some" in both texts has been made lowercase, because the `tolower` argument (that is described as "convert all features to lowercase") is `TRUE` by default.
+
+Arguments that don't have a default value, such as `x` in the `dfm()` function, are mandatory. Running the following line of code will give the error `argument "x" is missing, with no default`.
+
+``` r
+dfm()
+```
+
+It is often the case that in addition to the mandatory arguments you want to specify some specific other arguments. For this, there are two ways to *pass* arguments to a function.
+
+-   Use the same order in which they are specified in **Usage**
+-   Pass the arguments with their respective names
+
+To demonstrate passing by order, let's run the `dfm()` function again, but this time with input for `tolower` and `stem`.
+
+``` r
+dfm(example_texts, TRUE, TRUE)
+```
+
+In the output we see that the word "example" has been `stemmed` to "examp", because we have set the `stem` argument to `TRUE`. The words are still made lowercase, since we passed `TRUE` to `tolower`, which was also the default value.
+
+Passing by order is annoying if you want to specify only one particular argument. In the current example, we had to explicitly pass TRUE to `tolower` even though this was already the default. More importantly, this can become confusing and cause mistakes if you pass many arguments. Therefore, it is often recommended to pass values by name. Here we use this to only change `stem` to `TRUE`.
+
+``` r
+dfm(x = example_texts, stem = TRUE)
+```
+
+Overall, passing by name is more explicit and safe, but it can be needlessly verbose to specify all names, such as `x = example_texts` in the example. Thus, we can combine both approaches, passing the arguments to the left (i.e. the first, and often mandatory, arguments) by order, and arguments further to the right by name.
+
+``` r
+dfm(example_texts, stem=TRUE)
+```
+
+Whatever approach you prefer, try to be consistent, and take into account whether your code will still be easy to interpret for other that you share it with, or for yourself in the future. A good general rule is to pass mandatory arguments (such as `x` in the `dfm` function) without a name, but all the optional arguments (that have a default, such as `tolower` and `stem`) by name.
+
+### A note about 'methods' and 'generic functions'
+
+Some functions are *generic functions*, that use different *methods* depending on the input that they are used with. Ignoring technicalities, there's one thing you currently need to know about them, because you will need it to interpret their documentation pages.
+
+A method is a function that is associated with a specific object. For example, subsetting a `vector` works differently from subsetting a `data.frame` or `matrix`. Still, it is convenient to only have one function called `subset()` that can be used on all these kinds of input. In R, the `subset()` functions is therefore a *generic function*, that will behave differently depending on the kind of input.
+
+The type of input to the `subset()` function therefore also determines what type of arguments can be used. You can see this in the documentation page.
+
+``` r
+?subset
+```
+
+In the description we see that `subset()` can be used on vectors, matrices or data.frames. The **Usage** section therefore contains different versions, for different *S3 methods* (ignore "S3" for now) that are associated with different kinds of input. The general form is `subset(x, ...)`, which shows that subset always requires an argument `x`, and in the **Arguments** we see that `x` is the "object to be subsetted". We then see three methods: default, 'matrix' and 'data.frame'.
+
+-   The default will be used if `x` is neither a `matrix` or `data.frame` (for instance a `vector`). In this case the only argument is *subset*, which is the expression (e.g., `x > 10`) used to make a selection.
+-   If the input is a 'matrix', there are two additional arguments: *select* and *drop*. It makes sense that these are not available for vectors, because they are both only relevant if there are multiple columns. That is, *select* is used for selecting columns, and *drop* can be used to have subset return a `vector` (instead of a `matrix`) if only one row or column remains after subsetting.
+-   If the input is a 'data.frame', the same arguments are used as for 'matrix' (but internally the method works differently)
+
+### The special case of the three dot ellipsis
+
+A special type of argument that you'll often encounter in function documentation is the three dot ellipsis (`...`). This is used to pass any number of named or unnamed arguments. A good example of how this is used, is in the `data.frame()` function. In a previous tutorial you saw that you can use this function to create a data.frame from vectors, where names are used as column names. Now, you will see that these are actually just *named arguments*.
+
+``` r
+?data.frame
+data.frame(x = 1:5, y = c('a','b','c','d','e'))
+```
+
+As an additional example, consider the `sum()` function. Here the `...` is used for "numeric or complex or logical vector". This means that we can add any number of arguments with numbers in them, and they will all be added up.
+
+``` r
+?sum
+sum(1, 2, 3, c(1,2,3))
+```
+
+To clarify, if we want to set any of the other arguments, such as `na.rm` in `sum()`, we can do so by referring to them by name. By default, `sum()` returns NA (R's way of saying "missing") if any NA is present. As noted in the documentation, we can ignore the NA values by setting `na.rm` to `TRUE`
+
+``` r
+sum(1,2,NA)
+sum(1,2,NA, na.rm = T)
+?dfm
+```
+
+Finally, a way in which the three dot ellipsis is also often used, is to pass arguments on to another function that is used within the function. If you look back at the documentation for the `dfm()` function, you'll see in the explanation of `...`: "additional arguments passed to tokens; not used when x is a dfm". In this case, you can see which arguments these are by looking at the documentation of the `tokens` function. Here you see that you could also pass the argument `remove_numbers = TRUE` to `dfm()`.
+
+Further reading
+===============
+
+If you want to learn more about the basics of R, we recommend:
+
+-   [The (free online) R for Data Science book](http://r4ds.had.co.nz/functions.html)
+-   Taking one of the many (free) online introductions, such as the ones offered at [DataCamp](https://www.datacamp.com/courses/free-introduction-to-r/) or [Code School](http://tryr.codeschool.com/).
+
+Also, it could be nice to grab some of the [cheatsheets](https://www.rstudio.com/resources/cheatsheets/) collected on the RStudio website. For the basics of R, the cheatsheet [Base R](http://github.com/rstudio/cheatsheets/raw/master/base-r.pdf) is particularly usefull.

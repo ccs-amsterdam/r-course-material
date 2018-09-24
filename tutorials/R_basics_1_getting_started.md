@@ -48,7 +48,7 @@ For the current course material, you will need to install two pieces of software
 -   *R* is the actual R software, that is used to run R code.
 -   *RStudio* is a graphical user interface (GUI) that makes working with R much easier. While it is not required to use R, and there are other GUI's available, using RStudio is highly recommended.
 
-Both progrems can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
+Both programs can be downloaded for free, and are available for all main operating systems (Windows, macOS and Linux).
 
 Installing R
 ------------
@@ -172,14 +172,13 @@ Here **quanteda** lets us know that the corpus contains 58 documents, and 3 docv
 docvars(corp)  ## (only the first lines of output are shown here)
 ```
 
-|                 |  Year| President  | FirstName |
-|-----------------|-----:|:-----------|:----------|
-| 1789-Washington |  1789| Washington | George    |
-| 1793-Washington |  1793| Washington | George    |
-| 1797-Adams      |  1797| Adams      | John      |
-| 1801-Jefferson  |  1801| Jefferson  | Thomas    |
-| 1805-Jefferson  |  1805| Jefferson  | Thomas    |
-| 1809-Madison    |  1809| Madison    | James     |
+    ##                 Year  President FirstName
+    ## 1789-Washington 1789 Washington    George
+    ## 1793-Washington 1793 Washington    George
+    ## 1797-Adams      1797      Adams      John
+    ## 1801-Jefferson  1801  Jefferson    Thomas
+    ## 1805-Jefferson  1805  Jefferson    Thomas
+    ## 1809-Madison    1809    Madison     James
 
 The Document-term Matrix
 ------------------------
@@ -254,7 +253,7 @@ m_obama = dfm_subset(m, President=="Obama")
 m_postwar = dfm_subset(m, Year > 1945)
 ```
 
-Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this
+Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this.
 
 ``` r
 textplot_wordcloud(m_postwar, max_words = 100, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
@@ -279,19 +278,30 @@ Let's use this to see how the word "terror" has been used. We'll use "terror\*",
 kwic(corp, 'terror*') 
 ```
 
-| docname        |  from|    to| pre                                     | keyword   | post                              |
-|:---------------|-----:|-----:|:----------------------------------------|:----------|:----------------------------------|
-| 1797-Adams     |  1325|  1325| fraud or violence , by                  | terror    | , intrigue , or venality          |
-| 1933-Roosevelt |   112|   112| nameless , unreasoning , unjustified    | terror    | which paralyzes needed efforts to |
-| 1941-Roosevelt |   287|   287| seemed frozen by a fatalistic           | terror    | , we proved that this             |
-| 1961-Kennedy   |   866|   866| alter that uncertain balance of         | terror    | that stays the hand of            |
-| 1961-Kennedy   |   990|   990| of science instead of its               | terrors   | . Together let us explore         |
-| 1981-Reagan    |   813|   813| freeing all Americans from the          | terror    | of runaway living costs .         |
-| 1981-Reagan    |  2196|  2196| understood by those who practice        | terrorism | and prey upon their neighbors     |
-| 1997-Clinton   |  1055|  1055| They fuel the fanaticism of             | terror    | . And they torment the            |
-| 1997-Clinton   |  1655|  1655| maintain a strong defense against       | terror    | and destruction . Our children    |
-| 2009-Obama     |  1632|  1632| advance their aims by inducing          | terror    | and slaughtering innocents , we   |
-| 2017-Trump     |  1117|  1117| civilized world against radical Islamic | terrorism | , which we will eradicate         |
+    ##                                                                           
+    ##     [1797-Adams, 1325]                   fraud or violence, by |  terror  
+    ##  [1933-Roosevelt, 112]      nameless, unreasoning, unjustified |  terror  
+    ##  [1941-Roosevelt, 287]           seemed frozen by a fatalistic |  terror  
+    ##    [1961-Kennedy, 866]         alter that uncertain balance of |  terror  
+    ##    [1961-Kennedy, 990]               of science instead of its |  terrors 
+    ##     [1981-Reagan, 813]          freeing all Americans from the |  terror  
+    ##    [1981-Reagan, 2196]        understood by those who practice | terrorism
+    ##   [1997-Clinton, 1055]             They fuel the fanaticism of |  terror  
+    ##   [1997-Clinton, 1655]       maintain a strong defense against |  terror  
+    ##     [2009-Obama, 1632]          advance their aims by inducing |  terror  
+    ##     [2017-Trump, 1117] civilized world against radical Islamic | terrorism
+    ##                                     
+    ##  | , intrigue, or venality          
+    ##  | which paralyzes needed efforts to
+    ##  | , we proved that this            
+    ##  | that stays the hand of           
+    ##  | . Together let us explore        
+    ##  | of runaway living costs.         
+    ##  | and prey upon their neighbors    
+    ##  | . And they torment the           
+    ##  | and destruction. Our children    
+    ##  | and slaughtering innocents, we   
+    ##  | , which we will eradicate
 
 Note that KWIC uses the corpus (`corp`) rather than the DTM, as the DTM no longer has word order information (so it can't display context). Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `corpus_subset` rather than `dfm_subset`:
 

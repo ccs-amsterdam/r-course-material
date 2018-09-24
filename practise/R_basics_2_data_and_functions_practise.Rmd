@@ -1,5 +1,5 @@
 ---
-title: 'Practise R basics: Data'
+title: 'Practise R basics: data and functions'
 output:
   html_document:
   toc: true
@@ -8,7 +8,7 @@ output:
 
 # Completing your assignment in RMarkdown
 
-For this week's assignment (see separate tutorial on Canvas) you will be using RMarkdown. The file that you are currently reading is an RMarkdown file (.Rmd). This is type of file that combines two things:
+For this week's exercise, that acompanies the R_basics_2_data_and_functions tutorial, you will be using RMarkdown. The file that you are currently reading is an RMarkdown file (.Rmd). This is type of file that combines two things:
 
 * **Regular text**, such as the text you are reading now. RMarkdown is a [markup language](https://en.wikipedia.org/wiki/Markup_language), which means that we type certain instructions for how the text should be presented. For example, the hashtag before "Completing your assignment in RMarkdown" indicates that this is a level 1 header, and the asterisk in front of this paragraph indicates that this is a bulletpoint. The advantage is that this enables you to quickly type a document without worrying about lay-out, and afterwards we can create a pretty document (e.g., in html, docx or pdf) where we can still specify what layout we want to use (e.g., detemining the size of a level one header).   
 * **Code blocks**, in which you can type R code. If you *Knit* the file (we'll show how in a minute), this code will also be evaluated, and both the code and results will be printed in the document. 
@@ -20,7 +20,7 @@ install.packages('rmarkdown')
 install.packages('knitr')
 ```
 
-You can do many things with RMarkdown, but for this assignment we'll stick to the basics. Below you will find templates for completing your assignments. For each assignment, you will have to enter your code in the designated code blocks. Eventually, you will *Knit* your file to a .html or .doc file and hand it in on Canvas. We'll start with an example.
+You can do many things with RMarkdown, but for this assignment we'll stick to the basics. Below you will find templates for completing your assignments. For each assignment, you will have to enter your code in the designated code blocks. Eventually, you will *Knit* your file to a .html or .doc file. We'll start with an example.
 
 # Example of assignment template
 
@@ -154,13 +154,60 @@ R has some built-in data.frames for testing, such as the famous [iris](https://e
 * show the rows for which the sepal length is smaller than 4.5
 * show the rows for which the petals are at least 8 times longer than they are wide
 * show the sepal width column for the species "setosa" and "versicolor"
-* Find the setosa flowers with a sepal length of at most 4.4, and rename them to "sad setosa"
+* Find the setosa flowers with a sepal length of at most 4.4, and rename the species to "sad setosa"
 
 
 ```{r}
 head(iris)       ## shows the top 6 rows of the iris data.frame
 
 
-
-# tip: changing factors can be difficult, remember that changing them to character-vectors using "as.character()" is an easy way out
+# tip for renaming: changing factors is a hassle. Changing them to character-vectors using "as.character()" is an easy way out
+iris$Species = as.character(iris$Species)  ## ignore factors (easier)
 ```
+
+# Assignment 3: Functions
+
+
+### 3.A
+
+Use the `data.frame()` function to:
+
+* Create a data.frame using the V1 and V2 vectors as columns, where V1 is named "age" and V2 is named "gender" 
+* Create the same data.frame, but this time use arguments to prevent R from converting strings (in the "gender" variable) to factors
+
+```{r}
+V1 = floor(rnorm(10, mean = 21, sd = 3))            ## random age
+V2 = sample(c('Male','Female'), 10, replace=T)   ## random gender
+
+```
+
+### 3.B
+
+This time, you will be using a new function, so we recommend looking up the documentation. Given the iris data, use the `cor.test()` function to calculate:
+
+* The correlation between Petal.Length and Petal.Width, using the default settings.
+* The correlation between Petal.Length and Petal.Width, but this time using the "spearman" correlation method.
+
+```{r}
+head(iris)         ## shows top 6 rows, for reference
+## reminder: use iris$... to get a column vector
+
+
+```
+
+### 3.C
+
+Use the `paste()` function to:
+
+* Paste the vectors `x` and `y` together, separated by a dot (1.a, 2.b, etc.)
+* Collapse the elements in y, separated by  
+
+In addition, look at the documentation of the `paste()` function and explain (answer below the codeblock) what the difference is between `paste` and `paste0`.  
+
+```{r}
+x = 1:5
+y = c('a','b','c','d','e')
+
+
+```
+
