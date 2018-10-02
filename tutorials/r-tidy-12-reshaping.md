@@ -28,7 +28,7 @@ Before we start: Getting and cleaning the data
 
 For this tutorial we will use the data from Piketty's Capital in the 21st Century. In particular, we will work with the data on income inquality, with the goal of making a graph showing the evolution of income inequality in different countries.
 
-For this, we load the income inequality data sets (from the github page of this course) and remove missing values:
+For this, we load the income inequality data set and remove missing values.
 
 ``` r
 library(tidyverse)
@@ -36,6 +36,8 @@ base = "https://raw.githubusercontent.com/ccs-amsterdam/r-course-material/master
 income_raw = read_csv(paste(base, "income_topdecile.csv", sep = "/")) %>% na.omit
 income_raw
 ```
+
+Note that Piketty's data is published as excel files with complex (multi-row) headers, so we uploaded a cleaned version of the data to our github repository. Even though this data is slightly cleaner, you will see that there is plenty to be done to get this data in shape!
 
 Wide to long: Gathering data
 ============================
