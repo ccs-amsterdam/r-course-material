@@ -13,8 +13,16 @@ The goal is to organize relevant material into modular components, for more effi
 
 # Data mangling in the tidyverse
 
-* [dplyr](tutorials/R_tidyverse_1_dplyr.md) ([practise template](practise/R_tidyverse_1_dplyr_practise.Rmd))
+This is a set of tutorials designed to teach using the tidyverse functions for data cleaning, reshaping, visualizing etc.
+The chapter numbers are relevant chapters from the excellent (and freely available) book ["R for Data Scientists" (R4DS)](http://r4ds.had.co.nz/)
 
+| Tutorial | R4DS chapter(s) | Core packages / functions |
+|----|---|
+| [R Basics](tutorials/R-tidy-4-basics.md) | 4 | (base R functions) |
+| [Transforming Data](tutorials/R-tidy-5-transformation.md) | 5 | dplyr: filter, select, arrange, mutate, summarize | 
+| [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | 3 & 7 | ggplot2  |
+| [Reshaping data](tutorials/r-tidy-12-reshaping.md) | 12 | tidyr: spread, gather |
+| [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | 13 | dplyr: inner_join, left_join, etc. | 
 
 # Miscellaneous
 
