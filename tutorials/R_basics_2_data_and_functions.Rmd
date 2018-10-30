@@ -406,7 +406,7 @@ syntax     | meaning
 ---------- | --------------------
 d[i,j]     | select rows (i) and columns (j)
 d[i, ]     | select only rows (i) and use all columns
-d[ ,j]     | select only columns (i) and use all rows
+d[ ,j]     | select only columns (j) and use all rows
 
 Selection for rows (i) and columns (j) works identical to selection in vectors. You can use either a numeric vector with indices, or a logical vector. Accordingly, you can also use comparisons.
 
@@ -633,7 +633,7 @@ Overall, passing by name is more explicit and safe, but it can be needlessly ver
 dfm(example_texts, stem=TRUE)
 ```
 
-Whatever approach you prefer, try to be consistent, and take into account whether your code will still be easy to interpret for other that you share it with, or for yourself in the future. A good general rule is to pass mandatory arguments (such as `x` in the `dfm` function) without a name, but all the optional arguments (that have a default, such as `tolower` and `stem`) by name.
+Whatever approach you prefer, try to be consistent, and take into account whether your code will still be easy to interpret for others that you share it with, or for yourself in the future. A good general rule is to pass mandatory arguments (such as `x` in the `dfm` function) without a name, but all the optional arguments (that have a default, such as `tolower` and `stem`) by name.
 
 ### A note about 'methods' and 'generic functions'
 
