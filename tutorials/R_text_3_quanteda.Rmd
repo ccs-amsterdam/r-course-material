@@ -2,8 +2,8 @@
 title: 'R text analysis: quanteda'
 author: "Kasper Welbers & Wouter van Atteveldt"
 date: "2018-09"
-output: 
-  pdf_document:
+github_document:
+  toc: yes
 editor_options: 
   chunk_output_type: console
 urlcolor: blue
@@ -13,7 +13,7 @@ urlcolor: blue
 ```{r setup, include=FALSE}
 ## include this at top of your RMarkdown file for pretty output
 ## make sure to have the printr package installed: install.packages('printr')
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.show='hide')
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.path = "img/")
 #library(printr)
 
 ```
@@ -135,7 +135,7 @@ Using the dtm we can now employ various techniques. You've already seen some of 
 
 Get most frequent words in corpus.
 
-```{r}
+```{r quanteda_wordcloud1}
 textplot_wordcloud(dtm, max_words = 50)     ## top 50 (most frequent) words
 textplot_wordcloud(dtm, max_words = 50, color = c('blue','red')) ## change colors
 textstat_frequency(dtm, n = 10)             ## view the frequencies 
@@ -145,7 +145,7 @@ You can also inspect a subcorpus. For example, looking only at Obama speeches. T
 
 With `docvars(dtm)` we get a data.frame with the document variables. With `docvars(dtm)$President`, we get the character vector with president names. Thus, with `docvars(dtm)$President == 'Barack Obama'` we look for all documents where the president was Obama. To make this more explicit, we store the logical vector, that shows which documents are 'TRUE', as is_obama. We then use this to select these rows from the DTM.
 
-```{r}
+```{r quanteda_wordcloud2}
 is_obama = docvars(dtm)$President == 'Barack Obama' 
 obama_dtm = dtm[is_obama,]
 textplot_wordcloud(obama_dtm, max_words = 25)
@@ -163,7 +163,7 @@ head(ts, 20)    ## view first 20 results
 
 We can visualize these results, stored under the name `ts`, by using the textplot_keyness function
 
-```{r}
+```{r quanteda_keyness1}
 textplot_keyness(ts)
 ```
 
@@ -188,7 +188,7 @@ terror_dtm = dfm(terror_corp, tolower=T, remove=stopwords('en'), stem=T, remove_
 
 Now you can focus an analysis on whether and how Presidents talk about `terror*`.
 
-```{r}
+```{r quanteda_wordcloud3}
 textplot_wordcloud(terror_dtm, max_words = 50)     ## top 50 (most frequent) words
 ```
 
@@ -209,11 +209,11 @@ dict_dtm
 
 The "4 features" are the four entries in our dictionary. Now you can perform all the analyses with dictionaries.
 
-```{r}
+```{r quanteda_wordcloud4}
 textplot_wordcloud(dict_dtm)
 ```
 
-```{r}
+```{r quanteda_keyness2}
 tk = textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
 textplot_keyness(tk)
 ```

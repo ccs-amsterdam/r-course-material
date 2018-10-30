@@ -9,6 +9,7 @@ The goal is to organize relevant material into modular components, for more effi
 
 * [Getting started](tutorials/R_basics_1_getting_started.md)
 * [Data and functions](tutorials/R_basics_2_data_and_functions.md) ([practise template](practise/R_basics_2_data_and_functions_practise.Rmd))
+* [Text analysis](tutorials/R_text_3_quanteda.md)
 
 
 # Data mangling in the tidyverse
