@@ -14,6 +14,7 @@ Kasper Welbers & Wouter van Atteveldt
     -   [Compare corpora](#compare-corpora)
     -   [Keyword-in-context](#keyword-in-context)
     -   [Dictionary search](#dictionary-search)
+    -   [Creating good dictionaries](#creating-good-dictionaries)
 
 Introduction
 ============
@@ -222,4 +223,17 @@ You can also convert the dtm to a data frame to get counts of each concept per d
 ``` r
 df = convert(dict_dtm, to="data.frame")
 head(df)
+```
+
+Creating good dictionaries
+--------------------------
+
+A good dictionary means that all documents that match the dictionary are indeed about or contain the desired concept, and that all documents that contain the concept are matched.
+
+To check this, you can manually annotate or code a sample of documents and compare the score with the dictionary hits.
+
+You can also apply the keyword-in-context function to a dictionary to quickly check a set of matches and see if they make sense:
+
+``` r
+kwic(corp, dict$terrorism)
 ```
