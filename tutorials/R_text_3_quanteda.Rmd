@@ -13,17 +13,20 @@ editor_options:
 ```{r setup, include=FALSE}
 ## include this at top of your RMarkdown file for pretty output
 ## make sure to have the printr package installed: install.packages('printr')
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.path = "img/")
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
 #library(printr)
 
 ```
 
 
-# This tutorial
+# Introduction
 
-In this tutorial you will learn how to perform text analysis using the quanteda package. In the [R Basics: getting started](R_basics_1_getting_started.md) tutorial you were already given code to create wordclouds, compare term frequenties in two corpora and create keyword-in-context listings. This time, the goal is to understand this code better, towards becoming more self-proficient in using quanteda.
+In this tutorial you will learn how to perform text analysis using the quanteda package. 
+In the [R Basics: getting started](R_basics_1_getting_started.md) tutorial we introduced some of the techniques from this tutorial as a light introduction to R.
+In this and the following tutorials, the goal is to get more understanding of what actually happens 'under the hood' and which choices can be made, 
+and to become more confident and proficient in using quanteda for media (effects) research.
 
-# The quanteda package
+## The quanteda package
 
 The [quanteda package](https://quanteda.io/) is an extensive text analysis suite for R. It covers everything you need to perform a variety of automatic text analysis techniques, and features clear and extensive documentation. Here we'll focus on the main preparatory steps for text analysis, and on learning how to browse the quanteda documentation. The documentation for each function can also be found [here](https://quanteda.io/reference/index.html).
 
@@ -33,15 +36,16 @@ For a more detailed explanation of the steps discussed here, you can read the pa
 library(quanteda)
 ```
 
-## Importing text and creating a quanteda corpus
+# Step 1: Importing text and creating a quanteda corpus
 
 The first step is getting text into R in a proper format. stored in a variety of formats, from plain text and CSV files to HTML and PDF, and with different 'encodings'. There are various packages for reading these file formats, and there is also the convenient [readtext](https://cran.r-project.org/web/packages/readtext/vignettes/readtext_vignette.html) that is specialized for reading texts from a variety of formats.
 
 For this tutorial, we will be importing text from a csv. For convenience, we're using a csv that's available online, but the process is the same for a csv file on your own computer. The data consists of the State of the Union speeches of US presidents, with each document (i.e. row in the csv) being a paragraph. The data will be imported as a data.frame.
 
 ```{r}
+library(readr)
 url = 'https://bit.ly/2QoqUQS'
-d = read.csv(url)
+d = read_csv(url)
 head(d)   ## view first 6 rows
 ```
 
@@ -54,31 +58,33 @@ We can now create a quanteda corpus with the `corpus()` function. If you want to
 Here you see that for a data.frame, we need to specify which column contains the text field. Also, the text column must be a character vector. In data is imported from a csv, a `character` vector is sometimes interpreted as a `factor` vector. We'll therefore first explicitly convert the column to a `character` vector. 
 
 ```{r}
-d$text = as.character(d$text)          ## force 'text' column to be a character vector
 corp = corpus(d, text_field = 'text')  ## create the corpus
 corp
 ```
 
 
 
-## Creating the DTM (or DFM)
+# Step 2: Creating the DTM (or DFM)
 
 Many text analysis techniques only use the frequencies of words in documents. This is also called the bag-of-words assumption, because texts are then treated as bags of individual words. Despite ignoring much relevant information in the order of words and syntax, this approach has proven to be very powerfull and efficient.
 
 The standard format for representing a bag-of-words is as a `document-term matrix` (DTM). This is a matrix in which rows are documents, columns are terms, and cells indicate how often each term occured in each document. We'll first create a small example DTM from a few lines of text. Here we use quanteda's `dfm()` function, which stands for `document-feature matrix` (DFM), which is a more general form of a DTM.
 
 ```{r}
-text <-  c(d1 = "Guns are awesome!",
-           d2 = "We need better gun control!",
-           d3 = "This is a sentence about cheese.")
+text <-  c(d1 = "Cats are awesome!",
+           d2 = "We need more cats!",
+           d3 = "This is a soliloquy about a cat.")
 
 dtm <- dfm(text, tolower=F)
 dtm
 ```
 
-Here you see, for instance, that the word `cheese` only occurs in the third document. In this matrix format, we can perform calculations with texts, like analyzing different sentiments of frames regarding guns, or the fact that the third sentence has nothing to do with the first two sentences. 
+Here you see, for instance, that the word `soliloquy` only occurs in the third document. In this matrix format, we can perform calculations with texts, like analyzing different sentiments of frames regarding cats, or the computing the similarity betwee the third sentence and the first two sentences. 
 
-However, directly converting a text to a DTM is a bit crude. Note, for instance, that the words `Gun` and `guns` are given different columns. In this DTM, "Gun" and "guns" are as different as "gun" and "cheese", but for many types of analysis we would be more interested in the fact that both texts are about guns, and not about the specific word that is used. Also, for performance it can be usefull (or necessary) to use fewer columns, and to ignore less interesting words such as `is`.
+## Preprocessing/cleaning DTMs
+
+However, directly converting a text to a DTM is a bit crude. Note, for instance, that the words `Cats`, `cats`, and `cat` are given different columns.
+In this DTM, "Cats" and "awesome" are as different as "Cats" and "cats", but for many types of analysis we would be more interested in the fact that both texts are about felines, and not about the specific word that is used. Also, for performance it can be useful (or even necessary) to use fewer columns, and to ignore less interesting words such as `is` or very rare words such as `soliloquy`.
 
 This can be achieved by using additional `preprocessing` steps. In the next example, we'll again create the DTM, but this time we make all text lowercase, ignore stopwords and punctuation, and perform `stemming`. Simply put, stemming removes some parts at the ends of words to ignore different forms of the same word, such as singular versus plural ("gun" or "gun-s") and different verb forms ("walk","walk-ing","walk-s")
 
@@ -95,10 +101,10 @@ stopwords('en')
 
 This list of words is thus passed to the `remove` argument in the `dfm()` to ignore these words. If you are using texts in another language, make sure to specify the language, such as stopwords('nl') for Dutch or stopwords('de') for German.   
 
-There are various alternative preprocessing techniques, including more advanced techniques that are not implemented in quanteda. Whether, when and how to use these techniques is a broad topic that we won't cover today. For more details about preprocessing you can read the [Text Analysis in R](http://vanatteveldt.com/p/welbers-text-r.pdf) paper. 
+There are various alternative preprocessing techniques, including more advanced techniques that are not implemented in quanteda. Whether, when and how to use these techniques is a broad topic that we won't cover today. For more details about preprocessing you can read the [Text Analysis in R](http://vanatteveldt.com/p/welbers-text-r.pdf) paper cited above. 
 
 
-### Filtering the DTM
+## Filtering the DTM
 
 For this tutorial, we'll use the State of the Union speeches. We already created the corpus above. We can now pass this corpus to the `dfm()` function and set the preprocessing parameters.
 
@@ -107,31 +113,26 @@ dtm = dfm(corp, tolower=T, stem=T, remove=stopwords('en'), remove_punct=T)
 dtm
 ```
 
-This dtm has 23,469 documents and 20,469 features (i.e. terms), and no longer shows the actual matrix because it simply wouldn't fit. 
+This dtm has 23,469 documents and 20,429 features (i.e. terms), and no longer shows the actual matrix because it simply wouldn't fit. 
+In general, 20 thousand different words is much more than what is informative or useful for most analyses (unless you're interested in e.g. the richness of president's vocabularies). Although it depends on the corpus and the research question, you normaly want to reduce this to between 2,000 and 10,000 words. 
 
-A final step in our data preparation is to filter out some of less important terms. For didactic reasons, we'll walk through the steps. In the previous tutorial you learned that selection works by comparing a vector to a given value, which then selects all elements for which the comparison is TRUE. To filter on the frequency of terms, we can get the column sums of the matrix (the sum of all values in a column) and see whether the value is higher than a given threshold. Here we use threshold 10.
-
-```{r}
-## we'll use head() in the following examples to only show 
-## the first 6 values (instead of 20,469)
-head(colSums(dtm))      ## sums for first six columns/terms
-head(colSums(dtm) > 10) ## terms for which value is higher than 20 
-```
+To to this, we can filter out some of less important terms. In the previous tutorial you learned that selection works by comparing a vector to a given value, which then selects all elements for which the comparison is TRUE. To filter on the frequency of terms, we can get the column sums of the matrix (the sum of all values in a column) and see whether the value is higher than a given threshold. Here we use threshold 10.
 
 We can use this comparison in the `dfm_select()` function to select the columns for which the comparison is TRUE (sum is higher than 20). 
 
 ```{r}
-dtm = dtm[, colSums(dtm) > 10] ## read: select columns in dtm where column sum > 10
+dtm  = dfm_trim(dtm, min_termfreq = 10)
 dtm
 ```
 
-Now we have about 5000 features left.
+Now we have about 5000 features left. See `?dfm_trim` for more options. 
 
-## Analysis 
+
+# Step 3: Analysis 
 
 Using the dtm we can now employ various techniques. You've already seen some of them in the first tutorial, but by now you should be able to understand more about the R syntax, and understand how to tinker with different parameters.
 
-### Word frequencies and wordclouds
+## Word frequencies and wordclouds
 
 Get most frequent words in corpus.
 
@@ -151,7 +152,7 @@ obama_dtm = dtm[is_obama,]
 textplot_wordcloud(obama_dtm, max_words = 25)
 ```
 
-### Compare corpora
+## Compare corpora
 
 Compare word frequencies between two subcorpora. Here we (again) first use a comparison to get the is_obama vector. We then use this in the `textstat_keyness()` function to indicate that we want to compare the Obama documents (where is_obama is TRUE) to all other documents (where is_obama is FALSE).
 
@@ -167,7 +168,7 @@ We can visualize these results, stored under the name `ts`, by using the textplo
 textplot_keyness(ts)
 ```
 
-### Keyword-in-context
+## Keyword-in-context
 
 As seen in the first tutorial, a keyword-in-context listing shows a given keyword in the context of its use. This is a good help for interpreting words from a wordcloud or keyness plot.
 
@@ -192,7 +193,7 @@ Now you can focus an analysis on whether and how Presidents talk about `terror*`
 textplot_wordcloud(terror_dtm, max_words = 50)     ## top 50 (most frequent) words
 ```
 
-### Dictionary search
+## Dictionary search
 
 You can perform a basic dictionary search. In terms of query options this is less advanced than AmCAT, but quanteda offers more ways to analyse the dictionary results. Also, it supports the use of existing dictionaries, for instance for sentiment analysis (but mostly for english dictionaries).
 
@@ -203,9 +204,10 @@ dict = dictionary(list(terrorism = 'terror*',
                        economy = c('econom*', 'tax*', 'job*'),
                        military = c('army','navy','military','airforce','soldier'),
                        freedom = c('freedom','liberty')))
-dict_dtm = dfm(corp, dictionary = dict)
-dict_dtm
+dict_dtm = dfm_lookup(dtm, dict, exclusive=TRUE)
+dict_dtm 
 ```
+
 
 The "4 features" are the four entries in our dictionary. Now you can perform all the analyses with dictionaries.
 
@@ -218,31 +220,9 @@ tk = textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
 textplot_keyness(tk)
 ```
 
-### Topic modeling
-
-Topic modeling is a method for automatically findings topics in a corpus. These topics are then respresented as clusters of words that are indicative of the topic (also see [Text Analysis in R](http://vanatteveldt.com/p/welbers-text-r.pdf) or [Jacobi et al.](https://www.tandfonline.com/doi/full/10.1080/21670811.2015.1093271) for more details). It has often been used as a tool for exploring huge corpora. For smaller corpora (and the current corpus is in that sense small to moderate size) it is often less usefull. 
-
-Topic modeling is not directly supported in quanteda, but quanteda is designed to easily prepare data for use in external packages such as the `topicmodels` package. To illustrate this, we'll use the topicmodels package here to create a topicmodel. If you want to perform these steps, you'll first have to install the topicmodels package (only the first time).
-
-```{r, eval=F}
-install.packages('topicmodels')
-```
-
-```{r, eval=F}
-library(topicmodels)
-
-topmod_dtm <- convert(dtm, to = "topicmodels")
-
-## create a topicmodel with 5 topics and some additional settings
-lda <- LDA(topmod_dtm, k = 10, method = 'Gibbs')
-terms(lda, 10)
-```
-
-### Scrabble word value
-
-Not very usefull, but yeah.
+You can also convert the dtm to a data frame to get counts of each concept per document (which you can then match with e.g. survey data)
 
 ```{r}
-nscrabble('nexus')
+df = convert(dict_dtm, to="data.frame")
+head(df)
 ```
-
