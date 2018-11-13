@@ -7,10 +7,8 @@ The goal is to organize relevant material into modular components, for more effi
 
 # R Basics
 
-* [Getting started](tutorials/R_basics_1_getting_started.md)
+* [Getting started](tutorials/R_basics_1_getting_started.md) ([shorter version](tutorials/R_basics_1_getting_started_short.md))
 * [Data and functions](tutorials/R_basics_2_data_and_functions.md) ([practise template](practise/R_basics_2_data_and_functions_practise.Rmd))
-* [Text analysis](tutorials/R_text_3_quanteda.md)
-
 
 # Data mangling in the tidyverse
 
@@ -24,6 +22,11 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | 3 & 7 | ggplot2  |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) | 12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | 13 | dplyr: inner_join, left_join, etc. | 
+
+# Text analysis 
+
+* [Text analysis](tutorials/R_text_3_quanteda.md)
+* [Lexical sentiment analysis](tutorials/sentiment_analysis.md)
 
 # Miscellaneous
 
