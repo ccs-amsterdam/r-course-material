@@ -1,14 +1,17 @@
 ---
 title: "Fitting LDA Models in R"
-author: "Wouter van Atteveldt"
-date: "February 13, 2018"
-output: html_document
+author: "Wouter van Atteveldt & Kasper Welbers"
+date: "November 2018"
+output: 
+  github_document:
+    toc: yes
 editor_options: 
   chunk_output_type: console
 ---
 
+
 ```{r, echo=F}
-knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
 library(printr)
 ```
 
@@ -53,7 +56,7 @@ head(topwords)
 ```
 
 Now we can plot these words:
-```{r}
+```{r lda-wordcloud}
 library(wordcloud)
 wordcloud(names(topwords), topwords)
 ```
@@ -78,7 +81,7 @@ texts[docid]
 
 Finally, we can see which president prefered which topics:
 
-```{r}
+```{r lda-heatmap}
 docs = docs[rownames(docs) %in% rownames(dtm), ]
 tpp = aggregate(posterior(m)$topics, by=docs["President"], mean)
 rownames(tpp) = tpp$President
