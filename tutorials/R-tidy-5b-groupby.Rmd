@@ -1,0 +1,23 @@
+---
+title: 'R Tidyverse: Data Summarization with group_by, summarize, and mutate'
+author: "Kasper Welbers & Wouter van Atteveldt"
+date: "2019-03"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(tidyverse)
+url = "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+d = read_csv(url)
+```
+
+```{r}
+d %>% group_by(Pollster)
+```
+
+
