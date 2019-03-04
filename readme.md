@@ -18,7 +18,8 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | Tutorial | R4DS chapter(s) | Core packages / functions |
 |----|---|---|
 | [R Basics](tutorials/R-tidy-4-basics.md) | 4 | (base R functions) |
-| [Transforming Data](tutorials/R-tidy-5-transformation.md) | 5 | dplyr: filter, select, arrange, mutate, summarize | 
+| [Transforming Data](tutorials/R-tidy-5-transformation.md) | 5 | dplyr: filter, select, arrange, mutate | 
+| [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | 5 | dplyr: group_by, summarize |
 | [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | 3 & 7 | ggplot2  |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) | 12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | 13 | dplyr: inner_join, left_join, etc. | 
