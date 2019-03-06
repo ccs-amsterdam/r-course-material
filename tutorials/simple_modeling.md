@@ -32,6 +32,8 @@ head(capital)
 
 This data set describes the accumulation of public and private capital per year for a number of countries, expressed as percentage of GDP. So, in Australia in 1970, the net assets owned by the state amounted to 61% of GDP.
 
+In this tutorial we mainly use the `stats` package. This is loaded by default, so you do not need to call `library(stats)`.
+
 T-tests
 =======
 
@@ -126,7 +128,7 @@ plot(capital$Private ~ capital$Country)
 
 So, it seems that in fact a lot of countries are quite similar, with some extreme cases of high capital accumulation. (also, it seems that including Japan in the European countries might have been a mistake).
 
-We use the `aov` function for this, the `anova` function is meant to analyze already fitted models, as will be shown below.
+We use the `aov` function for this. Ther is also a function named `anova`, but this is meant to analyze already fitted models, as will be shown below.
 
 ``` r
 m = aov(capital$Private ~ capital$Country)
@@ -161,10 +163,12 @@ round(posthoc$p.value, 2)
 Linear models
 -------------
 
-A more generic way of fitting models is using the `lm` command. In fact, `aov` is a wrapper around `lm`. Let's model private capital as a function of country and public capital:
+A more generic way of fitting models is using the `lm` command. In fact, `aov` is a wrapper around `lm`. Let's see how well we can predict the `capital` variable (dependent) by the `country` and `public capital` variables (independent).
+
+The lm function also takes a formula as the first argument. The format is `dependent ~ independent1 + independent2 + ...`.
 
 ``` r
-m = lm(Private ~ Country + Public, data=capital)
+m = lm(Private ~ Country + Public, data=capital)  
 summary(m)
 ```
 
@@ -199,13 +203,13 @@ summary(m)
 As you can see, R automatically creates dummy values for nominal values, using the first value (U.S. in this case) as reference category. An alternative is to remove the intercept and create a dummy for each country:
 
 ``` r
-m = lm(Private ~ Country + Public - 1, data=capital)
+m = lm(Private ~ -1 + Country + Public, data=capital)
 summary(m)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = Private ~ Country + Public - 1, data = capital)
+    ## lm(formula = Private ~ -1 + Country + Public, data = capital)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
@@ -243,6 +247,7 @@ m2 = lm(Private ~ Group + Public + Group:Public, data=capital)
 A nice package to display multiple regression results side by side is the `screenreg` function from the `texreg` package:
 
 ``` r
+## remember to first install with install.packages('texreg')
 library(texreg)
 screenreg(list(m1, m2))
 ```
@@ -268,6 +273,13 @@ screenreg(list(m1, m2))
     ## *** p < 0.001, ** p < 0.01, * p < 0.05
 
 So, there is a significant interaction effect which displaces the main effect of public wealth.
+
+Finally, you can also use the texreg package to create the table in HTML, which makes it easier to copy it to a paper. Here we save the HTML to a new file named "model.html", and use the convenient `browseURL()` function to open it in your default webbrowser.
+
+``` r
+texreg::htmlreg(list(m1,m2), file = 'model.html')
+browseURL('model.html')
+```
 
 Comparing and diagnosing models
 -------------------------------

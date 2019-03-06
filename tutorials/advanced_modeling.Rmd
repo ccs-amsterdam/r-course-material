@@ -1,0 +1,226 @@
+---
+title: "Advanced Statistical Modeling in R"
+author: "Kasper Welbers & Wouter van Atteveldt"
+date: "November 2018"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r, echo=F}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
+library(printr)
+```
+
+# Advanced Modeling
+
+In this tutorial we show how to perform several advanced statistical models in R. For the sake of parsimony, we will not discuss each model in detail, but only point out the main usage and provide a general example.
+
+For this tutorial we use the tidyverse and texreg package to manage the data and present the models.
+For the statistical models we use the stats packages (loaded by default) and the amazing [lme4](https://cran.r-project.org/web//packages/lme4/vignettes/lmer.pdf) package 
+
+```{r}
+library(tidyverse)
+library(texreg)
+library(lme4)    ## remember to install first
+```
+
+# Generalized linear models
+
+> In statistics, the generalized linear model (GLM) is a flexible generalization of ordinary linear regression that allows for response variables that have error distribution models other than a normal distribution. The GLM generalizes linear regression by allowing the linear model to be related to the response variable via a link function and by allowing the magnitude of the variance of each measurement to be a function of its predicted value. [Wikipedia](https://en.wikipedia.org/wiki/Generalized_linear_model)
+
+Probably the most common use of generalized linear models is the logistic regression, or binary regression, that allows for a dichotomous response variable. Another common use is the Poisson regression, which allows for a response variable with a Poisson distribution.
+
+Generalized linear models can be performed with the regular stats package, in a way that is very similar to the regular linear models. 
+Where regular linear models have the `lm` function, generalized linear models have the `glm` function. Other than this, the main difference is that the family function, or link function, of the glm needs to be given.
+
+## Logistic regression
+
+First, we create a copy of the iris data, but with a dichotomous variable for whether a case (row) is of the species "versicolor".
+
+```{r}
+d = mutate(iris, versicolor = as.numeric(Species == 'versicolor'))
+head(d)
+```
+
+The `glm` function uses the same type of formula as the `lm` function: `dependent ~ independent1 + independent2 + ...`. 
+Here we try to predict whether the species is `versicolor` based on the Sepal size (length and width).
+We specify that we use the `binomial` family, for modeling a binomial dependent variable. 
+To view the model we again use the texreg package (but summary(m) would also work).
+
+```{r}
+m = glm(versicolor ~ Sepal.Length + Sepal.Width, family = binomial, data = d)
+screenreg(m)
+```
+
+Here we see that only Sepal.Width has a significant effect. 
+The smaller the Sepal.Width, the more likely that the species is Versicolor.
+
+Note that there is no R2 value, because the glm model is fit with a maximum likelihood estimator instead of the least squares approach used in regular lm. 
+To evaluate model fit, you can compare models using the anova function. 
+For example, we can make a second model with the Petal information included, and check whether the new model is an improvement.
+
+```{r}
+m1 = glm(versicolor ~ Sepal.Length + Sepal.Width, family = binomial, data = d)
+m2 = glm(versicolor ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, family = binomial, data = d)
+anova(m1,m2, test="Chisq")
+```
+
+Here we see that adding these variables does (somewhat) improve the model fit. 
+If we look at the model, we also see that Petal.Width is a significant predictor.
+
+```{r}
+screenreg(list(m1,m2))
+```
+
+Finally, to illustrate how fitting a `glm` is different from using a regular `lm`, we can plot the regression line for the Sepal.Width.
+To keep it simple, we'll fit a model with only the Sepal.Width as predictor.
+
+```{r fitting_glm}
+## create model
+m = glm(versicolor ~ Sepal.Width, family = binomial, data = d)
+
+## create a sequence of values within the observed boundaries of Sepal.Width
+x = seq(min(d$Sepal.Width), max(d$Sepal.Width), 0.01)     
+
+## predict response (probability of species being 'versicolor') for the values in x
+y = predict(m, list(Sepal.Width = x), type = 'response')  
+
+## plot the actual values for versicolor
+plot(d$Sepal.Width, d$versicolor)
+
+## add the predicted values
+lines(x,y, col='blue')
+```
+
+here we see that the versicolor cases (the dots at the top and bottom) are mostly on the left side (small Sepal Width).
+The curved prediction line shows that the probability approaches (but never exceeds) 1 the smaller the Sepal.Width gets, and approaches 0 the larger the Sepal.Width gets. 
+In a regular `lm`, this line would be straight, which is less suited for fitting the probability, and would arbitrarily have values higher than 1 and lower than 0. 
+
+
+# Multilevel models, or Mixed-Effects models
+
+Multilevel models are, simply put, linear models that can account for multiple levels in the data. Here we briefly explain what what multilevel analysis in and how to apply it in R with the `lme4` package.
+
+The examples in the lme4 packages use the sleepstudy data, which measures reaction time of participants after sleep deprivation. 
+The data contains three variables: Reaction, Days and Subject.
+Subjects were limited to 3 hours of sleep each night, so the question is whether their reaction time slows after more days of limited sleep.
+
+```{r}
+head(sleepstudy)
+```
+
+The sleepstudy data requires multilevel analysis, because the observations are nested in Subjects. 
+Linear regression models assume that observations are independent, but that is not the case here.
+Different subjects might have different reaction speeds in general, and might also be more or less affected by sleep deprivation. 
+
+To account for this, multilevel models can have `random intercepts` and `random slopes`. By using random intercepts, each Subject has its own intercept, which accounts for differences between subjects in overall reaction speed. Random slopes can be applied for each independent variable in the model, so that each Subject also has its own slope (i.e. coefficient) for this variable. This can be used simply to controll for implications of nested data (to not violate the independence assumption in linear regression). But moreover, it can be used to better investigate variance and effects at different levels. For instance, to what extent student learning success is explained by individual level factors (doing homework, participating in class) or class level factors (class size, experience of teacher).
+
+## What is a multilevel model: a visual explanation
+
+We will not try to explain exactly what a multilevel model is and when and how you should use it, but a brief introduction is helpfull. 
+For this we'll use toy data in which the random intercepts (and slopes) are extremely obvious.
+We'll stick to the names of the sleepstudy data for sake of simplicity.
+
+```{r}
+d = data.frame(Reaction = c(0,1,3,5,17,12,12,10,29,27,26,24,39,36,33,30,49,47,42,42),
+               Days = c(1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4),
+               Subject = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5))
+d
+```
+
+Here the Subjects have clearly different intercepts (average Reaction) and slopes (effect of Days on Reaction). 
+We can show this with a scatterplot, in which different subjects are given different colors.
+
+```{r, lme4demo1}
+cols = topo.colors(5)  # make colors for 5 subjects
+plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
+```
+
+If we just look at the dots without the colors, we hardly see any patterns. 
+Taking the colors into account, we see that the average reaction time (in our toy data) is vastly different for each Subject.
+Also, we see that overall the reaction time within Subjects decrease for most Subjects, but with different slopes, and one even increases.
+
+Let's see what happens if we fit a regular linear regression, and plot the regression line.
+
+```{r lme4demo2}
+m = lm(Reaction ~ Days, data=d)
+plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
+abline(coef(m)[1], coef(m)[2])
+```
+
+It captures the overal pattern, but only roughly. 
+Now lets fit a multilevel model with random intercepts (we'll discuss how the formula works later on).
+
+```{r lme4demo3}
+m = lmer(Reaction ~ Days + (1 | Subject), data=d)
+
+plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
+for (i in 1:5) {  ## for each subject
+  abline(coef(m)$Subject[i,1], coef(m)$Subject[i,2], col=cols[i])
+}
+```
+
+Now each Subject has it's own regression line for the effect of Days on Reaction. 
+Note that only the intercepts differ, but the slope is still the same.
+So now, let's fit the model with random intercepts AND random slopes.
+
+```{r, lme4demo4}
+plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)  ## redo the plot for clarity
+
+m = lmer(Reaction ~ Days + (1 + Days| Subject), data=d)
+
+for (i in 1:5) {  ## for each subject
+  abline(coef(m)$Subject[i,1], coef(m)$Subject[i,2], col=cols[i])
+}
+```
+
+Now each Subject has its own intercept and slope.
+
+
+## Multilevel regression with lmer()
+
+The `lmer()` function from the `lme4` package can be seen as the `lm` function for multilevel models.
+The syntax is also very similar.
+The only difference is that you need to specify the higher level in the formula.
+Using the sleepstudy data, where the dependent variable is Reaction, the independent variable is Days, and the higher level is Subject, the formula is:
+
+`Reaction ~ Days + (1 | Subject)`
+
+How to read this? The multilevel part is the added `+ (1 | Subject)`. 
+The part between the parentheses has two parts:
+
+* The part after the | symbol simply gives the name of the higher level group, in this case Subject.
+* The part before the | specifies the model for this higher level. In the current example, this is only `1`, which referes to the intercept. Normally, the intercept is implicit, but here you do always need to specify it. 
+
+If we want to add Days as a random slope, it looks like this:
+
+`Reaction ~ Days + (1 + Days | Subject)`
+
+Essentially, this is the same as adding the 'normal' independent variables. You can add more independent variables as you would with a regular `lm`:
+
+`dependent ~ independent1 + independent2 + (1 | group)`
+
+And you can add more random slopes by adding them between the parentheses:
+
+`dependent ~ independent1 + independent2 + (1 + independent1 + independent2 | group)`
+
+
+```{r}
+m = lmer(Reaction ~ Days + (1 + Days | Subject), data=d)
+
+```
+
+
+
+
+
+## Multilevel Logistic or Poisson regression with glmer()
+
+The `lmer` function can be seen as the `lm` function for multilevel models.
+Similarly, the `lme4` package has the `glmer` function, which can be seen as the `glm` function for multilevel models.
+In terms of syntax, using `glmer` is very similar to `lmer`, and like in `glm`, you need to specify a `family` (e.g., binomial for logistic regression, poisson for poisson regression).
+
