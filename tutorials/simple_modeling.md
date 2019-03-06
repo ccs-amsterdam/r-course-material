@@ -5,9 +5,9 @@ November 2018
 
 -   [Basic Modeling](#basic-modeling)
 -   [T-tests](#t-tests)
-    -   [Anova](#anova)
-    -   [Linear models](#linear-models)
-    -   [Comparing and diagnosing models](#comparing-and-diagnosing-models)
+-   [Anova](#anova)
+-   [Linear models](#linear-models)
+-   [Comparing and diagnosing models](#comparing-and-diagnosing-models)
 
 Basic Modeling
 ==============
@@ -113,7 +113,7 @@ t.test(pergroup$anglo, pergroup$european, paired=T)
 So, the mean difference per year between the groups is indeed significant.
 
 Anova
------
+=====
 
 We can also use a one-way Anova to see whether accumulation differs per country. Let's first do a box-plot to see how different the countries are.
 
@@ -161,7 +161,7 @@ round(posthoc$p.value, 2)
 | U.S.    |       1.00|    0.02|    1.00|        0|   0.02|      0|      0|     1|
 
 Linear models
--------------
+=============
 
 A more generic way of fitting models is using the `lm` command. In fact, `aov` is a wrapper around `lm`. Let's see how well we can predict the `capital` variable (dependent) by the `country` and `public capital` variables (independent).
 
@@ -282,7 +282,7 @@ browseURL('model.html')
 ```
 
 Comparing and diagnosing models
--------------------------------
+===============================
 
 A relevant question can be whether a model with an interaction effect is in fact a better model than the model without the interaction. This can be investigated with an anova of the model fits of the two models:
 

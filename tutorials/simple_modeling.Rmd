@@ -89,7 +89,7 @@ t.test(pergroup$anglo, pergroup$european, paired=T)
 So, the mean difference per year between the groups is indeed significant. 
 
 Anova
-----
+===
 
 We can also use a one-way Anova to see whether accumulation differs per country.
 Let's first do a box-plot to see how different the countries are.
@@ -122,7 +122,7 @@ round(posthoc$p.value, 2)
 ```
 
 Linear models
-----
+===
 
 A more generic way of fitting models is using the `lm` command. 
 In fact, `aov` is a wrapper around `lm`. 
@@ -174,7 +174,7 @@ browseURL('model.html')
 ```
 
 Comparing and diagnosing models
----
+===
 
 A relevant question can be whether a model with an interaction effect is in fact a better model than the model without the interaction.
 This can be investigated with an anova of the model fits of the two models:
