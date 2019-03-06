@@ -34,3 +34,4 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 # Miscellaneous
 
 * [R Markdown codeblock parameters](miscellaneous/RMarkdown_parameters.Rmd)
+* |[Simple modeling (statistics)](tutorials/simple_modeling.md)
