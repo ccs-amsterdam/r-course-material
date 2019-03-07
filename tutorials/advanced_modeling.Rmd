@@ -61,20 +61,27 @@ The smaller the Sepal.Width, the more likely that the species is Versicolor.
 
 Note that there is no R2 value, because the glm model is fit with a maximum likelihood estimator instead of the least squares approach used in regular lm. 
 To evaluate model fit, you can compare models using the anova function. 
-For example, we can make a second model with the Petal information included, and check whether the new model is an improvement.
+For example, here we first make a base model that does not contain any independent variables (other than the intercept), and also make a second model with the Petal information included.
+We then compare how the model fit changes.
 
 ```{r}
+m_base = glm(versicolor ~ 1, family = binomial, data = d)
 m1 = glm(versicolor ~ Sepal.Length + Sepal.Width, family = binomial, data = d)
 m2 = glm(versicolor ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, family = binomial, data = d)
-anova(m1,m2, test="Chisq")
+anova(m_base, m1,m2, test="Chisq")
 ```
 
-Here we see that adding these variables does (somewhat) improve the model fit. 
+We can see that adding the variables improves the model fit, in particular for m1, but also for m2.
+The chi2 test shows whether the change in the model fit is statistically significant for consequtive models (m_base to m1, and m1 to m2).
 If we look at the model, we also see that Petal.Width is a significant predictor.
 
 ```{r}
 screenreg(list(m1,m2))
 ```
+
+For reference, it is possible to get some sort of R2 value, often called the pseudo R2. 
+See for instance [this page](https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/) for a discussion and overview. 
+If you want to use it though, do not waste time figuring out how to calculate it, but rather look for a package that can do it for you (there are certain to be plenty).
 
 Finally, to illustrate how fitting a `glm` is different from using a regular `lm`, we can plot the regression line for the Sepal.Width.
 To keep it simple, we'll fit a model with only the Sepal.Width as predictor.
@@ -119,24 +126,24 @@ Different subjects might have different reaction speeds in general, and might al
 
 To account for this, multilevel models can have `random intercepts` and `random slopes`. By using random intercepts, each Subject has its own intercept, which accounts for differences between subjects in overall reaction speed. Random slopes can be applied for each independent variable in the model, so that each Subject also has its own slope (i.e. coefficient) for this variable. This can be used simply to controll for implications of nested data (to not violate the independence assumption in linear regression). But moreover, it can be used to better investigate variance and effects at different levels. For instance, to what extent student learning success is explained by individual level factors (doing homework, participating in class) or class level factors (class size, experience of teacher).
 
-## What is a multilevel model: a visual explanation
+## Multilevel modeling in R: a visual explanation
 
-We will not try to explain exactly what a multilevel model is and when and how you should use it, but a brief introduction is helpfull. 
+We will not try to explain exactly what a multilevel model is and when and how you should use it (this would be a workshop in itself).
+The main goal here is to show how to perform multilevel modeling in R, and to visually illustrate what happens when you add higher level variables to a linear model.
 For this we'll use toy data in which the random intercepts (and slopes) are extremely obvious.
 We'll stick to the names of the sleepstudy data for sake of simplicity.
 
 ```{r}
-d = data.frame(Reaction = c(0,1,3,5,17,12,12,10,29,27,26,24,39,36,33,30,49,47,42,42),
+d = data.frame(Reaction = c(0,1,7,9,17,16,12,10,29,27,24,22,39,36,33,30,49,47,42,42),
                Days = c(1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4),
                Subject = c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5))
-d
 ```
 
 Here the Subjects have clearly different intercepts (average Reaction) and slopes (effect of Days on Reaction). 
 We can show this with a scatterplot, in which different subjects are given different colors.
 
 ```{r, lme4demo1}
-cols = topo.colors(5)  # make colors for 5 subjects
+cols = rainbow(5)  # make colors for 5 subjects
 plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
 ```
 
@@ -144,79 +151,125 @@ If we just look at the dots without the colors, we hardly see any patterns.
 Taking the colors into account, we see that the average reaction time (in our toy data) is vastly different for each Subject.
 Also, we see that overall the reaction time within Subjects decrease for most Subjects, but with different slopes, and one even increases.
 
+To show how we can model this with random intercepts and random slopes, we'll fit this data with three models: regular linear model, multilevel model with random intercepts, multilevel model with random slopes. 
+
+### Regular linear model
+
 Let's see what happens if we fit a regular linear regression, and plot the regression line.
 
-```{r lme4demo2}
+```{r}
 m = lm(Reaction ~ Days, data=d)
+screenreg(m)
+```
+
+The model states that there is no relation between Days and Reaction.
+We can visualize the problem of fitting a regular linear model to this data by adding the coefficient line to the plot.
+
+```{r lme4demo2}
 plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
 abline(coef(m)[1], coef(m)[2])
 ```
 
-It captures the overal pattern, but only roughly. 
-Now lets fit a multilevel model with random intercepts (we'll discuss how the formula works later on).
+It does captures the overal pattern (Reaction times goes down), but only roughly. 
 
-```{r lme4demo3}
-m = lmer(Reaction ~ Days + (1 | Subject), data=d)
+### Multilevel model with random intercepts
 
+To fit a linear multilevel model we will use the `lmer` function from the `lme4` package.
+Notice the similarity to the `lm` function.
+
+The difference is that you need to specify the higher level in the formula, which looks like this.
+
+```{r}
+m_ri = lmer(Reaction ~ Days + (1 | Subject), data=d)
+```
+
+The multilevel part is the added `+ (1 | Subject)`. 
+The part between the parentheses has two parts:
+
+* The part after the | symbol gives the name of the higher level group, in this case Subject.
+* The part before the | specifies the model for this higher level. In the current example, this is only `1`, which referes to the intercept. Normally, the intercept is implicit, but here you do always need to specify it. 
+
+Here we can also use the `screenreg` function (from the `texreg` package) to print the regression table.
+
+```{}
+screenreg(m_ri)
+```
+
+Interestingly, we see that the intercept and the effect for Days is identical (though now the effect is Days statistically significant). 
+This part of the output still shows the overall intercept (or grand intercept) and effect.
+What's new is the lower part, which shows the way the model is fit and the random effects.
+As with the `glm` we see that there is no R2.
+To evaluate the model fit the common approach is to compare different models.
+
+For now, focus on the `Var: Subject (Intercept)` and `Var: Residual` rows.
+These report the variance for the two levels (The residual is the variance at the level of individual observations).
+We see that the Subject variance (259.00) is much higher than the Residual variance (10.83).
+This makes sense for our data, because the biggest differences in the Reaction scores can be explained by the differences between Subjects.
+We can see this more clearly by visualizing the effect of Days with the random interceps.
+The random intercept values are not reported in the model above, but they are stored in the output (m_ri).
+
+```{r lmer4demo3}
 plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
 for (i in 1:5) {  ## for each subject
-  abline(coef(m)$Subject[i,1], coef(m)$Subject[i,2], col=cols[i])
+  abline(coef(m_ri)$Subject[i,1], coef(m_ri)$Subject[i,2], col=cols[i])
 }
 ```
 
 Now each Subject has it's own regression line for the effect of Days on Reaction. 
-Note that only the intercepts differ, but the slope is still the same.
+This also makes it clear why the variance is mainly on the Subject level. 
+The distance of the observations (the dots) to the lines of the same colour is relatively small. 
+The bigger distance is between the lines. 
+
+### Multilevel model with random intercepts and random slopes
+
+In the random intercepts model the slope for the effect of Days is still the same.
 So now, let's fit the model with random intercepts AND random slopes.
+We do this by adding the Days variable in the multilevel part (the part between parentheses) of the formula.
 
-```{r, lme4demo4}
+```{r}
+m_rs = lmer(Reaction ~ Days + (1 + Days| Subject), data=d)
+screenreg(m_rs)
+```
+
+Again, the fixed effects for the Intercept and Days are the same. 
+What is new is that the variance of `Subject Days` is reported.
+This is the variance between Subject in the effect of Days on Reaction.
+In our data, this variance is most clearly seen in the effect for the 'red' Subject at the bottom of the graph, which is the only Subject for whom Reaction time somehow increased.
+
+```{r}
 plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)  ## redo the plot for clarity
-
-m = lmer(Reaction ~ Days + (1 + Days| Subject), data=d)
-
 for (i in 1:5) {  ## for each subject
-  abline(coef(m)$Subject[i,1], coef(m)$Subject[i,2], col=cols[i])
+  abline(coef(m_rs)$Subject[i,1], coef(m_rs)$Subject[i,2], col=cols[i])
 }
 ```
 
-Now each Subject has its own intercept and slope.
+### Comparing multilevel models
 
-
-## Multilevel regression with lmer()
-
-The `lmer()` function from the `lme4` package can be seen as the `lm` function for multilevel models.
-The syntax is also very similar.
-The only difference is that you need to specify the higher level in the formula.
-Using the sleepstudy data, where the dependent variable is Reaction, the independent variable is Days, and the higher level is Subject, the formula is:
-
-`Reaction ~ Days + (1 | Subject)`
-
-How to read this? The multilevel part is the added `+ (1 | Subject)`. 
-The part between the parentheses has two parts:
-
-* The part after the | symbol simply gives the name of the higher level group, in this case Subject.
-* The part before the | specifies the model for this higher level. In the current example, this is only `1`, which referes to the intercept. Normally, the intercept is implicit, but here you do always need to specify it. 
-
-If we want to add Days as a random slope, it looks like this:
-
-`Reaction ~ Days + (1 + Days | Subject)`
-
-Essentially, this is the same as adding the 'normal' independent variables. You can add more independent variables as you would with a regular `lm`:
-
-`dependent ~ independent1 + independent2 + (1 | group)`
-
-And you can add more random slopes by adding them between the parentheses:
-
-`dependent ~ independent1 + independent2 + (1 + independent1 + independent2 | group)`
-
+By comparing the models, we can see how the variance at different levels changes.
+Here we first make a base model, which is a random intercepts model without any predictor variables.
+Then we add Days at the individual level, and finally we add the random slopes for Days.
 
 ```{r}
-m = lmer(Reaction ~ Days + (1 + Days | Subject), data=d)
-
+m_base = lmer(Reaction ~ (1 | Subject), data=d)
+m1 = lmer(Reaction ~ Days + (1 | Subject), data=d)
+m2 = lmer(Reaction ~ Days + (1 + Days| Subject), data=d)
+anova(m_base,m1,m2)
 ```
 
+The anova shows that each model is an improvement of the previous model.
+Interestingly, the improvement from m_base to m1 is not that great.
+This is because the overall effect of Days (not taking random slopes into account) isn't that great (remember that it was not statistically significant)
 
+```{r}
+screenreg(list(m_base,m1,m2))
+```
 
-
+It is interesting to look at the random effects to see how the variance is explained at different levels.
+From m_base to m1 (adding the Days effect) we see that variance is mostly explained at `Var: Residual`.
+This makes sense, because Days this is a within Subject variable.
+From m1 to m2 (adding the random slope for Days), we see that even more variance at the `Var: Residual` level is explained.
+This again makes sense, because the lines within the Subjects now much better fit the data.
+This variance can now be measured as variance between the slopes for Days, as seen in `VAR: Subject Days`.
 
 ## Multilevel Logistic or Poisson regression with glmer()
 

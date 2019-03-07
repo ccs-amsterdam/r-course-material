@@ -22,6 +22,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | 5 | dplyr: group_by, summarize |
 | [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | 3 & 7 | ggplot2  |
 | [Basic statistics](tutorials/simple_modeling.md) | | stats: lm, aov, t.test |
+| [Advanced statistics](tutorials/advanced_modeling.md) | | stats: glm, lme4: lmer, glmer |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) | 12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | 13 | dplyr: inner_join, left_join, etc. | 
 
