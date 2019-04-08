@@ -189,12 +189,61 @@ Here we'll first create some variables and then look at the variables (using the
 ```{r}
 age21 = mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
 select(age21, Question, Pollster, party_diff)
-age21 = arrange(age21, Population, -Support)
-
 ```
 
 To transform (recode) a variable in the same column, you can simply use an existing name in `mutate()` to overwrite it.
 
+## Aggregating with summarize() and group_by()
+
+The final set of functions for this tutorial is used for computing *summary statistics*.
+Where mutate computes a value based on a single row, `summarize` computes a value for a group of rows, e.g. giving the count, sum, or mean.
+
+Similar to `mutate()`, you provide named arguments in which the summary is calculated. Importantly, the outcome of the calculation has to be a single value. Also see the **Useful functions** section in the documentation for a list of functions that do this. We'll start by calculating the overall mean, standard deviation and number of observations for support of raising the minimum age:
+
+
+```{r}
+summarize(age21, M = mean(Support), SD = sd(Support), N = n())
+```
+
+So, the average support in the 7 included polls is almost 76% with standard deviation of just over 6%. 
+
+
+Summarize is most often combined with `group_by()` to define groups on which you want summary statistics. This is more often referred to as aggregation, and is an absolute must in your data analytics toolbox. 
+
+For example, we can calculate the scores above per question in the original data set, 
+by first grouping by Question and then calling  summarize:
+
+```{r}
+dg = group_by(d, Question)
+summarize(dg, M = mean(Support), SD = sd(Support), N = n())
+```
+
+We can just as easily group by multiple variables. 
+
+```{r}
+dg = group_by(d, Question, Population)
+summarize(dg, M = mean(Support), SD = sd(Support), N = n())
+```
+
+
+# Bigger Example
+
+As an example of how the various functions can be combined, let's find out how much more (or less) republicans are in favour of each
+possible measure compared with democrats, taking only polls that are based on registered voters:
+
+```{r}
+ds = filter(d, Population == 'Registered Voters')            
+ds = mutate(ds, party_diff = `Republican Support` - `Democratic Support`)   
+ds = group_by(ds, Question)                                   
+summarize(ds, M = mean(party_diff), SD = sd(party_diff), N = n()) 
+
+```
+
+So, compared to Democrats, Republicans are much more in favour of arming teachers, but oppose stricter gun laws in general, 
+especially banning assault weapons and high capacity magazines.
+Note that the difference for repealing the 2nd amendment is much smaller, presumably because Democrats are also mostly against this,
+and the reverse holds for restrictions on mental health patients. 
+(As a small exercise, how can you check this assumption?)
 
 # Working with Pipes
 
@@ -209,24 +258,14 @@ you can just add it to the pipe: `a %>% f(x) %>% f2(y)` is equivalent to `f2(f(a
 
 Put simply, pipes take the output of a function, and directly use that output as the input for the `.data` argument in the next function. As you have seen, all the `dplyr` functions that we discussed have in common that the first argument is a *tibble*, and all functions return a *tibble*. This is intentional, and allows us to pipe all the functions together. 
 
-This seems a bit abstract, but consider the code below, which is a collection of statements from above:
+This seems a bit abstract, but consider the code below, which is identical to the code block above:
 
 ```{r}
-d = read_csv(url)
-age21 = filter(d, Question == 'age-21')
-age21 = mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
-age21 = select(age21, Question, Pollster, party_diff)
-arrange(age21, -party_diff)
-```
-
-To recap, this reads the csv, filters by question, computes the difference, drops other variables, and sorts.
-Since the output of each function is the input of the next, we can also write this as a single pipeline:
-
-```{r}
-read_csv(url) %>% filter(Question == 'age-21') %>% 
-  mutate(party_diff = abs(`Republican Support` - `Democratic Support`)) %>%
-  select(Question, Pollster, party_diff) %>% 
-  arrange(-party_diff)
+d %>%
+  filter(Population == 'Registered Voters') %>%
+  mutate(party_diff = `Republican Support` - `Democratic Support`) %>%
+  group_by(Question) %>%                                   
+  summarize(M = mean(party_diff), SD = sd(party_diff), N = n()) 
 ```
 
 The nice thing about pipes is that it makes it really clear what you are doing. Also, it doesn't require making many intermediate objects (such as `ds`). If applied right, piping allows you to make nicely contained pieces of code to perform specific parts of your analysis from raw input straight to results, including statistical modeling or visualization.
@@ -235,5 +274,12 @@ Of course, you probably don't want to replace your whole script with a single pi
 For example, you might want to download, clean, and subset a data set before doing multiple analyses with it.
 In that case, you probably want to store the result of downloading, cleaning, and subsetting as a variable, and use that in your analyses.
 
+For example:
+
+```{r}
+d = read_csv(url) %>% filter(Question == "age-21") %>% select(Pollster:Support, rep=`Republican Support`, dem=`Democratic Support`)
+d %>% arrange(Support) %>% select(Pollster, Support:dem)
+d %>% group_by(Population) %>% summarize(M=mean(Support), N=n())
+```
 
 
