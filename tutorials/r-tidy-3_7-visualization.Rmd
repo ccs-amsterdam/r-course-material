@@ -262,3 +262,41 @@ Some links for learning more about themes:
  + https://www.datanovia.com/en/blog/ggplot-themes-gallery
  + http://rstudio-pubs-static.s3.amazonaws.com/284329_c7e660636fec4a42a09eed968dc47f32.html
 
+# Plotting maps
+
+Geographic information can be plotted in `ggplot` much like scatter plots,
+simply using longitude and lattitude as x and y. 
+Often, we want to plot data on an actual map of (part of) the world,
+for example to plot locations of tweets or colour a map with information per country or state.
+
+In `ggplot` this is accomplished by plotting the shapes of the countries. The package includes shape
+data for the US, the world, and some countries like France, but unfortunately not EU or Germany. The maps originate from the `maps` package, so you can check their documentation to see what countries are included. 
+
+```{r}
+library(ggplot2)
+states = map_data('state')
+head(states)
+```
+
+This basically tells ggplot what lines to draw to form a state. If a state is not contiguous it will contain subregions resulting in multiple polygons.
+
+We can immediately plot this data, using the `geom_polygon` to plot shapes. We specify x and y as longitude and lattitude, fill by state, and make the state borders white. 
+
+```{r}
+ggplot(data = states) + 
+  geom_polygon(aes(x = long, y = lat, fill = region, group = group), color = "white") + 
+  coord_fixed(1.3) + guides(fill=FALSE)  
+```
+
+Note: the last line fixes the aspect ratio to 1.3 and prevents a per-state legend (guide) from being plotted.
+
+
+This example coloured the states as a non-informative nominal variable. We can also colour by our own data, for example by percentage white ethnicity:
+
+```{r}
+states = facts_state %>% mutate(region=tolower(area_name)) %>% select(region, white) %>% inner_join(states)
+ggplot(data = states) + 
+  geom_polygon(aes(x = long, y = lat, fill = white, group = group), color = "white") + 
+  coord_fixed(1.3) + theme_void() + 
+  ggtitle("Percentage white population per state") 
+```
