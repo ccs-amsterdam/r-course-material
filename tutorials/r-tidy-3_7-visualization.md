@@ -10,8 +10,7 @@ Kasper Welbers & Wouter van Atteveldt
     -   [Setting graph options](#setting-graph-options)
     -   [Grouped bar plots](#grouped-bar-plots)
 -   [Line plots](#line-plots)
--   [Bonus: Multiple 'faceted' plots](#bonus-multiple-faceted-plots)
--   [Bonus: Map plots](#bonus-map-plots)
+-   [Multiple 'faceted' plots](#multiple-faceted-plots)
 
 This tutorial teaches the basics of data visualization using the `ggplot2` package (included in `tidyverse`). For more information, see [R4DS Chapter 3: Da\`ta Visualization](http://r4ds.had.co.nz/data-visualisation.html) and [R4DS Chapter 7: Exploratory Data Analysis](http://r4ds.had.co.nz/exploratory-data-analysis.html).
 
@@ -206,8 +205,8 @@ ggplot(dems) + geom_line(aes(x=date, y=vote_prop, colour=candidate))
 
 Bonus question: in the code for Trump, the proportion was calculated in two statements (first per state, then per date), but in this code it is calculated only per date. How does that matter? Is either calculation more correct than the other?
 
-Bonus: Multiple 'faceted' plots
-===============================
+Multiple 'faceted' plots
+========================
 
 Just to show off some of the possibilities of ggplot, let's make a plot of all republican primary outcomes on Super Tuesday (March 1st):
 
@@ -216,20 +215,4 @@ super = results_state %>% left_join(schedule) %>% filter(party=="Republican" & d
 ggplot(super) + geom_bar(aes(x=candidate, y=vote_prop), stat='identity')  + facet_wrap(~ state, nrow = 3) + coord_flip()
 ```
 
-Bonus: Map plots
-================
-
-If data is tied to a geographical entity, like a state, we can also plot it on a map. For example, the following shows Trump (primary) vote percentage per state. We use the `usmap` package, which has a convenient function to plot state (and county) level variables with ggplot. Note that this is not part of the ggplot/tidyverse package, and handles its parameters slightly differently:
-
-``` r
-trump = results_state %>% group_by(state, party) %>% mutate(vote_prop=votes/sum(votes)) %>% filter(candidate=="Donald Trump")
-library(usmap)
-plot_usmap(data=trump, values="vote_prop") + scale_fill_continuous(name="Trump vote", low = "white", high = "red")
-```
-
-We can also plot e.g. percentage college-educated per county:
-
-``` r
-d = facts_subset %>% filter(!is.na(state_abbreviation)) %>% select(fips, college)
-plot_usmap(regions="counties", data=d, values="college") + scale_fill_continuous(name="College\neducated\n(%)")
-```
+Note <sub>facet\_wrap</sub> wraps around a single facet. You can also use ~facet\_grid() to specify separate variables for rows and columns
