@@ -25,6 +25,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Advanced statistics](tutorials/advanced_modeling.md) | | stats: glm, lme4: lmer, glmer |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) | 12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | 13 | dplyr: inner_join, left_join, etc. | 
+| [Basic string (text) handling](tutorials/R-tidy-14-strings.md) | 14 | readr: str_detect, str_extract etc., iconv |
 
 # Text analysis 
 
