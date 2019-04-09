@@ -113,7 +113,7 @@ facts_state = facts_state %>% mutate(growth=ifelse(pop_change > 1, "Growing", "S
 Now, we can add the category color to the plot:
 
 ```{r}
-ggplot(data=facts_state) + geom_point(mapping=aes(x=college, y=income, size=population, colour=growth), alpha=.9)
+ggplot(data=facts_state) + geom_point(mapping=aes(x=college, y=income, size=population, colour=growth), alpha=.9) 
 ```
 
 As you can see in these examples, ggplot tries to be smart about the mapping you ask.
@@ -244,4 +244,21 @@ ggplot(super) + geom_bar(aes(x=candidate, y=vote_prop), stat='identity')  + face
 
 Note ~facet_wrap~ wraps around a single facet. You can also use ~facet_grid() to specify separate variables for rows and columns
 
+# Themes
+
+Customization of things like background colour, grid colour etc. is handled by themes. 
+`ggplot` has two built-in themes: `theme_grey` (default) and `theme_bw` (for a more minimal theme with white background). 
+The package ggthemes has some more themes, including an 'economist' theme (based on the newspaper).
+To use a theme, simply add it to the plot:
+
+```{r}
+library(ggthemes)
+ggplot(trump) + geom_line(aes(x=date, y=vote_prop)) + theme_economist()
+```
+
+Some links for learning more about themes:
+
+ + https://ggplot2.tidyverse.org/reference/theme.html
+ + https://www.datanovia.com/en/blog/ggplot-themes-gallery
+ + http://rstudio-pubs-static.s3.amazonaws.com/284329_c7e660636fec4a42a09eed968dc47f32.html
 

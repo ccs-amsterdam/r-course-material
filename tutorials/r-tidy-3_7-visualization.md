@@ -11,6 +11,7 @@ Kasper Welbers & Wouter van Atteveldt
     -   [Grouped bar plots](#grouped-bar-plots)
 -   [Line plots](#line-plots)
 -   [Multiple 'faceted' plots](#multiple-faceted-plots)
+-   [Themes](#themes)
 
 This tutorial teaches the basics of data visualization using the `ggplot2` package (included in `tidyverse`). For more information, see [R4DS Chapter 3: Da\`ta Visualization](http://r4ds.had.co.nz/data-visualisation.html) and [R4DS Chapter 7: Exploratory Data Analysis](http://r4ds.had.co.nz/exploratory-data-analysis.html).
 
@@ -97,7 +98,7 @@ facts_state = facts_state %>% mutate(growth=ifelse(pop_change > 1, "Growing", "S
 Now, we can add the category color to the plot:
 
 ``` r
-ggplot(data=facts_state) + geom_point(mapping=aes(x=college, y=income, size=population, colour=growth), alpha=.9)
+ggplot(data=facts_state) + geom_point(mapping=aes(x=college, y=income, size=population, colour=growth), alpha=.9) 
 ```
 
 As you can see in these examples, ggplot tries to be smart about the mapping you ask. It automatically sets the x and y ranges to the values in your data. It mapped the size such that there are small and large points, but not e.g. a point so large that it would dominate the graph. For the colour, for interval variables it created a colour scale, while for a categorical variable it automatically assigned a colour to each group.
@@ -216,3 +217,19 @@ ggplot(super) + geom_bar(aes(x=candidate, y=vote_prop), stat='identity')  + face
 ```
 
 Note <sub>facet\_wrap</sub> wraps around a single facet. You can also use ~facet\_grid() to specify separate variables for rows and columns
+
+Themes
+======
+
+Customization of things like background colour, grid colour etc. is handled by themes. `ggplot` has two built-in themes: `theme_grey` (default) and `theme_bw` (for a more minimal theme with white background). The package ggthemes has some more themes, including an 'economist' theme (based on the newspaper). To use a theme, simply add it to the plot:
+
+``` r
+library(ggthemes)
+ggplot(trump) + geom_line(aes(x=date, y=vote_prop)) + theme_economist()
+```
+
+Some links for learning more about themes:
+
+-   <https://ggplot2.tidyverse.org/reference/theme.html>
+-   <https://www.datanovia.com/en/blog/ggplot-themes-gallery>
+-   <http://rstudio-pubs-static.s3.amazonaws.com/284329_c7e660636fec4a42a09eed968dc47f32.html>
