@@ -32,6 +32,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 * [Text analysis](tutorials/R_text_3_quanteda.md)
 * [Lexical sentiment analysis](tutorials/sentiment_analysis.md)
 * [LDA Topic Modeling](tutorials/2_lda.md)
+* [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md)
 
 
 # Miscellaneous
