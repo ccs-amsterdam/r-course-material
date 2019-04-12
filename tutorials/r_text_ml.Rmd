@@ -2,11 +2,15 @@
 title: "Supervised Text Classification"
 author: "Wouter van Atteveldt & Kasper Welbers"
 date: "April 2019"
-output: html_document
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(warning=FALSE, message=FALSE, results=F)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, results=F, fig.keep='none')
 library(printr)
 ```
 
@@ -141,7 +145,7 @@ Although wordfish is an unsupervised method (so doesn't really belong to this tu
 ```{r}
 library(magrittr)
 set.seed(1)
-m_wf <- textmodel_wordfish(dfm_train)
+m_wf <- textmodel_wordfish(dfm_train, sparse=T)
 topwords = c(scores %$% head(word, 10), scores %>% arrange(-neg) %$% head(word, 10))
 textplot_scale1d(m_wf, margin = "features", highlighted = c(topwords, "coen", "scorses", "paltrow", "shakespear"))
 ```

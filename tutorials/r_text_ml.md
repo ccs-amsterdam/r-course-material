@@ -1,27 +1,49 @@
----
-title: "Supervised Text Classification"
-author: "Wouter van Atteveldt & Kasper Welbers"
-date: "April 2019"
-output: html_document
----
+Supervised Text Classification
+================
+Wouter van Atteveldt & Kasper Welbers
+April 2019
 
-```{r, echo=F, message=F}
-knitr::opts_chunk$set(warning=FALSE, message=FALSE)
-library(printr)
+-   [Packages](#packages)
+-   [Data](#data)
+    -   [Training and test data](#training-and-test-data)
+-   [Training the model using quanteda](#training-the-model-using-quanteda)
+    -   [Testing the model](#testing-the-model)
+-   [Aside: Scaling with Quanteda](#aside-scaling-with-quanteda)
+-   [Using Caret](#using-caret)
+    -   [SVM](#svm)
+    -   [Neural Network](#neural-network)
+    -   [Parameter tuning](#parameter-tuning)
+
+Packages
+========
+
+We will use `quanteda` for text processing and some machine learning, and `tidyverse` for general data cleaning.
+
+``` r
+library(quanteda)
+library(tidyverse)
 ```
 
-# Data
+We also use `caret` for more machine learning options. This probably requires R version 3.5. If you have trouble installing it, you can still follow the quanteda part of this tutorial. The top line also installs the packages needed for the actual model training.
+
+``` r
+#install.packages(c("caret", "e1071", "LiblineaR", "caTools"))
+library(caret)
+```
+
+Data
+====
 
 For machine learning, we need annotated training data. Fortunately, there are many review data files available for free. A corpus of movie reviews is included in the `quanteda.corpora` package, which you need to install from github directly:
 
-```{r, eval=F}
+``` r
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("quanteda/quanteda.corpora")
 ```
 
 Now we can get the data:
 
-```{r}
+``` r
 reviews = quanteda.corpora::data_corpus_movies
 reviews
 head(docvars(reviews))
@@ -29,38 +51,150 @@ head(docvars(reviews))
 
 Note: if you have trouble with `install_github`, you can also download and load the data directly from github:
 
-```{r, eval=F}
+``` r
 download.file("https://github.com/quanteda/quanteda.corpora/blob/master/data/data_corpus_movies.rda?raw=true", "reviews.rda")
 load("reviews.rda")
 reviews = data_corpus_movies
 ```
 
-# Preparing the data
+Training and test data
+----------------------
+
+We split off a test set for testing performance (using `set.seed` for reproducibility), and create subsets of the corpus for training and testing:
+
+``` r
+set.seed(1)
+testset = sample(docnames(reviews), 500)
+reviews_test =  reviews %>% corpus_subset(docnames(reviews) %in% testset)
+reviews_train = reviews %>% corpus_subset(!docnames(reviews) %in% testset)
+actual_train = as.factor(docvars(reviews_train, "Sentiment"))
+actual_test = as.factor(docvars(reviews_test, "Sentiment"))
+```
+
+Training the model using quanteda
+=================================
 
 To prepare the data, we need to create matrices for the training and test data.
-First we split the data:
 
-```{r}
-library(tidyverse)
-trainset = sample(docnames(c_reviews), 1500)
-testset = setdiff(docnames(c_reviews), trainset)
+Now, we create the training dfm:
+
+``` r
+dfm_train = reviews_train %>%  dfm(stem = TRUE) %>% 
+  dfm_select(min_nchar = 2) %>% dfm_trim(min_docfreq=10)
 ```
 
-Now, we create the two dfms:
+And train the model:
 
-```{r}
-dfm_training <- c_reviews %>% corpus_subset(docnames(c_reviews) %in% trainset) %>%
-    dfm(stem = TRUE) %>% dfm_select(min_nchar = 2) %>% dfm_trim(min_docfreq=10)
-
-dfm_test
-
-textmodel_nb()
-
-# get test set (documents not in id_train)
-dfmat_test <- corpus_subset(corp_movies, !id_numeric %in% id_train) %>%
-    dfm(stem = TRUE)
-
-
+``` r
+m_nb <- textmodel_nb(dfm_train, actual_train)
+summary(m_nb)
 ```
 
+Testing the model
+-----------------
 
+To see how well the model does, we test it on the test data. For this, it's important that the test data uses the same features (vocabulary) as the training data The model contains parameters for these features, not for words that only occur in the test data,
+
+``` r
+dfm_test <- reviews_test %>% dfm(stem = TRUE) %>% 
+  dfm_match(featnames(dfm_train))
+nb_pred <- predict(m_nb, newdata = dfm_test)
+head(nb_pred)
+```
+
+To see how well we do, we compare the predicted sentiment to the actual sentiment:
+
+``` r
+mean(nb_pred == actual_test)
+```
+
+So (at least on my computer), 81% accuracy. Not bad for a first try -- but movie reviews are quite simple, this will be a lot harder for most political text...
+
+We can use the regular `table` command to create a cross-table, often called a 'confusion matrix' (as it shows what kind of errors the model makes):
+
+``` r
+confusion_matrix = table(actual_test, nb_pred)
+confusion_matrix
+```
+
+The `caret` package has a function can be used to produce the 'regular' metrics from this table:
+
+``` r
+confusionMatrix(nb_pred, actual_test, mode = "everything")
+```
+
+We can also inspect the actual parameters assigned to the words, to see which words are indicative of bad and good movies:
+
+``` r
+scores = t(m_nb$PcGw) %>% as_tibble(rownames = "word")
+scores %>% arrange(-neg)
+```
+
+Interestingly, the most negative words seem more indicative of genres than of evaluations (and after installing spacyr on more windows computers than I care for, I think the negative value for anaconda is certainly understandable...)
+
+``` r
+scores %>% arrange(-pos)
+```
+
+Aside: Scaling with Quanteda
+============================
+
+Quanteda also allows for supervised and unsupervised scaling. Although wordfish is an unsupervised method (so doesn't really belong to this tutorial), it produces a nice visualization:
+
+``` r
+library(magrittr)
+set.seed(1)
+m_wf <- textmodel_wordfish(dfm_train, sparse=T)
+topwords = c(scores %$% head(word, 10), scores %>% arrange(-neg) %$% head(word, 10))
+textplot_scale1d(m_wf, margin = "features", highlighted = c(topwords, "coen", "scorses", "paltrow", "shakespear"))
+```
+
+(note the use of %$% to expose the columns directly to the next function without sending the whole tibble)
+
+I highlighted the most positive and negative words according to naive bayes (and some other words). The most positive/negative words are interestingly located mostly in the center of the 2-dimensional scaling. So the (unsupervised) scaling captures genre more than sentiment, it seems.
+
+Using Caret
+===========
+
+Finally, let's use the caret library to train and test some models. First, we set the train control to none, as we don't want to do any resampling (like crossvalidation) yet:
+
+``` r
+trctrl = trainControl(method = "none")
+dtm_train = convert(dfm_train, to='matrix')
+dtm_test = convert(dfm_test, to='matrix')
+```
+
+We show two algorithms here, but caret can be used to train a very large number of different models. Note that caret doesn't include most algorithms, so you may need to install additional packages. Often, you also need to check the documentation for these packages (referenced in the caret docs) to understand exactly what the model does and what the hyperparameters are. See <https://topepo.github.io/caret/train-models-by-tag.html> for more information.
+
+SVM
+---
+
+Train a simple SVM from the `LiblineaR` package, setting the hyperparameters to (hopefully) sensible defaults:
+
+``` r
+set.seed(1)
+m_svm = train(x = dtm_train, y = actual_train, method = "svmLinearWeights2",
+              trControl = trctrl, tuneGrid = data.frame(cost = 1, Loss = 0, weight = 1))
+svm_pred = predict(m_svm, newdata = dtm_test)
+confusionMatrix(svm_pred, actual_test)
+```
+
+Neural Network
+--------------
+
+Train a simple Nueral Network (using `nnet`), choosing a single hidden layer and a small decay parameter. Note that since we need to set the maxnwts to the number of features time the number of layers
+
+``` r
+set.seed(1)
+m_nn = train(x = dtm_train, y = actual_train, method = "nnet", 
+             trControl = trctrl, tuneGrid = data.frame(size = 1, decay = 5e-4), MaxNWts = 6000)
+nn_pred <- predict(m_nn, newdata = dtm_test)
+confusionMatrix(nn_pred, actual_test)
+```
+
+Parameter tuning
+----------------
+
+Most algorithms have (hyper)parameters that need to be tuned, like the misclassification cost in SVM and the number and size of hidden layers in a neural network. There are often no good theoretical grounds to set these, so the best you can do is try a lot of them and taking the best.
+
+You can do this yourself, but caret also has built-in functions to do an automatic grid search. For this, set the `tuneGrid` to multiple values per parameter, and choose a different `trainControl` method, like crossvalidation. See <https://topepo.github.io/caret/random-hyperparameter-search.html> for more information.
