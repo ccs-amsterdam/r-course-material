@@ -146,6 +146,8 @@ topwords = c(scores %$% head(word, 10), scores %>% arrange(-neg) %$% head(word, 
 textplot_scale1d(m_wf, margin = "features", highlighted = c(topwords, "coen", "scorses", "paltrow", "shakespear"))
 ```
 
+(note the use of %$% to expose the columns directly to the next function without sending the whole tibble)
+
 I highlighted the most positive and negative words according to naive bayes (and some other words).
 The most positive/negative words are interestingly located mostly in the center of the 2-dimensional scaling.
 So the (unsupervised) scaling captures genre more than sentiment, it seems. 
