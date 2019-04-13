@@ -1,0 +1,156 @@
+---
+title: 'Structural Topic Modeling'
+author: "Wouter van Atteveldt & Kasper Welbers"
+date: "Last updated: 2019-04"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
+library(printr)
+```
+
+# Structural Topic Models
+
+Structural topic models are an extension of LDA that allow us to explicitly model text metadata such as date or author as covariates
+of the topic prevalence and/or topic words distributions. In the `stm` package it has excellent support for R (see http://structuraltopicmodel.com)
+(although fitting the models can be a bit slower than fitting regular LDA models)
+
+In this document we will model the inaugural addresses of recent presidents.
+First, we read the data into a (quanteda) corpus to make sure the metadata is kept with the text, and then we create a dfm:
+
+```{r}
+library(quanteda)
+corpus = data_corpus_inaugural %>% corpus_subset(Year > 1980) %>% 
+  corpus_reshape(to = "paragraphs")
+dfm = dfm(corpus, remove_punct=T, remove=stopwords("english")) %>% dfm_trim(min_docfreq = 2)
+head(docvars(dfm))
+```
+
+Now, we can use the `stm` function to fit a topic model. 
+First, let's fit one without any covariates:
+
+```{r}
+library(stm)
+m = stm(dfm, K = 10, max.em.its = 10)
+```
+
+(Note: `max.em.hits` sets the number of iterations  if the model doesn't converge earlier. 
+10 is probably too low, but sinec this is for demonstration purposes it helps that it finishes more quickly)
+
+This words similarly to a regular topic model, but it also models correlations between topics. 
+To inspect topic model results, we can use functions from the `stm` package:
+
+```{r}
+plot(m, type="summary", labeltype = "frex")
+labelTopics(m, topic=8)
+```
+
+By default, stm gives multiple ways of inspecting top words: simple highest probabibility (the first row) and three ways of finding the most 'typical' words by focusing on words that are less common in other topics. 
+
+We can also plot the words per topic and the words 'between' two topics:
+
+```{r}
+cloud(m, topic=8)
+plot(m, type="perspectives", topics=c(8,9))
+```
+
+## Prevalence covariate
+
+Now, let's model year as a covariance of the prevalence:
+
+```{r}
+m = stm(dfm, K = 10, prevalence =~ Year, max.em.its = 10)
+```
+
+Besides the functions above, we can now also model the effect of year using the `estimateEffect` function:
+
+```{r}
+prep <- estimateEffect(1:10 ~ Year, stmobj = m, meta = docvars(dfm))
+summary(prep, topics=1:8)
+```
+
+And plot the topic prevalences over time:
+
+```{r}
+plot(prep, "Year", method = "continuous", topics = c(8,9), model = m)
+```
+
+## Spline function
+
+A continuous covariate (like year above) is modeled as a linear relation. 
+To model a non-linear relation (i.e. to allow a topic to peak and decline),
+it can be useful to use a spline function, which decomposes the continuous function into
+a mixture of separate variables each modeling a specific (non-discrete) period.
+
+To see how splines work, let's have a look at a 4-spline model of the years in our data
+
+```{r}
+library(tidyverse)
+splines = cbind(data.frame(year=1980:2000), s(1980:2000, 3))
+splines = reshape2::melt(splines, id.var="year")
+ggplot(splines, aes(x=year, y=value, color=variable, group=variable)) + geom_line()
+```
+
+So as you can see, this creates 3 "soft dummies", each representing a unique period. 
+To use this for modeling, simply insert `s(Year, 3)` where we used `Year` above:
+
+```{r}
+m = stm(dfm, K = 10, prevalence =~ s(Year, 3), max.em.its = 10)
+prep <- estimateEffect(1:10 ~ s(Year, 3), stmobj = m, meta = docvars(dfm))
+plot(prep, "Year", method = "continuous", topics = c(8,9), model = m)
+```
+
+## Content covariates
+
+Finally, let's also add President as a content covariate, meaning that each president can use different words to discuss the same topic. 
+We add this covariate using the `content=~` argument:
+
+```{r}
+m = stm(dfm, K = 10, content =~ President, max.em.its = 10)
+```
+
+If we now ask for the top terms, we get the terms per President as well as per topic:
+
+```{r}
+labelTopics(m, topics = 8)
+```
+
+We can also plot the word use per president as a 'perspective plot':
+
+```{r}
+plot(m, type="perspectives", topics=8, covarlevels = c("Bush", "Obama"))
+```
+
+Finally, to find texts where a specific president talks about a specific topic, you can use: 
+
+```{r}
+findThoughts(m, texts = texts(corpus), topics = 8, where=President=="Obama", meta=docvars(dfm))
+```
+
+## Correlation structure
+
+Finally, we can plot the correlation structure of the model:
+
+
+```{r}
+corr = topicCorr(m)
+plot(corr)
+```
+
+## More complex models
+
+You're not limited to a single covariate. For example, the following would use both year and president for prevalence, and president as content covariate:
+
+```{r}
+m = stm(dfm, K = 10, content =~ President, prevalence =~ Year + President, max.em.its = 10)
+```
+
+
+## And more!
+
+STM contains many more useful functions, for example for selecting the best model or K, and determining coherence. See the [vignette](https://github.com/bstewart/stm/blob/master/inst/doc/stmVignette.pdf?raw=true) (from http://www.structuraltopicmodel.com/) and the help files for the stm package!
