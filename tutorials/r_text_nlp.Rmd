@@ -10,7 +10,7 @@ editor_options:
 ---
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
 library(printr)
 ```
 
@@ -18,20 +18,79 @@ For text analysis it is often useful to POS tag and lemmatize your text, especia
 R does not really have built-in functions for that, but there are libraries that connect to external tools to help you do this.
 This handout reviews spacy, which has a great R library and support for a number of (western) languages. 
 
-## Running Spacyr
+# Installing Spacyr
 
 Spacy is a python package with processing models for 6 different languages, which makes it attractive to use if you need e.g. French or German lemmatizing.
 
-To install it, you need to install the `spacy` module in python and download the appropriate language model. See https://spacy.io/usage/
+To install it, you need to install the `spacy` module in python and download the appropriate language model. This depends on your computer and can be tricky to get right. The sections below give some instructions on how to do this depending on your OS, see https://spacy.io/usage/ for more information. 
 
-After that, you can install `spacyr` and use it to tag, lemmatize, and/or parse text:
+## Installing Spacy using anaconda (esp. for Windows):
+
+1. Install [anaconda](https://www.anaconda.com/)
+2. In Anaconda navigator, create a virtual environment, e.g. named 'spacy', based on python 3
+3. Once that environment is setup up, click the 'Play' button to open a terminal, and run: (replacing `de_core_news_sm` with the model you need)
+```
+conda install -c conda-forge spacy
+python -m spacy download de_core_news_sm
+```
+tions on how to do this depending on your OS, see https://spacy.io/usage/ for more information. 
+
+## Installing Spacy using pip (esp. for Mac/Linux):
+
+1. Open a terminal (ubuntu: control-alt-T, mac: finder -> terminal)
+2. For mac, install xcode using `xcode-select --install`
+3. In the terminal, type the following commands to create a virtual environment, install spacy, and download the language model of your choice:
+```
+python3 -m venv spacy-env
+spacy-env/bin/pip install spacy
+spacy-env/bin/python -m spacy download de_core_news_sm
+```
+
+## Initializing spacyr
+
+The next step is to initialize spacyr by pointing it to your installed environment. 
+
+For anaconda, use the following (substituting the name you picked for the virtual environment and the language model of your choice):
+
+```{r, eval=F}
+library(spacyr)
+spacy_initialize("de_core_news_sm", condaenv = "spacy")
+```
+
+For pip, use the following:
+
+```{r, eval=F}
+library(spacyr)
+spacy_initialize("de_core_news_sm", python_executable = path.expand("~/spacy-env/bin/python"))
+```
+
+```{r, echo=F}
+library(spacyr)
+spacy_initialize("de_core_news_sm", python_executable =  path.expand("~/env/spacy/bin/python"))
+```
+
+## Troubleshooting
+
+As said, getting spacy and spacyr installed can be tricky. If you get an error message on initializing spacyr, it might help to install spacyr and reticulate directly from source. Before installing, clean your environment (with the broomstick icon) and restart R using the Session menu. 
 
 ```{r}
-library(spacyr)
-spacy_initialize("de_core_news_sm", python_executable = "/home/wva/env/spacy/bin/python")
+if (!require(devtools)) install.packages(devtools)
+install_github("rstudio/reticulate")
+install_github("quanteda/spacyr")
+```
+
+If that doesn't help, you can try installnig spacy the other way (following the instructions above), and/or googling your error message. 
+
+# Using Spacy(r)
+
+With spacy successfully installed and spacyr initialized, we can now use it to parse text:
+
+```{r}
 tokens = spacy_parse("Ich bin ein Berliner")
 head(tokens)
 ```
+
+
 
 ## Extracting information from spacy output
 
