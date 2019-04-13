@@ -39,7 +39,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | Tutorial | Core packages / functions |
 |----|---|
 | [Text analysis](tutorials/R_text_3_quanteda.md) | [quanteda](https://quanteda.io/) |
-| [Lexical sentiment analysis](tutorials/sentiment_analysis.md)
+| [Lexical sentiment analysis](tutorials/sentiment_analysis.md) | [quanteda](https://quanteda.io/), [corpustools](https://github.com/kasperwelbers/corpustools) |
 | [LDA Topic Modeling](tutorials/r_text_lda.md) | [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
 | [Structural Topic Modeling](tutorials/r_text_stm.md) | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
 | [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
