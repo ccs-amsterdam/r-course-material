@@ -14,6 +14,8 @@ April 2019
     -   [Neural Network](#neural-network)
     -   [Parameter tuning](#parameter-tuning)
 
+This handout contains a very brief introduction to using supervised machine learning for text classification in R. Check out <https://cran.r-project.org/web/packages/caret/vignettes/caret.html> for a more extensive tutorial.
+
 Packages
 ========
 
@@ -27,7 +29,7 @@ library(tidyverse)
 We also use `caret` for more machine learning options. This probably requires R version 3.5. If you have trouble installing it, you can still follow the quanteda part of this tutorial. The top line also installs the packages needed for the actual model training.
 
 ``` r
-#install.packages(c("caret", "e1071", "LiblineaR", "caTools"))
+#install.packages(c("caret", "e1071", "LiblineaR"))
 library(caret)
 ```
 
@@ -179,6 +181,8 @@ svm_pred = predict(m_svm, newdata = dtm_test)
 confusionMatrix(svm_pred, actual_test)
 ```
 
+*Note:* For more information on the algorithm, including the meaning of the parameters and how to tune them, you need to consult the documentation of the underlying package. The caret documentation linked above will tell you which package is used (in this case: LiblineaR), and that package will contain a more technical explanation of the algorithm, generally including examples and references.
+
 Neural Network
 --------------
 
@@ -197,4 +201,4 @@ Parameter tuning
 
 Most algorithms have (hyper)parameters that need to be tuned, like the misclassification cost in SVM and the number and size of hidden layers in a neural network. There are often no good theoretical grounds to set these, so the best you can do is try a lot of them and taking the best.
 
-You can do this yourself, but caret also has built-in functions to do an automatic grid search. For this, set the `tuneGrid` to multiple values per parameter, and choose a different `trainControl` method, like crossvalidation. See <https://topepo.github.io/caret/random-hyperparameter-search.html> for more information.
+You can do this yourself, but caret also has built-in functions to do an automatic grid search. For this, set the `tuneGrid` to multiple values per parameter, and choose a different `trainControl` method, like crossvalidation. See <https://topepo.github.io/caret/random-hyperparameter-search.html> for more information, and <https://cran.r-project.org/web/packages/caret/vignettes/caret.html> for a good tutorial.
