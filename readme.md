@@ -43,6 +43,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [LDA Topic Modeling](tutorials/r_text_lda.md) | [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
 | [Structural Topic Modeling](tutorials/r_text_stm.md) | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
 | [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
+| [Supervised machine learning for text classification](tutorials/r_text_ml.md) | caret |
 
 
 # Miscellaneous
