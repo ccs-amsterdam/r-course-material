@@ -55,7 +55,7 @@ We can now create a quanteda corpus with the `corpus()` function. If you want to
 ?corpus
 ```
 
-Here you see that for a data.frame, we need to specify which column contains the text field. Also, the text column must be a character vector. In data is imported from a csv, a `character` vector is sometimes interpreted as a `factor` vector. We'll therefore first explicitly convert the column to a `character` vector. 
+Here you see that for a data.frame, we need to specify which column contains the text field. Also, the text column must be a character vector. 
 
 ```{r}
 corp = corpus(d, text_field = 'text')  ## create the corpus

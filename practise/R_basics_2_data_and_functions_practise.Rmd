@@ -1,9 +1,10 @@
 ---
 title: 'Practise R basics: data and functions'
 output:
-  html_document:
-  toc: true
+  pdf_document: default
+  html_document: null
   theme: united
+  toc: yes
 ---
 
 # Completing your assignment in RMarkdown

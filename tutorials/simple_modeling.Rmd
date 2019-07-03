@@ -11,7 +11,7 @@ editor_options:
 
 
 
-```{r, echo=F}
+```{r, echo=F, message=F}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
 library(printr)
 ```
@@ -105,7 +105,7 @@ plot(capital$Private ~ capital$Country)
 So, it seems that in fact a lot of countries are quite similar, with some extreme cases of high capital accumulation.
 (also, it seems that including Japan in the European countries might have been a mistake).
 
-We use the `aov` function for this. Ther is also a function named `anova`, but this is meant to analyze already fitted models, 
+We use the `aov` function for this. There is also a function named `anova`, but this is meant to analyze already fitted models, 
 as will be shown below.
 
 ```{r}
@@ -198,3 +198,32 @@ plot(m)
 ```
 
 See http://www.statmethods.net/stats/rdiagnostics.html for a more exhausitve list of model diagnostics.
+
+
+Jamovi
+===
+
+R features several packages with alternative implementations of basic statistics. One of these is the `jmv` package, which allows you to use the stats functions from [Jamovi](https://www.jamovi.org). 
+Jamovi is an open-source statistical spreadsheet program that runs on R.
+It can be a nice stepping stone from SPSS to R.  
+
+Note that installing jmv might take a while.
+
+```{r eval=F}
+install.packages('jmv')
+```
+
+The ANOVA function in jmv gives output very similar to the SPSS output.
+
+```{r}
+library(jmv)
+
+ANOVA(capital, dep = 'Private', factors = 'Country', postHoc = 'Country')
+```
+
+Likewise for t-tests. Here we compute an independent samples (IS) t-test.
+
+```{r}
+ttestIS(capital, vars = 'Private', group = 'Group', plots=T)
+```
+

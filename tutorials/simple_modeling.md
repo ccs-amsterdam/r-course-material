@@ -8,6 +8,7 @@ November 2018
 -   [Anova](#anova)
 -   [Linear models](#linear-models)
 -   [Comparing and diagnosing models](#comparing-and-diagnosing-models)
+-   [Jamovi](#jamovi)
 
 Basic Modeling
 ==============
@@ -128,7 +129,7 @@ plot(capital$Private ~ capital$Country)
 
 So, it seems that in fact a lot of countries are quite similar, with some extreme cases of high capital accumulation. (also, it seems that including Japan in the European countries might have been a mistake).
 
-We use the `aov` function for this. Ther is also a function named `anova`, but this is meant to analyze already fitted models, as will be shown below.
+We use the `aov` function for this. There is also a function named `anova`, but this is meant to analyze already fitted models, as will be shown below.
 
 ``` r
 m = aov(capital$Private ~ capital$Country)
@@ -309,3 +310,99 @@ plot(m)
 ![](img/modeling_lmdiag-1.png)
 
 See <http://www.statmethods.net/stats/rdiagnostics.html> for a more exhausitve list of model diagnostics.
+
+Jamovi
+======
+
+R features several packages with alternative implementations of basic statistics. One of these is the `jmv` package, which allows you to use the stats functions from [Jamovi](https://www.jamovi.org). Jamovi is an open-source statistical spreadsheet program that runs on R. It can be a nice stepping stone from SPSS to R.
+
+Note that installing jmv might take a while.
+
+``` r
+install.packages('jmv')
+```
+
+The ANOVA function in jmv gives output very similar to the SPSS output.
+
+``` r
+library(jmv)
+
+ANOVA(capital, dep = 'Private', factors = 'Country', postHoc = 'Country')
+```
+
+    ## 
+    ##  ANOVA
+    ## 
+    ##  ANOVA                                                                   
+    ##  ─────────────────────────────────────────────────────────────────────── 
+    ##                 Sum of Squares    df     Mean Square    F       p        
+    ##  ─────────────────────────────────────────────────────────────────────── 
+    ##    Country                 201      8         25.158    30.8    < .001   
+    ##    Residuals               280    343          0.817                     
+    ##  ─────────────────────────────────────────────────────────────────────── 
+    ## 
+    ## 
+    ##  POST HOC TESTS
+    ## 
+    ##  Post Hoc Comparisons - Country                                                         
+    ##  ────────────────────────────────────────────────────────────────────────────────────── 
+    ##    Country           Country    Mean Difference    SE       df     t          p-tukey   
+    ##  ────────────────────────────────────────────────────────────────────────────────────── 
+    ##    Australia    -    Canada              0.8954    0.200    343      4.484    < .001   
+    ##                 -    France              0.3580    0.200    343      1.793      0.687   
+    ##                 -    Germany             0.9927    0.200    343      4.972    < .001   
+    ##                 -    Italy              -0.5002    0.200    343     -2.505      0.233   
+    ##                 -    Japan              -1.2537    0.200    343     -6.279    < .001   
+    ##                 -    Spain              -1.3898    0.232    343     -5.982    < .001   
+    ##                 -    U.K.                0.0280    0.200    343      0.140      1.000   
+    ##                 -    U.S.                0.2027    0.200    343      1.015      0.984   
+    ##    Canada       -    France             -0.5373    0.200    343     -2.691      0.155   
+    ##                 -    Germany             0.0973    0.200    343      0.487      1.000   
+    ##                 -    Italy              -1.3956    0.200    343     -6.990    < .001   
+    ##                 -    Japan              -2.1490    0.200    343    -10.763    < .001   
+    ##                 -    Spain              -2.2852    0.232    343     -9.835    < .001   
+    ##                 -    U.K.               -0.8673    0.200    343     -4.344    < .001   
+    ##                 -    U.S.               -0.6927    0.200    343     -3.469      0.017   
+    ##    France       -    Germany             0.6346    0.200    343      3.178      0.042   
+    ##                 -    Italy              -0.8583    0.200    343     -4.299    < .001   
+    ##                 -    Japan              -1.6117    0.200    343     -8.072    < .001   
+    ##                 -    Spain              -1.7479    0.232    343     -7.523    < .001   
+    ##                 -    U.K.               -0.3300    0.200    343     -1.653      0.775   
+    ##                 -    U.S.               -0.1554    0.200    343     -0.778      0.997   
+    ##    Germany      -    Italy              -1.4929    0.200    343     -7.477    < .001   
+    ##                 -    Japan              -2.2463    0.200    343    -11.251    < .001   
+    ##                 -    Spain              -2.3825    0.232    343    -10.254    < .001   
+    ##                 -    U.K.               -0.9646    0.200    343     -4.831    < .001   
+    ##                 -    U.S.               -0.7900    0.200    343     -3.957      0.003   
+    ##    Italy        -    Japan              -0.7534    0.200    343     -3.773      0.006   
+    ##                 -    Spain              -0.8896    0.232    343     -3.829      0.005   
+    ##                 -    U.K.                0.5283    0.200    343      2.646      0.172   
+    ##                 -    U.S.                0.7029    0.200    343      3.521      0.014   
+    ##    Japan        -    Spain              -0.1362    0.232    343     -0.586      1.000   
+    ##                 -    U.K.                1.2817    0.200    343      6.419    < .001   
+    ##                 -    U.S.                1.4563    0.200    343      7.294    < .001   
+    ##    Spain        -    U.K.                1.4179    0.232    343      6.102    < .001   
+    ##                 -    U.S.                1.5925    0.232    343      6.854    < .001   
+    ##    U.K.         -    U.S.                0.1746    0.200    343      0.875      0.994   
+    ##  ──────────────────────────────────────────────────────────────────────────────────────
+
+Likewise for t-tests. Here we compute an independent samples (IS) t-test.
+
+``` r
+ttestIS(capital, vars = 'Private', group = 'Group', plots=T)
+```
+
+    ## 
+    ##  INDEPENDENT SAMPLES T-TEST
+    ## 
+    ##  Independent Samples T-Test                               
+    ##  ──────────────────────────────────────────────────────── 
+    ##                              statistic    df     p        
+    ##  ──────────────────────────────────────────────────────── 
+    ##    Private    Student's t      -4.49 ᵃ    350    < .001   
+    ##  ──────────────────────────────────────────────────────── 
+    ##    ᵃ Levene's test is significant (p < .05),
+    ##    suggesting a violation of the assumption of equal
+    ##    variances
+
+![](img/unnamed-chunk-18-1.png)
