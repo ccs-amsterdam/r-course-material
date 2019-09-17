@@ -1,7 +1,6 @@
 R basics: Getting started
 ================
 Kasper Welbers & Wouter van Atteveldt
-2018-09
 
 -   [Introduction](#introduction)
     -   [What is R and why should you learn it?](#what-is-r-and-why-should-you-learn-it)
@@ -53,7 +52,7 @@ Both programs can be downloaded for free, and are available for all main operati
 Installing R
 ------------
 
-To install R, you can download it from the [CRAN (comprehensive R Archive Network) website](https://cran.r-project.org/). Do not be alarmed by the website's 90's asthetics. R itself is cold, dry, no-nonsense software. The decorations comes with RStudio.
+To install R, you can download it from the [CRAN (comprehensive R Archive Network) website](https://cran.r-project.org/). Do not be alarmed by the website's 90's asthetics. R itself is cold, dry, no-nonsense software. The decoration comes with RStudio.
 
 Installing RStudio
 ------------------
@@ -206,7 +205,7 @@ The entire DTM is pretty big, so we cannot visualize it entirely. Here we print 
 m[1:10,1:10]
 ```
 
-    ## Document-feature matrix of: 10 documents, 10 features (60% sparse).
+    ## Document-feature matrix of: 10 documents, 10 features (60.0% sparse).
     ## 10 x 10 sparse Matrix of class "dfm"
     ##                  features
     ## docs              fellow-citizens senate house representatives among
@@ -238,7 +237,7 @@ For example, we see here that the word "senat", which is the stemmed version of 
 Word clouds
 -----------
 
-To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot\_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min\_count (the minimum wordcount) to 20 to ignore all words that occured less than 70 times.
+To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot\_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min\_count (the minimum wordcount) to 50 to ignore all words that occured less than 50 times.
 
 ``` r
 textplot_wordcloud(m, min_count = 50)
@@ -256,7 +255,8 @@ m_postwar = dfm_subset(m, Year > 1945)
 Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this.
 
 ``` r
-textplot_wordcloud(m_postwar, max_words = 100, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+textplot_wordcloud(m_postwar, max_words = 100, 
+                   color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
 ```
 
 ![](img/basics_wordcloud2-1.png)
@@ -272,7 +272,7 @@ Keyword in context
 
 The wordcloud shows you the words that occur most frequently, but lack context. To get an idea of the context in which words are used, a **keyword-in-context** (kwic) listing can be of assistance. With quanteda, you can simply run the **kwic()** function on the corpus object (which we earlier named corp) and specifying what word to use.
 
-Let's use this to see how the word "terror" has been used. We'll use "terror\*", where the \* is a wild-card that indicates that any word starting with "terror" is matched.
+Let's use this to see how the word "terror" has been used. We'll use "terror\*", where the \* is a wild-card that indicates that any word starting with "terror" is matched. The output shows an occurence of the word with a given number of words before and after the word (this might not fit on the line, so widen your console window for a better view)
 
 ``` r
 kwic(corp, 'terror*') 
