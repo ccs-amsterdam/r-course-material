@@ -5,7 +5,7 @@ date: "2018-09"
 output: 
   github_document:
     toc: true
-    toc_depth: 1
+    toc_depth: 2
 editor_options: 
   chunk_output_type: console
 urlcolor: blue
@@ -28,17 +28,7 @@ In the first tutorial you immediately started using advanced features in R, util
 However, data science is not always smooth sailing. You will often find yourself willing to do something specific that is not directly supported by a package, or you have to work with data that first needs to be cleaned and prepared in order to use a certain function. It is therefore important to learn some of the basics. 
 
 In this week's lab you will learn about basic R data types, data structures and functions. You can consider these as the main building blocks for working with R data. Learning about these basics might be less exciting compared to using the advanced features, but in the long run it will save you time and frustration. 
-
-## Exercise
-
-This tutorial consists of three parts:
-
-* Data types
-* Data structures
-* Functions
-
-Each parts has an excercise (not to be handed in), that you can find and complete in the separate **R_basics_2_data_and_functions_practise.Rmd** file on Canvas. You need to open this file in RStudio. We recommend first reading through the entire tutorial and then completing the exercise.
-
+An additional R Markdown file is available in the course material for practicing with data types, data structures and functions.
 
 # Data types
 
@@ -49,7 +39,7 @@ Data types concern the different types that single values in data can have. The 
 * factor (categorical data)
 * logical (True or False)
 
-In addition, we will discuss how to work with dates:
+In addition, there are special types for data such as date/time values.
 
 * Date (calendar dates) or POSIXlt (calendar dates and times). 
 
@@ -114,181 +104,9 @@ z
 
 R has decent built-in support for working with character values, but for more advanced techniques for working with **strings** it is recommended to use a dedicated package such as [stringr](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf).
 
-## Factor
+## Additional types
 
-A *factor* in R is a series of labeled numbers.
-This is usefull if you have a categorical variable, such as education level (in surveys) or medium type (in content analysis).
-If you are familiar with SPSS, this is comparable to using *value labels*. 
-
-To demonstrate how factors work, we have to use a sequence of values, called a *vector*. We will discuss vectors in more detail below. For now, just see that we combine multiple values in a particular order by putting them between parentheses with a *c* in front. Also, note that despite the somewhat similar name, *factors* and *vectors* are different things.
-
-```{r}
-x = c('De Volkskrant','De Volkskrant','NRC Handelsblad',
-      'De Volkskrant','NRC Handelsblad','Trouw')
-x
-```
-
-We now have a sequence of character values. What's special about these character values, is that the same values are often repeated. In this case, it's best to think as each unique value ("De Volkskrant", "NRC Handelsblad", "Trouw") as a label. This is a typical job for the *factor* type, so let's transform the character type vector to a factor type.
-
-```{r}
-x = factor(x)
-x
-```
-
-Two things have changed. 
-Firstly, you see that there is now a line that says "levels: ...", in which the three unique labels are shown.
-Secondly, the quotes have disappeared. This is because it's no longer a character value.
-
-Behind the scenes, x is now a sequence of numbers, where each number points to a label
-
-```{r}
-as.numeric(x) ## show the numbers: 1 for De Volkskrant, 2 for NRC and 3 for Trouw
-levels(x)     ## show the levels / labels. 
-```
-
-If this confuses you, you're still perfectly healthy. The benefits of factors become more apparent later on when you start working with certain types of analysis, visualizations, and when you use very large data (numeric values require less memory than character values). 
-
-You might have concluded that factors are only a hassle, and you'll simply stick to character values.
-This is a valid strategy, except that R tends to force factors on you, for example when you import data or make a data.frame, and R thinks that your character column is better of as a factor. There are ways to ask R not to do this, but really, you're better of just accepting factors. It's better on the long run.
-
-Still, if you ever run into trouble with factors and really prefer to use character values, you can simply convert them into "character" type, using **as.character()**
-
-```{r}
-as.character(x)
-```
-
-## Logical
-
-The *logical* data type only has two values: **TRUE** and **FALSE** (which can be abbreviated to **T** and **F**). You will not often encounter logical values in your data, but you will use them in many operations such as subsetting and transforming data, as you will see when we discuss data structures. Understanding a bit about logical values will help you understand how these operations work.
-
-For now, we will focus on how logical values result from comparisons, and how logical operators can be used. 
-
-### Comparisons
-
-The most common way in which you will get logical values in R is as the results of a **comparison** between two values or two vectors. There are 6 types of comparissons, which use operators that you are probably already familiar with:
-
-operator   | meaning
----------- | --------------------
-x < y      | x is smaller than y             
-x > y      | x is larger than y               
-x <= y     | x is smaller than or equal to y  
-x >= y     | x is larger than or equal to y     
-x == y     | x equals y                       
-x != y     | x does not equal y               
-
-The outcome of a comparison of two values is a logical value. 
-
-```{r}
-5 < 10
-5 < 2
-```
-
-The outcome of a comparison of two vectors is a logical vector. For example, let's assume that we have the average math grade's for 5 students in year 1 and year 2, and we look-up whether their grade went down (i.e. grade in year 1 was higher than year 2). Here we see that only for the first student the grade went down (from 6 in year 1 to 5 in year 2), so only the first value is TRUE. 
-
-```{r}
-grade_year_1 = c(6,6,7,7,4)
-grade_year_2 = c(5,6,8,7,6)
-grade_year_1 > grade_year_2    
-```
-
-If we compare a vector to a single value, each value of the vector will be compared to that value. As you will see shortly, this is a core mechanic behind selecting and subsetting data. In the following example, we will look-up which participants for our hypothetical drinking study are at least 18 years old.
-
-```{r}
-age = c(17,34,12,20,12,25,30,14,33)
-age >= 18
-```
-
-Finally, while not strictly a comparison, there is another common operator that creates a logical value or vector.
-
-operator   | meaning
----------- | --------------------
-x %in% y   | the value(s) in x also exist in y             
-
-This is for instance usefull if you want to look for multiple values. For example, let's select select `Bob` and `Carol` from our list of names.
-
-```{r}
-name = c('Alice','Bob','Carol','Dave','Eve')
-name %in% c('Bob', 'Carol')
-```
-
-### Logical operators
-
-Given a logical value (or vector), we can use the logic operators & (AND), | (OR) and ! (NOT). In the following table, x and y are both logical values.
-
-operator   | meaning | outcome
----------- | ------- | --------------------
-x & y      | x AND y | only TRUE if both x and y are TRUE           
-x \| y     | x OR y  | only TRUE if either x or y, or both are TRUE.               
-!x         | NOT x   | the opposite if x, so only TRUE if x is FALSE.
-
-You can play with the following code to try it out (results not shown in this document).
-
-```{r, eval=F}
-TRUE & TRUE        ## is TRUE
-TRUE & FALSE       ## is FALSE
-FALSE & FALSE      ## is FALSE
-
-TRUE | TRUE        ## is TRUE
-TRUE | FALSE       ## is TRUE
-FALSE | FALSE      ## is FALSE
-
-!TRUE              ## NOT TRUE, so is FALSE
-!FALSE             ## NOT FALSE, so is TRUE
-
-TRUE & !FALSE      ## !FALSE == TRUE, so you get TRUE & TRUE
-TRUE & (!TRUE | TRUE) ## !TRUE | TRUE == FALSE  | TRUE == TRUE, so you get TRUE & TRUE 
-
-a = c(T, T, F, F, F, T)
-b = c(T, F, F, F, T, T) 
-a & b              ## 6 pairwise comparisons: T & T, T & F, F & F, F & F, F & T, T & T) 
-```
-
-
-## Date
-
-Date is not one of the basic data types in R, but in social scientific research we often work with calendar dates and times. This requires a special data type, because there are many limitations or complications if we try to express dates and times as character or numeric values. Two of the most common date classes in native R (i.e. not requiring additional packages) are *Date*, which only handles calendar dates, and *POSIXlt*, that handles both calendar dates and times. 
-
-In this tutorial we will only demonstrate how to use *POSIXlt*, but the general approach for working with dates and times in R is the same for different date types (and is actually similar in other programming languages as well). You can do most things that you need with only two functions: *strptime* and *strftime*
-
-* strptime (**str**ing **p**arse **time**) creates a date/time value from a character value
-* strftime (**str**ing **f**ormat **time**) extracts parts of a date/time from a date/time value.
-
-For both functions, you need to know how to specify the *format*. Essentially, this is a string (character value) that contains the date format, using special placeholders to indicate specific parts of the date. These placeholders are always a percentage symbol **%** followed by a letter. The most commonly used placeholders are:
-
-placeholder          | date part
--------------------- | ------------------------
-%Y | year with century (2010, 2011, etc.)
-%m | month as a decimal number (01, 02, 03, ..., 10, 11, 12)
-%d | day as a decimal number (01, 02, 03, ..., 28, 29, 30)
-%H | hour as a decimal (00, 01, 02, ..., 21, 22, 23)
-%M | minute as a decimal (00, 01, 02, ..., 57, 58, 59)
-%S | seconds as a decimal (00, 01, 02, ..., 57, 58, 59)
-
-Using these placeholders, we can describe various date formats. Here we show how to use this together with the **strptime** function to **parse** a date from character type to a date (POSIXlt) type. We will explain more about functions below. For now, just note that the first argument passed to **strptime()** is the date, and the second argument is the format.
-
-```{r}
-strptime('2010-01-01 20:00:00', format = '%Y-%m-%d %H:%M:%S')
-strptime('01/01/2010', format = '%m/%d/%Y')
-strptime('2010 any 01 format 01 goes', format = '%Y any %m format %d goes')
-```
-
-With the **strftime()** function we can use the same format strings to extract specific parts from a date/time value. Here, we first create a POSIXlt date with strptime, and then use strftime to extract parts. Note that all parts are returned as a character value, even if they are single numbers.
-
-```{r}
-x = strptime('2010-06-01 20:00:00', format = '%Y-%m-%d %H:%M:%S')
-strftime(x, '%Y')
-strftime(x, '%Y week %W')
-strftime(x, 'Today is a %A')  ## language of weekday depends on your locale settings
-```
-
-You can find a full list of format placeholders in the documentation of the **strptime** function, which you can access by putting a questionmark in front of the function name and running it as code. The help page should open in your bottom-right window in RStudio.
-
-```{r, eval=F}
-?strptime
-```
-
-For reference, if you feel the urge to master date and time operations, there is also the excellent **lubridate** package. Usage is explained in detail in this (free online) [chapter from "R for Data Science"](http://r4ds.had.co.nz/dates-and-times.html). You can also download the cheatsheet [here](https://github.com/rstudio/cheatsheets/raw/master/lubridate.pdf).
-
+Additional instructions for working with factors, logical and date type values are included at the bottom of this document. But for now we'll first move on to data structures.
 
 # Data structures
 
@@ -358,20 +176,39 @@ x[-5]            ## select every element except the fifth
 x[-c(1,3)]       ## select every element other than the first and third
 ```
 
-The second way to select values is to use a logical vector. The logical vector has to be of the same length, and all values for which the logical vector is TRUE will be selected.
+The second way to select values is to use a **logical vector**. More information about logical vectors is given at the bottom of this document, but for now you only need to understand that a logical vector only has te valus FALSE and TRUE. 
+
+If you use a logical vector to select values of avector, it has to be of the same length. All values for which the logical vector is TRUE will then be selected. In this example the first three values are TRUE, and so the first three values are selected from the vector x
 
 ```{r}
 x[c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)]
 ```
 
-This is where your hard thinking about logical vectors pays off. As we have seen above, you can create logical vectors by using comparisons. Accordingly, we can use comparisons to select values. 
+Now, you might be thinking: how is this usefull? Indeed, you will never use this in practice, but if you understand this, it helps you understand how you can use **comparison** so select values. Comparisons are also explained in more detail at hte bottom of this document. For now, you only need to understand that you can compare values to create logical vector. 
+
+For example, we can compare all values in vector to a single value. Here we create a vector called **age**, and we compare the values of this vector to the value 18. We use **==**, which means *equals*.
 
 ```{r}
-age = c(17,34,12,20,12,25,30,14,33)
+age = c(17,34,18,20,12,25,30,14,33)
+age == 18
+```
 
+We can also use **>** for a *greater than* comparison, or **>=** for a *greater than or equal* comparison.
+
+```{r}
+age >= 18
+```
+
+Now, we can use the logical vector (TRUE / FALSE) to select values. 
+
+```{r}
 selection = age >= 18   ## comparison creates logical vector
 age[selection]          ## selects values using logical vector
+```
 
+It is not necessary to first give the logical vector a name as we do here with **selection**. We can directly use the comparison to select value.
+
+```{r}
 age[age >= 18]          ## same, but less verbose (recommended) 
 ```
 
@@ -446,15 +283,10 @@ d[1:5,]    ## select first 5 rows
 A very usefull additional trick is that you can use all the columns to make comparisons. For example, we can use the gender column to look up all elements for which the value is "M" (male), and use this to select rows.
 
 ```{r}
-## step-by-step example     
-selection = d$gender == "M" ## look up elements in d$gender of which value is "M"    
-selection                   ## see that this is a logical vector
-d[selection, ]              ## use logical vector to select rows
-
-d[d$gender == "M", ]        ## recommended style 
+d[d$gender == "M", ]       
 ```
 
-You can combine this with the logical operators to make a selection using multiple columns.
+You can combine this with the logical operators to make a selection using multiple columns. Logical operators are explained in detail at the bottom of this document. For now, you only need to understand that we can use the **&** (AND) operator to say that we want two comparisons to be TRUE (d\$gender == "F" AND d\$age == 21).
 
 ```{r}
 d[d$gender == "F" & d$age == 21, ]    ## 21 year old female participant(s)
@@ -516,6 +348,8 @@ There are other common data structures, such as the `matrix` and `list`. Package
 
 Where data types and structures concern how data is respresented in R, functions are the tools that you use to read, create, manage, manipulate, analyze and visualize data. 
 
+## What is a function?
+
 There are many correct and formal ways to define what functions are, but for the sake of simplicity we will focus on an informal description of how you can think of functions in R:
 
 * A function has the form: `output = function_name(argument1, argument2, ...)`
@@ -555,6 +389,7 @@ By now we hope you have realized just how broad the use of functions is. The *R 
 
 The many R packages that you can install are mostly just collections of functions (some also provide new **classes**, which we'll save for later). We will now show how you can learn how to use each function by knowing how to view and interpret it's documentation page.
 
+
 ### Viewing and interpreting function documentation
 
 You can access the documentation of a function by typing a question mark in front of the function name, and running the line of code. Let's do this to view the documentation of the `sqrt()` function
@@ -579,7 +414,7 @@ sqrt(c(1,2,3,4,5))
 
 There are more parts to the documentation that we'll ignore for now. Notable parts to look into for yourself are **Details**, that provides more information, and the **Examples** section at the very bottom, which is a great starting point to see a function in action. 
 
-### Understanding multi-argument functions
+## Functions with multiple arguments
 
 Now, let's move to a function with multiple arguments. We'll again look at the `dfm()` function from the `quanteda` package. To access this function, we first run `library(quanteda)`, to tell R that we want to be able to access the functions in this package. Note that you have to have the package installed as well. This should still be the case from a prior tutorial, but if you changed computers, you will have to run the line `install.packages('quanteda')` first.  
 
@@ -635,6 +470,188 @@ dfm(example_texts, stem=TRUE)
 
 Whatever approach you prefer, try to be consistent, and take into account whether your code will still be easy to interpret for others that you share it with, or for yourself in the future. A good general rule is to pass mandatory arguments (such as `x` in the `dfm` function) without a name, but all the optional arguments (that have a default, such as `tolower` and `stem`) by name.
 
+
+# Additional instructions
+
+Here we provide several additional instructions  about data types, structures and functions. There are all very usefull to know about, but a bit more hard to chew. Prioritize understanding the former part, but by all means, do study these a additional instructions.
+
+## Additional data types
+
+### Factor
+
+A *factor* in R is a series of labeled numbers.
+This is usefull if you have a categorical variable, such as education level (in surveys) or medium type (in content analysis).
+If you are familiar with SPSS, this is comparable to using *value labels*. 
+
+```{r}
+x = c('De Volkskrant','De Volkskrant','NRC Handelsblad',
+      'De Volkskrant','NRC Handelsblad','Trouw')
+x
+```
+
+We now have a sequence of character values. What's special about these character values, is that the same values are often repeated. In this case, it's best to think as each unique value ("De Volkskrant", "NRC Handelsblad", "Trouw") as a label. This is a typical job for the *factor* type, so let's transform the character type vector to a factor type.
+
+```{r}
+x = factor(x)
+x
+```
+
+Two things have changed. 
+Firstly, you see that there is now a line that says "levels: ...", in which the three unique labels are shown.
+Secondly, the quotes have disappeared. This is because it's no longer a character value.
+
+Behind the scenes, x is now a sequence of numbers, where each number points to a label
+
+```{r}
+as.numeric(x) ## show the numbers: 1 for De Volkskrant, 2 for NRC and 3 for Trouw
+levels(x)     ## show the levels / labels. 
+```
+
+If this confuses you, you're still perfectly healthy. The benefits of factors become more apparent later on when you start working with certain types of analysis, visualizations, and when you use very large data (numeric values require less memory than character values). 
+
+You might have concluded that factors are only a hassle, and you'll simply stick to character values.
+This is a valid strategy, except that R tends to force factors on you, for example when you import data or make a data.frame, and R thinks that your character column is better of as a factor. There are ways to ask R not to do this, but really, you're better of just accepting factors. It's better on the long run.
+
+Still, if you ever run into trouble with factors and really prefer to use character values, you can simply convert them into "character" type, using **as.character()**
+
+```{r}
+as.character(x)
+```
+
+### Logical
+
+The *logical* data type only has two values: **TRUE** and **FALSE** (which can be abbreviated to **T** and **F**). You will not often encounter logical values in your data, but you will use them in many operations such as subsetting and transforming data, as you will see when we discuss data structures. Understanding a bit about logical values will help you understand how these operations work.
+
+For now, we will focus on how logical values result from comparisons, and how logical operators can be used. 
+### Date
+
+Date is not one of the basic data types in R, but in social scientific research we often work with calendar dates and times. This requires a special data type, because there are many limitations or complications if we try to express dates and times as character or numeric values. Two of the most common date classes in native R (i.e. not requiring additional packages) are *Date*, which only handles calendar dates, and *POSIXlt*, that handles both calendar dates and times. 
+
+In this tutorial we will only demonstrate how to use *POSIXlt*, but the general approach for working with dates and times in R is the same for different date types (and is actually similar in other programming languages as well). You can do most things that you need with only two functions: *strptime* and *strftime*
+
+* strptime (**str**ing **p**arse **time**) creates a date/time value from a character value
+* strftime (**str**ing **f**ormat **time**) extracts parts of a date/time from a date/time value.
+
+For both functions, you need to know how to specify the *format*. Essentially, this is a string (character value) that contains the date format, using special placeholders to indicate specific parts of the date. These placeholders are always a percentage symbol **%** followed by a letter. The most commonly used placeholders are:
+
+placeholder          | date part
+-------------------- | ------------------------
+%Y | year with century (2010, 2011, etc.)
+%m | month as a decimal number (01, 02, 03, ..., 10, 11, 12)
+%d | day as a decimal number (01, 02, 03, ..., 28, 29, 30)
+%H | hour as a decimal (00, 01, 02, ..., 21, 22, 23)
+%M | minute as a decimal (00, 01, 02, ..., 57, 58, 59)
+%S | seconds as a decimal (00, 01, 02, ..., 57, 58, 59)
+
+Using these placeholders, we can describe various date formats. Here we show how to use this together with the **strptime** function to **parse** a date from character type to a date (POSIXlt) type. We will explain more about functions below. For now, just note that the first argument passed to **strptime()** is the date, and the second argument is the format.
+
+```{r}
+strptime('2010-01-01 20:00:00', format = '%Y-%m-%d %H:%M:%S')
+strptime('01/01/2010', format = '%m/%d/%Y')
+strptime('2010 any 01 format 01 goes', format = '%Y any %m format %d goes')
+```
+
+With the **strftime()** function we can use the same format strings to extract specific parts from a date/time value. Here, we first create a POSIXlt date with strptime, and then use strftime to extract parts. Note that all parts are returned as a character value, even if they are single numbers.
+
+```{r}
+x = strptime('2010-06-01 20:00:00', format = '%Y-%m-%d %H:%M:%S')
+strftime(x, '%Y')
+strftime(x, '%Y week %W')
+strftime(x, 'Today is a %A')  ## language of weekday depends on your locale settings
+```
+
+You can find a full list of format placeholders in the documentation of the **strptime** function, which you can access by putting a questionmark in front of the function name and running it as code. The help page should open in your bottom-right window in RStudio.
+
+```{r, eval=F}
+?strptime
+```
+
+For reference, if you feel the urge to master date and time operations, there is also the excellent **lubridate** package. Usage is explained in detail in this (free online) [chapter from "R for Data Science"](http://r4ds.had.co.nz/dates-and-times.html). You can also download the cheatsheet [here](https://github.com/rstudio/cheatsheets/raw/master/lubridate.pdf).
+
+## Comparisons
+
+The most common way in which you will get logical values in R is as the results of a **comparison** between two values or two vectors. There are 6 types of comparissons, which use operators that you are probably already familiar with:
+
+operator   | meaning
+---------- | --------------------
+x < y      | x is smaller than y             
+x > y      | x is larger than y               
+x <= y     | x is smaller than or equal to y  
+x >= y     | x is larger than or equal to y     
+x == y     | x equals y                       
+x != y     | x does not equal y               
+
+The outcome of a comparison of two values is a logical value. 
+
+```{r}
+5 < 10
+5 < 2
+```
+
+The outcome of a comparison of two vectors is a logical vector. For example, let's assume that we have the average math grade's for 5 students in year 1 and year 2, and we look-up whether their grade went down (i.e. grade in year 1 was higher than year 2). Here we see that only for the first student the grade went down (from 6 in year 1 to 5 in year 2), so only the first value is TRUE. 
+
+```{r}
+grade_year_1 = c(6,6,7,7,4)
+grade_year_2 = c(5,6,8,7,6)
+grade_year_1 > grade_year_2    
+```
+
+If we compare a vector to a single value, each value of the vector will be compared to that value. As you will see shortly, this is a core mechanic behind selecting and subsetting data. In the following example, we will look-up which participants for our hypothetical drinking study are at least 18 years old.
+
+```{r}
+age = c(17,34,12,20,12,25,30,14,33)
+age >= 18
+```
+
+Finally, while not strictly a comparison, there is another common operator that creates a logical value or vector.
+
+operator   | meaning
+---------- | --------------------
+x %in% y   | the value(s) in x also exist in y             
+
+This is for instance usefull if you want to look for multiple values. For example, let's select select `Bob` and `Carol` from our list of names.
+
+```{r}
+name = c('Alice','Bob','Carol','Dave','Eve')
+name %in% c('Bob', 'Carol')
+```
+
+
+## Logical operators
+
+Given a logical value (or vector), we can use the logic operators & (AND), | (OR) and ! (NOT). In the following table, x and y are both logical values.
+
+operator   | meaning | outcome
+---------- | ------- | --------------------
+x & y      | x AND y | only TRUE if both x and y are TRUE           
+x \| y     | x OR y  | only TRUE if either x or y, or both are TRUE.               
+!x         | NOT x   | the opposite if x, so only TRUE if x is FALSE.
+
+You can play with the following code to try it out (results not shown in this document).
+
+```{r, eval=F}
+TRUE & TRUE        ## is TRUE
+TRUE & FALSE       ## is FALSE
+FALSE & FALSE      ## is FALSE
+
+TRUE | TRUE        ## is TRUE
+TRUE | FALSE       ## is TRUE
+FALSE | FALSE      ## is FALSE
+
+!TRUE              ## NOT TRUE, so is FALSE
+!FALSE             ## NOT FALSE, so is TRUE
+
+TRUE & !FALSE      ## !FALSE == TRUE, so you get TRUE & TRUE
+TRUE & (!TRUE | TRUE) ## !TRUE | TRUE == FALSE  | TRUE == TRUE, so you get TRUE & TRUE 
+
+a = c(T, T, F, F, F, T)
+b = c(T, F, F, F, T, T) 
+a & b              ## 6 pairwise comparisons: T & T, T & F, F & F, F & F, F & T, T & T) 
+```
+
+
+## Methods, generic functions and the three dot ellipsis
+
 ### A note about 'methods' and 'generic functions'
 
 Some functions are *generic functions*, that use different *methods* depending on the input that they are used with. Ignoring technicalities, there's one thing you currently need to know about them, because you will need it to interpret their documentation pages. 
@@ -679,6 +696,7 @@ sum(1,2,NA, na.rm = T)
 ```
 
 Finally, a way in which the three dot ellipsis is also often used, is to pass arguments on to another function that is used within the function. If you look back at the documentation for the `dfm()` function, you'll see in the explanation of `...`: "additional arguments passed to tokens; not used when x is a dfm". In this case, you can see which arguments these are by looking at the documentation of the `tokens` function. Here you see that you could also pass the argument `remove_numbers = TRUE` to `dfm()`.
+
 
 # Further reading
 
