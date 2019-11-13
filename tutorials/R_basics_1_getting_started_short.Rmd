@@ -155,11 +155,13 @@ corp
 Here **quanteda** lets us know that the corpus contains 58 documents, and 3 docvars. The docvars are **variables** about the documents, in this case the first and last name of the president, and the year of the speech. We can view them with the *docvars()* function. 
 
 ```{r, eval=F}
-docvars(corp)  ## (only the first lines of output are shown here)
+docvars(corp)  # (only the first lines of output are shown here)
 ```
 ```{r, echo=F}
 head(docvars(corp))
 ```
+
+(Note: the '#' is used to add a _comment_ to a line, i.e. to explain something for the reader. R will ignore everything after the # symbol. The limit your own output to the first 6 lines, use `head(docvars(corp))`)
 
 ## The Document-term Matrix
 
@@ -178,11 +180,11 @@ Here we print a subset of only the first 10 documents and first 10 terms.
 m[1:10,1:10]
 ```
 
-For example, we see here that the word "senat", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
+For example, we see here that the word "senate", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
 
 ## Word clouds
 
-To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min_count (the minimum wordcount) to 20 to ignore all words that occured less than 70 times.
+To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min_count (the minimum wordcount) to 50 to ignore all words that occured less than 50 times.
 
 ```{r basics_wordcloud}
 textplot_wordcloud(m, min_count = 50)

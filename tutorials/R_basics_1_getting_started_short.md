@@ -167,7 +167,7 @@ corp
 Here **quanteda** lets us know that the corpus contains 58 documents, and 3 docvars. The docvars are **variables** about the documents, in this case the first and last name of the president, and the year of the speech. We can view them with the *docvars()* function.
 
 ``` r
-docvars(corp)  ## (only the first lines of output are shown here)
+docvars(corp)  # (only the first lines of output are shown here)
 ```
 
     ##                 Year  President FirstName
@@ -177,6 +177,8 @@ docvars(corp)  ## (only the first lines of output are shown here)
     ## 1801-Jefferson  1801  Jefferson    Thomas
     ## 1805-Jefferson  1805  Jefferson    Thomas
     ## 1809-Madison    1809    Madison     James
+
+(Note: the '\#' is used to add a *comment* to a line, i.e. to explain something for the reader. R will ignore everything after the \# symbol. The limit your own output to the first 6 lines, use `head(docvars(corp))`)
 
 The Document-term Matrix
 ------------------------
@@ -198,7 +200,7 @@ We now have a DTM with 58 documents and 5,405 terms. The entire DTM is pretty bi
 m[1:10,1:10]
 ```
 
-    ## Document-feature matrix of: 10 documents, 10 features (60% sparse).
+    ## Document-feature matrix of: 10 documents, 10 features (60.0% sparse).
     ## 10 x 10 sparse Matrix of class "dfm"
     ##                  features
     ## docs              fellow-citizens senate house representatives among
@@ -225,12 +227,12 @@ m[1:10,1:10]
     ##   1821-Monroe                0        0    2     1      0
     ##   1825-Adams                 1        0    1     0      0
 
-For example, we see here that the word "senat", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
+For example, we see here that the word "senate", which is the stemmed version of the word "senate", occurs once in the 1789 speech by George Washington, and once in the 1797 speech of John Adams.
 
 Word clouds
 -----------
 
-To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot\_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min\_count (the minimum wordcount) to 20 to ignore all words that occured less than 70 times.
+To get a basic idea of what presidents talk about, we can create a wordcloud with quanteda's **textplot\_wordcloud()** function. The main input for this function is the DTM that you created in the previous step. As an additional argument we set min\_count (the minimum wordcount) to 50 to ignore all words that occured less than 50 times.
 
 ``` r
 textplot_wordcloud(m, min_count = 50)
