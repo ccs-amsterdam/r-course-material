@@ -40,6 +40,8 @@ library(quanteda)
 
 The first step is getting text into R in a proper format. stored in a variety of formats, from plain text and CSV files to HTML and PDF, and with different 'encodings'. There are various packages for reading these file formats, and there is also the convenient [readtext](https://cran.r-project.org/web/packages/readtext/vignettes/readtext_vignette.html) that is specialized for reading texts from a variety of formats.
 
+## From CSV files
+
 For this tutorial, we will be importing text from a csv. For convenience, we're using a csv that's available online, but the process is the same for a csv file on your own computer. The data consists of the State of the Union speeches of US presidents, with each document (i.e. row in the csv) being a paragraph. The data will be imported as a data.frame.
 
 ```{r}
@@ -63,7 +65,38 @@ corp
 ```
 
 
+## From text (or word/pdf) files
 
+Rather than a csv file, your texts might be stored as separate files, e.g. as .txt, .pdf, or .docx files. You can quite easily read these as well with the `readtext` function from the `readtext` package. You might have to install that package first with:
+
+```{r, eval=F}
+install.packages(readtext)
+```
+
+You can then call the readtext function on a particular file, or on a folder or zip archive of files directly. 
+
+```{r}
+library(readtext)
+url = "https://github.com/ccs-amsterdam/r-course-material/blob/master/data/files.zip?raw=true"
+texts = readtext(url)
+texts
+```
+
+As you can see, it automatically downloaded and unzipped the files, and converted the MS Word and PDF files into plain text.
+
+I read them from an online source here, but you can also read them from your hard drive by specifying the path:
+
+```{r, eval=F}
+texts = reattext("c:/path/to/files")
+texts = reattext("/Users/me/Documents/files")
+```
+
+You can convert the texts directly into a corpus object as above:
+
+```{r}
+corp2 = corpus(texts)
+corp2
+```
 # Step 2: Creating the DTM (or DFM)
 
 Many text analysis techniques only use the frequencies of words in documents. This is also called the bag-of-words assumption, because texts are then treated as bags of individual words. Despite ignoring much relevant information in the order of words and syntax, this approach has proven to be very powerfull and efficient.
