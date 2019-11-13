@@ -1,7 +1,7 @@
 ---
 title: 'R text analysis: quanteda'
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09"
+date: "2019-1"
 output: 
   github_document:
     toc: yes
@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = F
 In this tutorial you will learn how to perform text analysis using the quanteda package. 
 In the [R Basics: getting started](R_basics_1_getting_started.md) tutorial we introduced some of the techniques from this tutorial as a light introduction to R.
 In this and the following tutorials, the goal is to get more understanding of what actually happens 'under the hood' and which choices can be made, 
-and to become more confident and proficient in using quanteda for media (effects) research.
+and to become more confident and proficient in using quanteda for text analysis.
 
 ## The quanteda package
 
@@ -146,12 +146,11 @@ dtm = dfm(corp, tolower=T, stem=T, remove=stopwords('en'), remove_punct=T)
 dtm
 ```
 
-This dtm has 23,469 documents and 20,429 features (i.e. terms), and no longer shows the actual matrix because it simply wouldn't fit. 
-In general, 20 thousand different words is much more than what is informative or useful for most analyses (unless you're interested in e.g. the richness of president's vocabularies). Although it depends on the corpus and the research question, you normaly want to reduce this to between 2,000 and 10,000 words. 
+This dtm has 23,469 documents and 20,429 features (i.e. terms), and no longer shows the actual matrix because it simply wouldn't fit. Depending on the type of analysis that you want to conduct, we might not need this many words, or might actually run into computational limitations. 
 
-To to this, we can filter out some of less important terms. In the previous tutorial you learned that selection works by comparing a vector to a given value, which then selects all elements for which the comparison is TRUE. To filter on the frequency of terms, we can get the column sums of the matrix (the sum of all values in a column) and see whether the value is higher than a given threshold. Here we use threshold 10.
+Luckily, many of these 20K features are not that informative. The distribution of term frequencies tends to have a very long tail, with many words occuring only once or a few times in our corpus. For many types of bag-of-words analysis it would not harm to remove these words, and it might actually improve results. 
 
-We can use this comparison in the `dfm_select()` function to select the columns for which the comparison is TRUE (sum is higher than 20). 
+We can use the `dfm_trim` function to remove columns based on criteria specified in the arguments. Here we say that we want to remove all terms for which the frequency (i.e. the sum value of the column in the DTM) is below 10. 
 
 ```{r}
 dtm  = dfm_trim(dtm, min_termfreq = 10)
@@ -160,10 +159,9 @@ dtm
 
 Now we have about 5000 features left. See `?dfm_trim` for more options. 
 
-
 # Step 3: Analysis 
 
-Using the dtm we can now employ various techniques. You've already seen some of them in the first tutorial, but by now you should be able to understand more about the R syntax, and understand how to tinker with different parameters.
+Using the dtm we can now employ various techniques. You've already seen some of them in the introduction tutorial, but by now you should be able to understand more about the R syntax, and understand how to tinker with different parameters.
 
 ## Word frequencies and wordclouds
 

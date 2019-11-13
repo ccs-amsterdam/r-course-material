@@ -263,9 +263,9 @@ age &gt;= 20  ## example</code></pre>
 <pre class="r"><code>strptime('1961-12-24', format='%Y-%m-%d')   ## example</code></pre>
 <pre><code>## [1] &quot;1961-12-24 CET&quot;</code></pre>
 <pre class="r"><code>strptime('25 12, 1961', format='')</code></pre>
-<pre><code>## [1] &quot;2019-05-10 CEST&quot;</code></pre>
+<pre><code>## [1] &quot;2019-09-24 CEST&quot;</code></pre>
 <pre class="r"><code>strptime('1961-12-26T19:00:00', format='')</code></pre>
-<pre><code>## [1] &quot;2019-05-10 CEST&quot;</code></pre>
+<pre><code>## [1] &quot;2019-09-24 CEST&quot;</code></pre>
 </div>
 <div id="f" class="section level3">
 <h3>1.F</h3>
@@ -335,13 +335,13 @@ iris$Species = as.character(iris$Species)  ## ignore factors (easier)</code></pr
 <h1>Assignment 3: Functions</h1>
 <div id="a-2" class="section level3">
 <h3>3.A</h3>
-<p>Use the <code>data.frame()</code> function to:</p>
+<p>Here we create two vectors (V1 and V2). Now, use the <code>data.frame()</code> function to:</p>
 <ul>
 <li>Create a data.frame using the V1 and V2 vectors as columns, where V1 is named “age” and V2 is named “gender”</li>
 <li>Create the same data.frame, but this time use arguments to prevent R from converting strings (in the “gender” variable) to factors</li>
 </ul>
 <pre class="r"><code>V1 = floor(rnorm(10, mean = 21, sd = 3))            ## random age
-V2 = sample(c('Male','Female'), 10, replace=T)   ## random gender</code></pre>
+V2 = sample(c('Male','Female'), 10, replace=T)      ## random gender</code></pre>
 </div>
 <div id="b-2" class="section level3">
 <h3>3.B</h3>

@@ -1,7 +1,6 @@
 ---
 title: 'Practise R basics: data and functions'
 output:
-  pdf_document: default
   html_document: null
   theme: united
   toc: yes
@@ -171,15 +170,14 @@ iris$Species = as.character(iris$Species)  ## ignore factors (easier)
 
 ### 3.A
 
-Use the `data.frame()` function to:
+Here we create two vectors (V1 and V2). Now, use the `data.frame()` function to:
 
 * Create a data.frame using the V1 and V2 vectors as columns, where V1 is named "age" and V2 is named "gender" 
 * Create the same data.frame, but this time use arguments to prevent R from converting strings (in the "gender" variable) to factors
 
 ```{r}
 V1 = floor(rnorm(10, mean = 21, sd = 3))            ## random age
-V2 = sample(c('Male','Female'), 10, replace=T)   ## random gender
-
+V2 = sample(c('Male','Female'), 10, replace=T)      ## random gender
 ```
 
 ### 3.B

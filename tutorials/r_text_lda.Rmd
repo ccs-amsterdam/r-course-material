@@ -1,7 +1,7 @@
 ---
 title: "Fitting LDA Models in R"
 author: "Wouter van Atteveldt & Kasper Welbers"
-date: "November 2018"
+date: "November 2019"
 output: 
   github_document:
     toc: yes
@@ -15,9 +15,11 @@ knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
 library(printr)
 ```
 
-Fitting LDA models in R is technically quite simple: just call the `LDA` function from the `topicmodels` package.
-First, let's create a document term matrix from the inaugural speeches in quanteda,
-at the paragraph level since we can expect these to be mostly about the same topic:
+# Introduction
+
+LDA, which stands for Latent Dirichlet Allocation, is one of the most popular approaches for probabilistic topic modeling. The goal of topic modeling is to automatically assign topics to documents without requiring human supervision. Although the idea of an algorithm figuring out topics might sound close to magical (mostly because people have too high expectations of what these 'topics' are), and the mathematics might be a bit challenging, it is actually really simple fit an LDA topic model in R.  
+
+A good first step towards understanding what topic models are and how they can be usefull, is to simply play around with them, so that's what we'll do here. First, let's create a document term matrix from the inaugural speeches in quanteda, at the paragraph level since we can expect these to be mostly about the same topic:
 
 ```{r}
 library(quanteda)
@@ -36,6 +38,8 @@ set.seed(1)
 m = LDA(dtm, method = "Gibbs", k = 10,  control = list(alpha = 0.1))
 m
 ```
+
+Although LDA will figure out the topics, we do need to decide ourselves how many topics we want. Also, there are certain hyperparameters (alpha) that we can tinker with to have some control over the topic distributions. For now, we won't go into details, but do note that we could also have asked for 100 topics, and our results would have been much different.  
 
 ## Inspecting LDA results
 
@@ -56,13 +60,13 @@ head(topwords)
 ```
 
 Now we can plot these words:
+
 ```{r lda-wordcloud}
 library(wordcloud)
 wordcloud(names(topwords), topwords)
 ```
 
 We can also look at the topics per document, to find the top documents per topic:
-
 
 ```{r}
 topic.docs = posterior(m)$topics[, topic] 
@@ -106,6 +110,7 @@ theta <- as.matrix(posterior(m)$topics)
 vocab <- colnames(phi)
 doc.length = slam::row_sums(dtm)
 term.freq = slam::col_sums(dtm)[match(vocab, colnames(dtm))]
+
 library(LDAvis)
 json = createJSON(phi = phi, theta = theta, vocab = vocab,
      doc.length = doc.length, term.frequency = term.freq)
