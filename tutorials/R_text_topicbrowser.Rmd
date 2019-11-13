@@ -16,7 +16,7 @@ library(printr)
 
 # Introduction
 
-Interpreting topic models can be hard. We can look at the top terms per topic to get an idea of what latent topic underlies their co-occurences, but as people tend to be really good at finding patterns when the look hard enough, it is easy to draw wrong conclusions. An excellent paper on the matter is @@@ by @@@.
+Interpreting topic models can be hard. We can look at the top terms per topic to get an idea of what latent topic underlies their co-occurences, but as people tend to be really good at finding patterns when the look hard enough, it is easy to draw wrong conclusions. 
 
 A great technique for interpreting and validating topic models is to create a full text browser in which we can see how the individual words in documents are assigned to topics. In this document we demonstrate how this browser can easily be created with the `corpustools` package. In addition, we'll show how the `udpipe` package can be used to apply advanced NLP preprocessing without the hassle of external dependencies.
 

@@ -6,7 +6,7 @@ November 2019
 Introduction
 ============
 
-Interpreting topic models can be hard. We can look at the top terms per topic to get an idea of what latent topic underlies their co-occurences, but as people tend to be really good at finding patterns when the look hard enough, it is easy to draw wrong conclusions. An excellent paper on the matter is @@@ by @@@.
+Interpreting topic models can be hard. We can look at the top terms per topic to get an idea of what latent topic underlies their co-occurences, but as people tend to be really good at finding patterns when the look hard enough, it is easy to draw wrong conclusions.
 
 A great technique for interpreting and validating topic models is to create a full text browser in which we can see how the individual words in documents are assigned to topics. In this document we demonstrate how this browser can easily be created with the `corpustools` package. In addition, we'll show how the `udpipe` package can be used to apply advanced NLP preprocessing without the hassle of external dependencies.
 
@@ -145,13 +145,13 @@ The tCorpus also has a function for looking at the top terms for a given feature
 top_features(tc, 'feature', group_by = 'topic', rank_by = 'chi2')
 ```
 
-|  topic| 1         | 2      | 3         | 4         | 5        | 6        | 7           | 8      | 9        | 10      |
-|------:|:----------|:-------|:----------|:----------|:---------|:---------|:------------|:-------|:---------|:--------|
-|      1| woman     | man    | people    | Iraq      | country  | freedom  | serve       | come   | have     | nation  |
-|      2| terrorist | Al     | Qaida     | weapon    | terror   | regime   | Afghanistan | threat | ally     | war     |
-|      3| tax       | health | care      | insurance | coverage | Medicare | retirement  | pay    | economy  | family  |
-|      4| energy    | job    | oil       | make      | business | trade    | technology  | year   | Congress | gas     |
-|      5| school    | child  | education | student   | math     | life     | help        | year   | ask      | teacher |
+|  topic| 1         | 2      | 3         | 4        | 5         | 6           | 7       | 8      | 9         | 10           |
+|------:|:----------|:-------|:----------|:---------|:----------|:------------|:--------|:-------|:----------|:-------------|
+|      1| energy    | school | job       | make     | education | student     | college | child  | oil       | year         |
+|      2| terrorist | weapon | Al        | Qaida    | Iran      | attack      | regime  | world  | East      | Middle       |
+|      3| Iraq      | man    | freedom   | woman    | war       | people      | America | nation | peace     | troops       |
+|      4| health    | care   | insurance | coverage | drug      | Medicare    | senior  | doctor | aids      | prescription |
+|      5| tax       | year   | business  | cut      | deficit   | Republicans | let     | time   | Democrats | Congress     |
 
 Now, finally we get to the main purpose of this document. We can now use the topic annotations to create a text browser where different topics are highlighted, and can be navigated with the category filter.
 
