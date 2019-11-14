@@ -114,6 +114,8 @@ dr = DR_data(diri) ## for visualization, make this a DirichletRegData object
 plot(dr) 
 ```
 
+![](img/alpha1-1.png)
+
 high, symmetrical alpha: sense and even distribution (each document often contains a mixture of all topics)
 
 ``` r
@@ -121,6 +123,8 @@ diri = rdirichlet(100, alpha = c(10,10,10))
 dr = DR_data(diri) 
 plot(dr) 
 ```
+
+![](img/alpha2-1.png)
 
 Low, assymmetrical alpha: sparse and uneven distribution (2 high value topics more likely to occur, but often one OR the other. Due to sparseness, the low value topic can still be dominant in a few topics)
 
@@ -130,6 +134,8 @@ dr = DR_data(diri)
 plot(dr) 
 ```
 
+![](img/alpha3-1.png)
+
 high, assymmetrical alpha: dense and uneven distribution (two topics most likely to occur, but often together within the same document. Due to denseness, other topics are rarely dominant)
 
 ``` r
@@ -137,6 +143,8 @@ diri = rdirichlet(100, alpha = c(1,5,5))
 dr = DR_data(diri) 
 plot(dr) 
 ```
+
+![](img/alpha4-1.png)
 
 Latent dirichlet allocation (LDA)
 =================================
@@ -148,8 +156,6 @@ For the distribution of topics over documents, each document is a PFM of length 
 Here are some examples of what these dirichlet distributions look like given different hyperparameters. Note that these are only the starting values of the distribution (i.e. they change as the model is trained on the data). The way this works is off course identical to the bag of dices example. It is only presented in a slightly different way to make the connection with text analysis. Most importantly, for this example we assume that we just want to know whether a topic occurs in a document, for which we use a threshold of 0.3. That is, a topic is assumed to be 'present' in a document if in the PMF of this document the topic scores above o.3.
 
 Example 1: A distribution of topics over documents with 5 topics and a dense, symmetrical alpha. This gives documents in which many topics can occur in each document
-
-Note that since we
 
 ``` r
 N = 1000
