@@ -10,7 +10,7 @@ editor_options:
 ---
 
 
-```{r, echo=F}
+```{r, echo=F, message=F, warning=F}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
 library(printr)
 ```

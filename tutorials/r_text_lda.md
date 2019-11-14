@@ -7,10 +7,6 @@ November 2019
     -   [Inspecting LDA results](#inspecting-lda-results)
     -   [Visualizing LDA with LDAvis](#visualizing-lda-with-ldavis)
 
-    ## Registered S3 method overwritten by 'printr':
-    ##   method                from     
-    ##   knit_print.data.frame rmarkdown
-
 Introduction
 ============
 
