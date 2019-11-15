@@ -49,5 +49,4 @@ p = ggplot(data = d, aes(x = topic, y = term)) +
   geom_tile(aes(fill = d$value), colour = "grey50") +
   ggtitle("Iterations: ")+
   transition_manual(frame)
-gganimate(p)
 gganimate::animate(p)
