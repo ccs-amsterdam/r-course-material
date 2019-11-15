@@ -80,7 +80,7 @@ for (i in 1:nrow(p)) {
 
 Now we can plot the perplexity scores for different values of k.
 
-```{r}
+```{r perplexity_plot}
 library(ggplot2)
 ggplot(p, aes(x=k, y=perplexity)) + geom_line()
 ```

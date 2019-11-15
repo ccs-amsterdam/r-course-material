@@ -57,7 +57,7 @@ And then we calculate perplexity for dtm\_test
 perplexity(m, dtm_test)
 ```
 
-    ## [1] 680.0832
+    ## [1] 684.9717
 
 Now, a single perplexity score is not really usefull. What we want to do is to calculate the perplexity score for models with different parameters, to see how this affects the perplexity. Here we'll use a for loop to train a model with different topics, to see how this affects the perplexity score. Note that this might take a little while to compute.
 
@@ -90,7 +90,7 @@ library(ggplot2)
 ggplot(p, aes(x=k, y=perplexity)) + geom_line()
 ```
 
-![](img/unnamed-chunk-7-1.png)
+![](img/perplexity_plot-1.png)
 
 What we see here is that first the perplexity decreases as the number of topics increases. This makes sense, because the more topics we have, the more information we have. It is only between 64 and 128 topics that we see the perplexity rise again. If we would use smaller steps in k we could find the lowest point. If we repeat this several times for different models, and ideally also for different samples of train and test data, we could find a value for k of which we could argue that it is the *best* in terms of model fit.
 
