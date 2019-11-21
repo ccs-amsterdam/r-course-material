@@ -69,9 +69,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type="text/css">
 .main-container {
@@ -96,22 +94,92 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
 });
 </script>
 
 <!-- code folding -->
 
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -128,13 +196,13 @@ $(document).ready(function () {
 <h1>R course material</h1>
 <p>This page contains a collection of R tutorials, developed at the Vrije Universiteit Amsterdam for Communication Science courses that use R.</p>
 <p>The goal is to organize relevant material into modular components, for more efficient design and maintenance of material, that can be used across courses, and that are accessible to students during and after their studies.</p>
+<p>Below we list the relevant handouts/tutorials. Each links to the md file, see the Rmd file with the same name for the source code of the tutorials.</p>
 </div>
 <div id="r-basics" class="section level1">
 <h1>R Basics</h1>
 <ul>
-<li><a href="tutorials/R_basics_1_getting_started.md">Getting started</a></li>
+<li><a href="tutorials/R_basics_1_getting_started.md">Getting started</a> (<a href="tutorials/R_basics_1_getting_started_short.md">shorter version</a>)</li>
 <li><a href="tutorials/R_basics_2_data_and_functions.md">Data and functions</a> (<a href="practise/R_basics_2_data_and_functions_practise.Rmd">practise template</a>)</li>
-<li><a href="tutorials/R_text_3_quanteda.md">Text analysis</a></li>
 </ul>
 </div>
 <div id="data-mangling-in-the-tidyverse" class="section level1">
@@ -157,22 +225,94 @@ $(document).ready(function () {
 <tr class="even">
 <td><a href="tutorials/R-tidy-5-transformation.md">Transforming Data</a></td>
 <td>5</td>
-<td>dplyr: filter, select, arrange, mutate, summarize</td>
+<td>dplyr: filter, select, arrange, mutate</td>
 </tr>
 <tr class="odd">
+<td><a href="tutorials/R-tidy-5b-groupby.md">Summarizing Data</a></td>
+<td>5</td>
+<td>dplyr: group_by, summarize</td>
+</tr>
+<tr class="even">
 <td><a href="tutorials/r-tidy-3_7-visualization.md">Visualizing Data</a></td>
 <td>3 &amp; 7</td>
 <td>ggplot2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="tutorials/r-tidy-12-reshaping.md">Reshaping data</a></td>
 <td>12</td>
 <td>tidyr: spread, gather</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="tutorials/R-tidy-13a-joining.md">Combining (merging) Data</a></td>
 <td>13</td>
 <td>dplyr: inner_join, left_join, etc.</td>
+</tr>
+<tr class="odd">
+<td><a href="tutorials/R-tidy-14-strings.md">Basic string (text) handling</a></td>
+<td>14</td>
+<td>readr: str_detect, str_extract etc., iconv</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="statistical-analysis" class="section level1">
+<h1>Statistical Analysis</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Tutorial</th>
+<th>Core packages / functions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="tutorials/simple_modeling.md">Basic statistics</a></td>
+<td>stats: lm, aov, t.test</td>
+</tr>
+<tr class="even">
+<td><a href="tutorials/advanced_modeling.md">Advanced statistics</a></td>
+<td>stats: glm, lme4: lmer, glmer</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="text-analysis" class="section level1">
+<h1>Text analysis</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Tutorial</th>
+<th>Core packages / functions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="tutorials/R_text_3_quanteda.md">Text analysis</a></td>
+<td><a href="https://quanteda.io/">quanteda</a></td>
+</tr>
+<tr class="even">
+<td><a href="tutorials/sentiment_analysis.md">Lexical sentiment analysis</a></td>
+<td><a href="https://quanteda.io/">quanteda</a>, <a href="https://github.com/kasperwelbers/corpustools">corpustools</a></td>
+</tr>
+<tr class="odd">
+<td><a href="tutorials/r_text_lda.md">LDA Topic Modeling</a></td>
+<td><a href="https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8">topicmodels</a>,<a href="https://quanteda.io/">quanteda</a></td>
+</tr>
+<tr class="even">
+<td><a href="tutorials/r_text_stm.md">Structural Topic Modeling</a></td>
+<td><a href="https://www.structuraltopicmodel.com/">stm</a>, <a href="https://quanteda.io/">quanteda</a></td>
+</tr>
+<tr class="odd">
+<td><a href="tutorials/r_text_nlp.md">NLP Preprocessing with Spacy(r)</a></td>
+<td><a href="https://www.rdocumentation.org/packages/spacyr/versions/0.9.91">spacyr</a>, <a href="https://quanteda.io/">quanteda</a> (see also <a href="https://spacy.io/">spacy</a> itself)</td>
+</tr>
+<tr class="even">
+<td><a href="tutorials/r_text_ml.md">Supervised machine learning for text classification</a></td>
+<td>caret</td>
+</tr>
+<tr class="odd">
+<td><a href="tutorials/R_text_topicbrowser.md">Creating a topic browser with LDA</a></td>
+<td><a href="https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html">corpustools</a></td>
 </tr>
 </tbody>
 </table>
@@ -181,6 +321,7 @@ $(document).ready(function () {
 <h1>Miscellaneous</h1>
 <ul>
 <li><a href="miscellaneous/RMarkdown_parameters.Rmd">R Markdown codeblock parameters</a></li>
+<li><a href="https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/guardian.md">Scraping the Guardian</a></li>
 </ul>
 </div>
 
