@@ -57,7 +57,7 @@ And then we calculate perplexity for dtm\_test
 perplexity(m, dtm_test)
 ```
 
-    ## [1] 684.9717
+    ## [1] 692.3172
 
 Now, a single perplexity score is not really usefull. What we want to do is to calculate the perplexity score for models with different parameters, to see how this affects the perplexity. Here we'll use a for loop to train a model with different topics, to see how this affects the perplexity score. Note that this might take a little while to compute.
 
@@ -103,19 +103,33 @@ Alas, this is not really the case. In the paper "Reading tea leaves: How humans 
 
 They measured this by designing a simple task for humans. Given a topic model, the top 5 words per topic are extracted. Then, a sixth random word was added to act as the *intruder*. Human coders (they used crowd coding) were then asked to identify the intruder. If the topics are coherent (e.g., "cat", "dog", "fish", "hamster"), it should be obvious which word the intruder is ("airplane"). Thus, the extent to which the intruder is correctly identified can serve as a measure of coherence.
 
-We can make a little game out of this:
+We can make a little game out of this. We first train a topic model with the full DTM.
 
 ``` r
-m = LDA(dtm_train, method = "Gibbs", k = 5,  control = list(alpha = 0.01))
+m = LDA(dtm, method = "Gibbs", k = 10,  control = list(alpha = 0.01))
+```
 
-tw = terms(m, 5)
+Now we get the top terms per topic. This can be done with the `terms` function from the `topicmodels` package. However, as these are simply the most likely terms per topic, the top terms often contain overall common terms, which makes the game a bit too much of a guessing task (which, in a sense, is fair). Here we therefore use a simple (though not very elegant) trick for penalizing terms that are likely across more topics.
+
+``` r
+tw = posterior(m)$terms    
+tw = tw/colSums(tw)      
+tw = apply(tw, 1, function(x) colnames(tw)[head(order(-x), 5)])  ## top 5 terms
+```
+
+Selecting terms this way makes the game a bit easier, so one might argue that its not entirely fair. However, you'll see that even now the game can be quite difficult! The following lines of code start the game.
+
+``` r
 for (i in 1:ncol(tw)) {
   real = tw[,i]
   intruder = sample(setdiff(colnames(dtm), real), 1)
   options = sample(c(real, intruder), 6)
   cat(paste(paste(1:6, options, sep=':  '), collapse='\n'))
   answer = readline(prompt="Which is the intruder? [1-6]  ")
-  if (options[as.numeric(answer)] == intruder) message("CORRECT!!\n") else (message("WRONG!!\n"))
+  if (options[as.numeric(answer)] == intruder) 
+    message("CORRECT!!\n") 
+  else 
+    message(sprintf('WRONG!! it was "%s"\n', intruder))
 }
 ```
 
