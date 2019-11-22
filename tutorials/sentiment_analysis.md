@@ -11,7 +11,9 @@ Wouter van Atteveldt & Kasper Welbers
     -   [Applying a quanteda dictionary](#applying-a-quanteda-dictionary)
     -   [Validating a dictionary](#validating-a-dictionary)
     -   [Improving a dictionary](#improving-a-dictionary)
--   [Limiting the dtm to search context](#limiting-the-dtm-to-search-context)
+-   [Corpustools](#corpustools)
+    -   [Highlighting dictionary hits](#highlighting-dictionary-hits)
+    -   [Limiting the dtm to search context](#limiting-the-dtm-to-search-context)
 
 Introduction
 ============
@@ -37,19 +39,19 @@ For this example, we'll download a corpus of UK immigration news from Github. Fo
 
 ``` r
 download.file("https://github.com/quanteda/quanteda.corpora/raw/master/data/data_corpus_immigrationnews.rda", destfile="immigration.rda")
-load("immigration.rda")
-saveRDS(data_corpus_immigrationnews$documents, "immigration_articles.rds")
 ```
 
-NOTE: when making an Rmd file (like this), it's often a good idea to cache remote downloads like this to a local file, and set `eval=F` on the chunk that downloads the file. That way, it's clear where the file came from, but it doesn't re-download it every time you knit the document.
+``` r
+load("immigration.rda")
+```
+
+NOTE: when downloading data from the internet, it's often a good idea to cache remote downloads like this to a local file, and set `eval=F` on the chunk that downloads the file. That way, it's clear where the file came from, but it doesn't re-download it every time you knit the document.
 
 Now, we can create a dtm as normal:
 
 ``` r
 library(quanteda)
-news = readRDS("immigration_articles.rds")
-corp = corpus(news, docid_field = "id", text_field = "texts")
-dtm = corp %>% dfm(remove=stopwords("english"), remove_punct=T) %>% dfm_trim(min_docfreq=10)
+dtm = data_corpus_immigrationnews %>% dfm(remove=stopwords("english"), remove_punct=T) %>% dfm_trim(min_docfreq=10)
 dtm
 ```
 
@@ -125,7 +127,7 @@ Applying a quanteda dictionary
 Now that we have a dtm and a dictionary, applying it is relatively simple by using the `dfm_lookup` function. To use the result in further analysis, we convert to a data frame and change it in to a tibble. The last step is purely optional, but it makes working with it within tidyverse slightly easier:
 
 ``` r
-result = dtm %>% dfm_lookup(GI_dict) %>% convert(to = "data.frame") %>% as.tibble
+result = dtm %>% dfm_lookup(GI_dict) %>% convert(to = "data.frame") %>% as_tibble
 result
 ```
 
@@ -154,19 +156,19 @@ To get an overall quantitative measure of the validity of a dictionary, you shou
 You can create a random sample from the original data frame using the sample function:
 
 ``` r
-sample_ids = sample(news$id, size=50)
+sample_ids = sample(docnames(dtm), size=50)
 ```
 
 ``` r
-news %>% filter(id %in% sample_ids) %>% mutate(sentiment="") %>% write_csv("to_code.csv")
+docs = data_corpus_immigrationnews$documents 
+docs = docs %>% mutate(document=rownames(docs)) %>% as_tibble()
+docs %>% filter(document %in% sample_ids) %>% mutate(manual_sentiment="") %>% write_csv("to_code.csv")
 ```
 
 Then, you can open the result in excel, code the documents by filling in the sentiment column, and read the result back in and combine with your results above. Note that I rename the columns and turn the document identifier into a character column to facilitate matching it:
 
 ``` r
-validation = read_csv("to_code.csv") %>% select(document=id, manual_sentiment=sentiment) %>% 
-  mutate(document=as.character(document))
-validation = validation %>% inner_join(result)
+validation = read_csv("to_code.csv") %>% inner_join(result)
 ```
 
 Now let's see if my (admittedly completely random) manual coding matches the sentiment score. We can do a correlation:
@@ -196,8 +198,7 @@ Improving a dictionary
 To improve a sentiment dictionary, it is important to see which words in the dictionary are driving the results. The easiest way to do this is to use `textstat_frequency` function and then using the tidyverse filter function together with the `%in%` operator to select only rows where the feature is in the dictionary:
 
 ``` r
-freqs = textstat_frequency(dtm) %>% as.tibble
-freqs %>% filter(feature %in% HL_dict$positive)
+textstat_frequency(dtm) %>% as_tibble() %>% filter(feature %in% HL_dict$positive)
 ```
 
 As you can see, the most frequent 'positive' words found are 'like' and 'work'. Now, it's possible that these are actually used in a positive sense ("I like you", "It works really well"), but it is equally possible that they are used neutrally, especially the word "like".
@@ -205,7 +206,7 @@ As you can see, the most frequent 'positive' words found are 'like' and 'work'. 
 To find out, the easiest method is to get a keyword-in-context list for the term:
 
 ``` r
-head(kwic(corp, "like"))
+head(kwic(data_corpus_immigrationnews, "like"))
 ```
 
 From this, it seems that the word `like` here is not used as a positive verb, but rather as a neutral preposition. To remove it from the list of positive words, we can use the `setdiff` (difference between two sets) function:
@@ -234,20 +235,50 @@ By piping the result to View, it is easy to scroll through the results in rstudi
 
 Scroll through the most frequent words, and if you find a word that might be positive or negative check using `kwic` whether it is indeed (generally) used that way, and then add it to the dictionary similar to above, but using the combination function `c` rather than `setdiff`.
 
+Corpustools
+===========
+
+Corpustools is a package developed at VU Amsterdam to provide functionality that is not possible with document-term matrices. Here, we will be using two features of corpustools: highlighting dictionary hits and doing a windowed search. First, install corpustools (if needed), load it, and transform the quanteda corpus into a corpustools tcorpus object:
+
+``` r
+install.packages("corpustools")
+```
+
+``` r
+library(corpustools)
+library(corpustools)
+t = create_tcorpus(data_corpus_immigrationnews$documents, text_colum="texts", doc_column="id")
+```
+
+Highlighting dictionary hits
+----------------------------
+
+For validation, it can be very useful to inspect dictionary hits within the original text. This is possible with the corpustools `browse_text` function. First, we create a new sentiment variable using the GI\_dict created above:
+
+``` r
+t$code_dictionary(GI_dict, column = 'lsd15')
+t$set('sentiment', 1, subset = lsd15 %in% c('positive','neg_negative'))
+t$set('sentiment', -1, subset = lsd15 %in% c('negative','neg_positive'))
+```
+
+Now, we can browse the texts:
+
+``` r
+browse_texts(t, scale='sentiment')
+```
+
+This opens a selection of texts, with positive words indicated in green, and negative words in red.
+
 Limiting the dtm to search context
-==================================
+----------------------------------
 
 In many cases, you want to look only at the words immediately surrounding your search term. Especially in political text, many articles will mention e.g. both Clinton and Trump, and often contain text about events and strategy as well as issues. So, to understand the sentiment or frames about an actor or issue, you want to keep only the words surrounding the name of the actor or issue.
 
 This technique is useful for all forms of dictionary analysis, for example to see how a certain issue or person is described or framed, or to see what issue a party is associated with; but especially for sentiment analysis it can help find sentiment that is actually related to a specific actor or issue.
 
-Selecting a context window can be achieved with the 'corpustools' package. This package (developed by Kasper Welbers) remembers the position of words in a document, so it allows for analyses that do not use the 'bag of words' assumption that only word frequencies are important.
-
-For this tutorial, we create a 'tcorpus' object from the data frame, and then limit it to words occurring within 10 words of 'ukip':
+For this tutorial, we limit the tcorpus to words occurring within 10 words of 'ukip':
 
 ``` r
-library(corpustools)
-t = create_tcorpus(news, doc_column="id", text_columns="texts")
 t$subset_query("ukip", window=10)
 ```
 
