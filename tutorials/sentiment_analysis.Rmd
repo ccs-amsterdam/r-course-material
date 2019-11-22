@@ -286,7 +286,6 @@ install.packages("corpustools")
 ```
 ```{r}
 library(corpustools)
-library(corpustools)
 t = create_tcorpus(data_corpus_immigrationnews$documents, text_colum="texts", doc_column="id")
 ```
 
@@ -307,6 +306,7 @@ Now, we can browse the texts:
 ```{r, eval=F}
 browse_texts(t, scale='sentiment')
 ```
+
 This opens a selection of texts, with positive words indicated in green, and negative words in red. 
 
 ## Limiting the dtm to search context
@@ -321,17 +321,13 @@ This technique is useful for all forms of dictionary analysis, for example to se
 or to see what issue a party is associated with; 
 but especially for sentiment analysis it can help find sentiment that is actually related to a specific actor or issue. 
 
-
 For this tutorial, we limit the tcorpus to words
 occurring within 10 words of 'ukip':
 
 
 ```{r}
-t$subset_query("ukip", window=10)
+ukip = subset_query(t, "ukip", window=10)
 ```
-
-Note that corpustools works slightly different from most other R packages by using a more 'object oriented' approach.
-So, `t$subset_query` applies the method `subset_query` to the `t` object, and changes the object in-place rather than returning the changed object. 
 
 The last step is to convert the tcorpus back to a regular dtm object.
 We can then use the methods from quanteda to clean it by removing infrequent words, stopwords, lowercasing it, and removing all words that contain anything
@@ -339,7 +335,7 @@ apart from letters (e.g. punctuation, numbers).
 Note that the last step is done using a regular expression, see for example [regexone.com](https://regexone.com/) for a gentle introduction. 
 
 ```{r}
-dtm_ukip = t$dfm(feature='token') %>% dfm_trim(min_docfreq=10) %>% dfm_remove(stopwords('english')) %>% 
+dtm_ukip = get_dfm(ukip, feature='token') %>% dfm_trim(min_docfreq=10) %>% dfm_remove(stopwords('english')) %>% 
   dfm_tolower %>% dfm_remove("[^a-z]", valuetype="regex")
 ```
 
