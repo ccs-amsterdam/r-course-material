@@ -1,11 +1,11 @@
 Reshaping data: wide, long, and tidy
 ================
 Wouter van Atteveldt & Kasper Welbers
-2018
+2019
 
 -   [Introduction: Long and Wide data](#introduction-long-and-wide-data)
 -   [Before we start: Getting and cleaning the data](#before-we-start-getting-and-cleaning-the-data)
--   [Wide to long: Gathering data](#wide-to-long-gathering-data)
+-   [Wide to long: stacking columns](#wide-to-long-stacking-columns)
 -   [A more complicated case: wealth inequality](#a-more-complicated-case-wealth-inequality)
     -   [Pivot longer (wide to long)](#pivot-longer-wide-to-long)
     -   [Separating columns (splitting one column into two)](#separating-columns-splitting-one-column-into-two)
@@ -23,6 +23,8 @@ In a data matrix, normally the rows consist of observations (cases, respondents)
 
 Note that what is called 'tidy' here is what is also often called a *long* data format, with most information in separate rows, while a *wide* data format contains most information in separate columns. Another way to view the functions is that `pivot_longer` transforms data from wide to long (also called variables to cases), and `pivot_wider` converts data from long to wide (cases to variables).
 
+For reference, `long` data is sometimes also referred to as `stacked` data, because the data is represented as rows that are stacked on top of each other.
+
 Before we start: Getting and cleaning the data
 ==============================================
 
@@ -39,12 +41,14 @@ income_raw
 
 Note that Piketty's data is published as excel files with complex (multi-row) headers, so we uploaded a cleaned version of the data to our github repository. Even though this data is slightly cleaner, you will see that there is plenty to be done to get this data in shape!
 
-Wide to long: Gathering data
-============================
+Wide to long: stacking columns
+==============================
 
 As you can see (after getting rid of missing values), the data stores the share of income going to the top decile/percentile of earners per decade per country. This data is 'wide', in the sense that the columns contain observations, while it is normally better (or tidier) to have the observations in different rows. As we will see, that will make it easier to combine or adjust the data later on.
 
-In tidyverse, the function used for transforming data from columns (wide) to rows (long) is `pivot_longer`: the idea is that you gather the information from multiple columns into a single column. The syntax for calling `pivot_longer` is as follows: `{r,eval=F}pivot_longer(data, columns, names_to="key_column", values_to="value_column")`. The first argument is the data (unless you use pipe notation, as shown below). The second argument, columns, is a list of columns which need to be gathered in a single column. You can list the columns one by one, or specify them as a sequence `first:last`. The `names_to=` argument specifies the name of a new column that will hold the names of the observations, i.e. the old column names. In our case, that would be `country` since the columns refer to countries. The `values_to=` argument specifies the name of the new column that will hold the values, in our case the top-decile of incomes.
+In tidyverse, the function used for transforming data from columns (wide) to rows (long) is `pivot_longer`: the idea is that you stack the information from multiple columns into a single, longer column.
+
+The syntax for calling `pivot_longer` is as follows: `pivot_longer(data, columns, names_to="key_column", values_to="value_column")`. The first argument is the data (unless you use pipe notation, as shown below). The second argument, columns, is a list of columns which need to be gathered in a single column. You can list the columns one by one, or specify them as a sequence `first:last`. The `names_to=` argument specifies the name of a new column that will hold the names of the observations, i.e. the old column names. In our case, that would be `country` since the columns refer to countries. The `values_to=` argument specifies the name of the new column that will hold the values, in our case the top-decile of incomes.
 
 Note that (similar to mutate and other tidyverse functions), the column names don't need to be quoted as long as they don't contain spaces or other characters that are invalid in R names.
 
@@ -127,7 +131,7 @@ Pivot wider (long to wide)
 
 The wealth data above is now 'too long' to be tidy: the measurement for each country is spread over multiple rows, listing the three different measurement levels (decile, percentile, promille). In effect, we want to undo one level of gathering, by `spread`ing the column over multiple columns.
 
-Ths syntax for the spread call is similar to that for pivot\_longer: `{r, eval=F}pivot_wider(data, names_from=key_column, values_from=value_column)`. Before we had the arguments names\_to and values\_to, to specify the column names of the new stacked (i.e. long format) columns. This time, we have the names\_from and values\_from arguments to reverse the process. For each unique value in the names\_from column a new column will be created, with the corresponding value in the values\_from column in the cell.
+Ths syntax for the spread call is similar to that for pivot\_longer: `pivot_wider(data, names_from=key_column, values_from=value_column)`. Before we had the arguments names\_to and values\_to, to specify the column names of the new stacked (i.e. long format) columns. This time, we have the names\_from and values\_from arguments to reverse the process. For each unique value in the names\_from column a new column will be created, with the corresponding value in the values\_from column in the cell.
 
 ``` r
 wealth = pivot_wider(wealth, names_from=measurement, values_from=value)

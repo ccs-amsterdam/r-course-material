@@ -1,7 +1,7 @@
 ---
 title: "Reshaping data: wide, long, and tidy"
 author: "Wouter van Atteveldt & Kasper Welbers"
-date: "2018"
+date: "2019"
 output: 
   github_document:
     toc: yes
@@ -30,6 +30,8 @@ Thus, using the names of the tidyverse functions, there is a need to `pivot_long
 
 Note that what is called 'tidy' here is what is also often called a *long* data format, with most information in separate rows, while a *wide* data format contains most information in separate columns. Another way to view the functions is that `pivot_longer` transforms data from wide to long (also called variables to cases), and `pivot_wider` converts data from long to wide (cases to variables).
 
+For reference, `long` data is sometimes also referred to as `stacked` data, because the data is represented as rows that are stacked on top of each other.
+
 # Before we start: Getting and cleaning the data
 
 For this tutorial we will use the data from Piketty's Capital in the 21st Century. 
@@ -51,12 +53,13 @@ Note that Piketty's data is published as excel files with complex (multi-row) he
 so we uploaded a cleaned version of the data to our github repository. 
 Even though this data is slightly cleaner, you will see that there is plenty to be done to get this data in shape!
 
-# Wide to long: Gathering data
+# Wide to long: stacking columns
 
 As you can see (after getting rid of missing values), the data stores the share of income going to  the top decile/percentile of earners per decade per country. This data is 'wide', in the sense that the columns contain observations, while it is normally better (or tidier) to have the observations in different rows. As we will see, that will make it easier to combine or adjust the data later on.
 
-In tidyverse, the function used for transforming data from columns (wide) to rows (long) is `pivot_longer`: the idea is that you gather the information from multiple columns into a single column.
-The syntax for calling `pivot_longer` is as follows: ```{r,eval=F}pivot_longer(data, columns, names_to="key_column", values_to="value_column")```. The first argument is the data (unless you use pipe notation, as shown below). The second argument, columns, is a list of columns which need to be gathered in a single column. You can list the columns one by one, or specify them as a sequence `first:last`. 
+In tidyverse, the function used for transforming data from columns (wide) to rows (long) is `pivot_longer`: the idea is that you stack the information from multiple columns into a single, longer column. 
+
+The syntax for calling `pivot_longer` is as follows: `pivot_longer(data, columns, names_to="key_column", values_to="value_column")`. The first argument is the data (unless you use pipe notation, as shown below). The second argument, columns, is a list of columns which need to be gathered in a single column. You can list the columns one by one, or specify them as a sequence `first:last`. 
 The `names_to=` argument specifies the name of a new column that will hold the names of the observations, i.e. the old column names. In our case, that would be `country` since the columns refer to countries. 
 The `values_to=` argument specifies the name of the new column that will hold the values, in our case the top-decile of incomes. 
 
@@ -150,7 +153,7 @@ The wealth data above is now 'too long' to be tidy: the measurement for each cou
 listing the three different measurement levels (decile, percentile, promille).
 In effect, we want to undo one level of gathering, by `spread`ing the column over multiple columns.
 
-Ths syntax for the spread call is similar to that for pivot_longer: ```{r, eval=F}pivot_wider(data, names_from=key_column, values_from=value_column)```.
+Ths syntax for the spread call is similar to that for pivot_longer: `pivot_wider(data, names_from=key_column, values_from=value_column)`.
 Before we had the arguments names_to and values_to, to specify the column names of the new stacked (i.e. long format) columns. 
 This time, we have the names_from and values_from arguments to reverse the process.
 For each unique value in the names_from column a new column will be created, with the corresponding value in the values_from column in the cell.
