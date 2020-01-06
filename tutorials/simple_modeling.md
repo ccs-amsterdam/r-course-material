@@ -87,10 +87,10 @@ pergroup %>% ggplot + geom_line(aes(x=Year, y=Private, colour=Group))
 
 So initially capital is higher in the Anglo-Saxon countries, but the European countries overtake quickly and stay higher.
 
-Now, we can do a paired-sample t-test. This requires the group measurements to be in different columns as the 'anglo' and 'european' are seen as two 'measurements' on the same year. So, we first spread the data over columns:
+Now, we can do a paired-sample t-test. This requires the group measurements to be in the same row across different columns, so that the 'anglo' and 'european' are seen as two 'measurements' on the same year. We therefore first use pivot\_wider, as discussed in the tutorial on reshaping data:
 
 ``` r
-pergroup = spread(pergroup, Group, Private)
+pergroup = pivot_wider(pergroup, names_from = Group, values_from = Private)
 ```
 
 Now we can do a t.test of two different columns, using the `data$column` notation to specify columns:
