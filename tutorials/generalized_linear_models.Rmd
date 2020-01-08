@@ -1,0 +1,30 @@
+---
+title: "Generalized linear models"
+author: "Kasper Welbers & Wouter van Atteveldt"
+date: "January 2020"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r, echo=F}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
+library(printr)
+```
+
+# Generalized linear models
+
+
+
+
+# Linear models versus generalized linear models
+
+The main purpose of this tutorial is to show how to user GLMs in R, so we'll keep the mathematics to a minimum, but a basic understanding of maximum likelihood is usefull for understanding how GLMs work, and why certain elements require different interpretation compared to plain linear regression.
+
+## link functions
+
+## Least squares versus maximum likelihood
+

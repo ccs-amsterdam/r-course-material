@@ -31,7 +31,8 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | Tutorial | Core packages / functions |
 |----|---|
 | [Basic statistics](tutorials/simple_modeling.md) | stats: lm, aov, t.test |
-| [Advanced statistics](tutorials/advanced_modeling.md) | stats: glm, lme4: lmer, glmer |
+| [Advanced statistics (short version)](tutorials/advanced_modeling.md) | stats: glm, lme4: lmer, glmer |
+
 
 
 # Text analysis 
@@ -51,4 +52,5 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 # Miscellaneous
 
 * [R Markdown codeblock parameters](miscellaneous/RMarkdown_parameters.Rmd)
+* [Gathering Data](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/Gathering_data.md)
 * [Scraping the Guardian](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/guardian.md)
