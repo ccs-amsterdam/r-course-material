@@ -251,7 +251,7 @@ plot_model(m, type='pred', grid = T)
 
 First of all, the interpretation of the p-values is the same as in ordinary linear regression. All our coefficients are significant, so in this case we can interpret all of the effects.
 
-We see that our column with coefficients says `Odds Ratios`. Before we discuss what that means, a VERY IMPORTANT word of caution. The actual coefficients in the logistic regression model are `log odds ratios`. To interpret these coefficients it's easier to transform them to `odds ratios`, and in some software (like in `sjPlot's tab_model`) this transformation is default. Always check which values are reported before you 
+We see that our column with coefficients says `Odds Ratios`. Before we discuss what that means, a VERY IMPORTANT word of caution. The actual coefficients in the logistic regression model are `log odds ratios`. To interpret these coefficients it's easier to transform them to `odds ratios`, and in some software (like in `sjPlot's tab_model`) this transformation is default. Always check which values are reported to avoid misinterpretation.
 
 The transformation is easy to do yourself as well. To go from `log odds ratios` to `odds ratios` you simply take the exponential (the inverse function of the natural log) of the `log odds ratios`. To go back from `odds ratios` to `log odds ratios`, simply apply the natural log function. For reference, note that the log of `odds ratios` for the `hours_studied` variable is close to the coefficient that we used in the data generation above (0.4).
 
@@ -264,24 +264,25 @@ For interpretation you'll generally want to use the `odds ratios`, and this is o
 
 So how to intepret the `odds ratio`? These are, quite straighforwardly, the ratios of the odds (We assume that you know what odds are [^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
 
-For example, the ratio of the `odds of passing the test` for students that (1) `did complete the selftest`, versus the odds of students that (2) `did not complete the selftest`. In our model, that $odds ratio$ is $3.43$, meaning that the odds of passing the test increase by **a factor** of $3.43$ for students that completed the selftest. In other words, the odds of passing the test are almost 3.5 times greater. 
+For example, the ratio of the `odds of passing the test` for students that (1) `did complete the selftest`, versus the odds of students that (2) `did not complete the selftest`. In our model, that $odds ratio$ is $3.43$, meaning that the odds of passing the test increase by **a factor** of $3.43$ for students that completed the selftest. In other words, the odds of passing the test are 3.43 times greater. 
 
 [^3]: We assume that you are familiar with the difference between odds and probabilities. Probability indicate how likely an event is to occur as a value between 0 and 1. Odds is the ratio of `the probability that an event will occur` divided by `the probability that an event will not occur`. For example, if the probability of throwing a six on a six sided die is $1 / 6 = 0.1666...$, then the odds are $0.1666 / (1 - 0.1666) = 0.2.
 For the probability of not throwing six ($5 / 6 = 0.8333...$), this is $0.8333 / (1 - 0.8333) = 5$. So, If probability is below 0.5, then the odds are between 0 and 1. If probability is higher than 0.5, then the odds are between 1 and infinity. 
 
-Carefully think about what `3.5 times greater` means here in terms of probability. Consider a student who, given a certain amount of studying and alcohol use, has a 60\% probability of passing the test without taking the selftest. If he/she would take the selftest, we would expect the odds to be about 3 times greater, so what would the change in probability be? We can calculate this by transforming this probability to odds, multiplying by the odds ratio, and then tranforming the new odds back to probabilities.
+Think carefully about what `3.43 times greater odds` means here in terms of probability. Consider a student who, given a certain amount of studying and alcohol use, has a 60\% probability of passing the test without taking the selftest. If he/she would take the selftest, we would expect the odds to be 3.43 times greater, so what would the change in probability be? We can calculate this by transforming this probability to odds, multiplying by the odds ratio, and then tranforming the new odds back to probabilities.
 
 ```{r}
 prob_to_odds <- function(p) p / (1 - p)
 odds_to_prob <- function(o) o / (1 + o)
 
-odds = prob_to_odds(0.6)         
-odds_to_prob(odds * 3.43)
+odds = prob_to_odds(0.6)
+odds_with_test = odds * 3.43
+odds_to_prob(odds_with_test)
 ```
 
 So in this case, `3.43 times greater` odds means an increase in probability from 0.60 to 0.84.  
 
-It is slightly more complicated for continuous variables, in our case `hours_studied` (number of hours) and `alcohol` (number of glasses). Here, we talk about an increase by a certain factor for every unit increase in the independent variable. For an increase from 0 to 1 this is still simple. If all other independent variables are equal, then if a person studies one hour more, we multiply the odds of passing the test by $1.49$. For increases of more than 1, we need to multiply multiple times. If a person studies 3 hours more, we need to multiply by $1.49$ three times, so $odds * 1.49 * 1.49 * 1.49 = odds * 1.49^3$.
+It is slightly more complicated for continuous variables, in our case these are `hours_studied` (number of hours) and `alcohol` (number of glasses). Here, we talk about an increase by a certain factor for every unit increase in the independent variable. For an increase from 0 to 1 this is still simple. If all other independent variables are equal, then if a person studies one hour more, we multiply the odds of passing the test by $1.49$. For increases of more than 1, we need to multiply multiple times. If a person studies 3 hours more, we need to multiply by $1.49$ three times, so $odds * 1.49 * 1.49 * 1.49 = odds * 1.49^3$.
 
 For the number of glasses of alcohol per week the calculation is the same, but note that here we have a negative effect. 
 If all other independent variables are equal, then if a person drinks 5 more glasses of alcohol per week, the odds become less than half: $odds * 0.84^5 = odds * 0.418$.
