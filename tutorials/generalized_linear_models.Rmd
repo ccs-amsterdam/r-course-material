@@ -79,7 +79,7 @@ You can consult the help page for `?family` For the available distributions and 
 
 # When to use a GLM
 
-As the name implies, Generalized Linear Models are a generalization of ordinary linear regression models. While ordinary linear regression is a powerful tool that we all know and love, there are some cases where it cannot (or at least should not) be applied. For instance, if the dependent variable is binary (values of 0 or 1), then a logistic regression model (which is one form GLM) is more appropriate.
+As the name implies, Generalized Linear Models are a generalization of ordinary linear regression models. While ordinary linear regression is a powerful tool that we all know and love, there are some cases where it cannot (or at least should not) be applied. For instance, if the dependent variable is binary (values of 0 or 1), then a logistic regression model (which is one form of GLM) is more appropriate.
 
 So when is it inappropriate to use ordinary linear regression? You'll commonly hear: "when the dependent variable is not normally distributed". This is not the whole story, but it is a good place to start. If your dependent variable is not normally distributed, then the following issues are more likely to occur:
 
@@ -284,7 +284,7 @@ So in this case, `3.43 times greater` odds means an increase in probability from
 It is slightly more complicated for continuous variables, in our case `hours_studied` (number of hours) and `alcohol` (number of glasses). Here, we talk about an increase by a certain factor for every unit increase in the independent variable. For an increase from 0 to 1 this is still simple. If all other independent variables are equal, then if a person studies one hour more, we multiply the odds of passing the test by $1.49$. For increases of more than 1, we need to multiply multiple times. If a person studies 3 hours more, we need to multiply by $1.49$ three times, so $odds * 1.49 * 1.49 * 1.49 = odds * 1.49^3$.
 
 For the number of glasses of alcohol per week the calculation is the same, but note that here we have a negative effect. 
-If all other independent variables are equal, then if a person drink 5 more glasses of alcohol per week, the odds become less than half: $odds * 0.84^5 = odds * 0.418$.
+If all other independent variables are equal, then if a person drinks 5 more glasses of alcohol per week, the odds become less than half: $odds * 0.84^5 = odds * 0.418$.
 
 A good way to remember all of this is by remembering the following formula for calculating the probability for a given case. For example, what is the probability of passing the test for a student that:
 
@@ -500,7 +500,7 @@ First, we'll fit a `Gaussian` (i.e. normal) distribution with a `log` link.
 glm(y~x, family=gaussian('log'))
 ```
 
-```{r, glm_visual_exp2, fig.align='center', fig.height=3, fig.width=5}
+```{r, glm_visual_exp2, echo=F, fig.align='center', fig.height=3, fig.width=5}
 nice_plot(glm(y~x, family=gaussian('log')))
 ```
 
@@ -514,7 +514,7 @@ Now we'll fit the `Poisson` distribution with the `log` link.
 glm(y~x, family=poisson('log'))
 ```
 
-```{r, glm_visual_exp3, fig.align='center', fig.height=3, fig.width=5}
+```{r, glm_visual_exp3, echo=F, fig.align='center', fig.height=3, fig.width=5}
 nice_plot(glm(y~x, family=poisson('log')))
 ```
 
@@ -526,7 +526,7 @@ For reference, let's also look at the poisson distribution with an identity link
 glm(y~x, family=poisson('identity'))
 ```
 
-```{r, glm_visual_exp4, fig.align='center', fig.height=3, fig.width=5}
+```{r, glm_visual_exp4, echo=F, fig.align='center', fig.height=3, fig.width=5}
 nice_plot(glm(y~x, family=poisson('identity')))
 ```
 
