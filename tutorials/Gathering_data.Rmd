@@ -197,7 +197,7 @@ The Guardian (newspaper) has a very nice API that let's you download news conten
 First, install GuardianR from CRAN as normal and get an API key from https://open-platform.theguardian.com/access/. Then replace the 'test' key below with your actual key:
 
 ```{r}
-key = "test"
+key = "eb739546-9621-4af7-aa97-fd90f406ad27"
 ```
 
 Sending a single query to the API is simple. Let's query the news on the 'backstop'  in the week before Brexit was supposed to happen.
@@ -214,6 +214,29 @@ news %>% select(webUrl, publication, headline, date, body) %>% mutate(len=str_le
 As you can see, this includes the metadata (url, headline, date) and full body of the article. 
 For more information on the query syntax and possibilities, see https://open-platform.theguardian.com/documentation/. 
 
+With `GuardianR`, you can only query one month at a time. 
+To query a longer time frame, you can use a for loop like so:
+
+```{r, eval=F}
+library(lubridate)
+results = list()
+months = seq(as.Date("2019-01-01"), by = "month", length = 3) 
+for (i in seq_along(months)) {
+  from = months[i]
+  message(str_c("Querying: ", i, ": ", from))
+  # calculate last day of month
+  to = from
+  month(to) = month(to) + 1
+  to = to - 1
+  # query
+  news = get_guardian("backstop", from.date=from, to.date=to, api.key = key)
+  # store in list 
+  results[[as.character(from)]] = news
+}
+# combine all results and postpr
+results = bind_rows(results)
+print(str_c("Retrieved ", nrow(results), " articles"))
+```
 
 ## Example: CBS
 

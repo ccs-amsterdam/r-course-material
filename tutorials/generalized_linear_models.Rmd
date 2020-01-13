@@ -3,28 +3,582 @@ title: "Generalized linear models"
 author: "Kasper Welbers & Wouter van Atteveldt"
 date: "January 2020"
 output: 
-  github_document:
+  html_document:
     toc: yes
 editor_options: 
   chunk_output_type: console
 ---
 
 
-```{r, echo=F}
+```{r, echo=F, message=F, warning=F}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
 library(printr)
 ```
 
-# Generalized linear models
+# Generalized linear models (GLM)
+
+
+In this tutorial you will learn how to use GLMs[^1] in R, focusing initially on logistic and Poisson regression (for binary and count data). As you will see, GLMs can be applied more broadly, and if you understand logistic and Poisson regression this is relatively straightforward to do. The goal of this tutorial is to get you started with fitting and interpreting GLMs, so we'll keep the mathematics to a minimum.  
+
+We will use the `glm` function in the R `stats` package (which is opened by default, so you don't have to run `library(stats)`). In addition, we'll use the `sjPlot` package, which is a package for creating tables (`tab_model()`) and visualizations (`plot_model()`) for various statistical models[^1]. 
+
+For the examples in this tutorial we'll generate the data ourselves. 
+This way we can clearly show how you can use GLM to model data with different distributions.
+You do not need to understand the data generation code to follow this tutorial, but it can help you better understand the idea of the distribution family and link function in GLM.
+
+[^1]: By GLM we strictly refer to General**ized** linear models, and not General Linear Models. Yes, there's a difference. Don't blame us, we didn't name this stuff.
+[^2]: there are similar packages that you might be familiar with, such as `texreg`, `stargazer` and 'apaTables`) 
+
+```{r, eval=F}
+install.packages('sjPlot')
+```
+```{r}
+library(sjPlot)
+```
+
+# GLM in R: the short version
+
+Maybe you already know what a GLM is, and you just want to know how to run it in R. Maybe you already completed this tutorial and just want to refresh your memory. In that case, this section is probably all you need.
+
+For this quick demonstration, we'll generate data with a log link function and Poisson error distribution. We'll pretend that our dependent variable is the number of times a tweet is retweeted, and the independent variable is how funny the tweet was on a scale from 1 to 10.
+We know that our dependent variable `retweets` is a count variable, and we think the number of retweets will be higher for `funny` tweets. We don't think this relation will be linear, because tweets that have been retweeted reach a wider audience and as such become more likely to be retweeted more. 
+
+```{r}
+set.seed(1)
+x = runif(100, 1, 10)          ## sample x from a uniform distribution
+mu = exp(-2 + 0.3*x)           ## linear prediction with inverse of the "log" link
+y = rpois(n=100, lambda=mu)    ## generate y from prediction with Poisson error distribution
+d = data.frame(retweets=y, funny=x)
+```
+
+To fit a GLM model, R has the `glm` function. This works just like the regular `lm` function for linear models. The only difference is that the error distribution and link function need to be specified. For this we use the `family` argument, which takes a family object. For Poisson regression the code is as follows.
+
+```{r}
+m = glm(retweets ~ funny, d, family=poisson(link = 'log'))
+```
+
+We can inspect the model with the `summary` function, but there are also packages such as `sjPlot` that print the data in a nice table and with additional information such as pseudo R measures. 
+
+```{r}
+tab_model(m)
+```
+
+`sjPlot` also has a nice function for plotting the data with the fitted values. 
+
+```{r glm_tldr_plot, fig.align='center', fig.height=3, fig.width=5}
+plot_model(m, type = 'pred', show.data=T)
+```
+
+Here we see how the GLM fits the data. Note the exponential increase (due to the log link function) and the increase in variance along with x (due to the Poisson distribution)
+
+You can consult the help page for `?family` For the available distributions and link functions.
+
+```{r, eval=F}
+?family
+```
+
+# When to use a GLM
+
+As the name implies, Generalized Linear Models are a generalization of ordinary linear regression models. While ordinary linear regression is a powerful tool that we all know and love, there are some cases where it cannot (or at least should not) be applied. For instance, if the dependent variable is binary (values of 0 or 1), then a logistic regression model (which is one form GLM) is more appropriate.
+
+So when is it inappropriate to use ordinary linear regression? You'll commonly hear: "when the dependent variable is not normally distributed". This is not the whole story, but it is a good place to start. If your dependent variable is not normally distributed, then the following issues are more likely to occur:
+
+* there is no linear relation between the dependent variable and the independent variable (or in multivariate analysis, the linear combination of independent variables)
+* the residuals are not normally distributed
+* the variance of the residuals is not constant (heteroscedacity)
+
+As you might have recognized, these are violations of key assumptions of ordinary linear regression (linear relationship, multivariate normality, homoscedacity). This is where GLMs come in as a possible solution.
+
+Let's first look at an example where this is the case. As an introduction to GLMs we'll first take a look at logistic regression analysis.
+
+## Ordinary linear regression versus logistic regression 
+
+For reference, we first take a look at a case where linear regression works well.
+
+```{r glm_lm_on_normal, fig.align='center', fig.height=3, fig.width=5}
+## generate data
+set.seed(1)
+x = rnorm(200, 5, 4)        ## sample x from a normal distribution
+mu = 3 + 2*x                ## linear prediction
+y = rnorm(200, mu, 3)       ## generate y from prediction with a normal error distribution
+
+## fit linear model and plot
+m = lm(y~x)
+plot(x,y, bty='n')
+abline(m, col='green')
+```
+
+This is perfect data for an ordinary linear regression analysis.
+There is a linear relation and the residuals are normally distributed around the regression line with a constant variance. 
+
+
+### Fitting a linear model on binary data
+
+Now let's compare this to a case where the dependent variable is binary. First we generate the data.
+
+```{r}
+## generate data
+set.seed=1
+x = rnorm(200, 5, 4)              ## sample x from a normal distribution
+mu = -1 + 0.4*x                   ## linear predictor
+prob = 1 / (1 + exp(-mu))         ## transform linear predictor with inverse of "logit" link
+y = rbinom(200, 1, prob = prob)   ## sample y from probabilities with binomial error distribution
+```
+
+Then we fit the linear model, make a scatterplot and add the regression line.
+
+```{r, glm_lm_on_binary, fig.align='center', fig.height=3, fig.width=5}
+## fit linear model and plot
+m_lm = lm(y ~ x)
+plot(x,y, bty='n')
+abline(m_lm, col='green')
+```
+
+In the scatterplot we see that (as expected) there are only 2 values on the y-axis: 0 and 1. 
+We see that cases where `y = 1` are more common for higher x values, which indicates that there is a positive effect of x on y.
+This is also reflected in the regression line.
+
+So why are we not happy?
+It is clear that a linear model is not a good fit for this data.
+Since y is binary, most predicted values of y (i.e. the line) are literally impossible. 
+There is also the problem that the prediction (necessarily) has values above 1 and below 0. 
+While the model captures that higher values of x are more likely to have y values of 1, for values above 15 we now actually get errors because we predict that y is higher than 1.
+
+The residuals are also nonnormal with nonconstant variance.
+For low values of x, almost all residuals are negative, and for high values of x almost all values are positive. 
+We also would not want constant variance of the residuals with regard to x. If x is very low or very high then we have a much better prediction of y, whereas for center values of x such as 5 we are very uncertain. 
+
+### Fitting a logistic regression model on binary data
+
+Logistic regression analysis is a form of GLM in which a `binomial` error distribution is used with a `logit` link function.
+We discuss the error distribution and link function in detail below, so for now just believe us that we need the binomial distribution and logit link for logistic regression.
+Logistic regression is a very common model for regression analysis with a binary dependent variable.
+Fitting this model in R is surprisingly simple and intuitive.
+The GLM alternative for the `lm` (linear model) function in R, is `glm`.
+The specification of the regression formula is also identical.
+To specify the error distribution and link function, we use the `family` argument.
+
+For logistic regression, we only need to pass the `binomial` function to `family`, which by default uses the `logit` link. Here we write it in full for sake of completeness.
+
+```{r}
+m_glm = glm(y ~ x, family = binomial(link = 'logit'))
+```
+
+Now we can again make the scatterplot to see how the new predictions fit the data.
+However, we cannot use the `abline` function for this, because this can only add straight lines.
+Instead, we'll calculate the predictions for the possible values of petal length.
+
+```{r glm_glm_on_binary, fig.align='center', fig.height=3, fig.width=5}
+## create sequence of x values from lowest to highest in our data
+x_min_to_max = seq(min(x), max(x), by = 0.1)
+## predict y for these values
+y_hat = predict(m_glm, newdata = data.frame(x = x_min_to_max), type = 'response')
+## create the scatterplot
+plot(x, y, bty='n')
+## add regression line
+lines(x_min_to_max, y_hat, col='green')
+```
+
+Our new line bends in order to fit the observations with low and high x.
+To the left, it approaches but never reaches 0, and to the right it approaches but never reaches 1.
+
+It's not just the line that's changed. 
+The residuals are still non-normal, but this is no longer a problem. 
+In fact, we need to think rather differently about how the model *fits* the data. 
+The predicted response of the logistic regression model (i.e. the green line) is not the expected value of y, but the probability that y is 1. 
+This has implications for how to interpret the model coefficients and model fit, as discussed in the next section.
+
+
+# Interpreting a GLM
+
+The output of a GLM looks very similar to that of ordinary linear regression. However, coefficients will often have to be interpreted very differently, and the interpretation of model fit is somewhat different. 
+In this tutorial we'll focus on the interpretation of logistic regression, which introduces you to key concepts that are the same or similar in other GLMs. 
+
+
+## Logistic regression
+
+To discuss the interpretation of logistic regression analysis we again simulate data, but this time we'll give our data proper names to make it easier to interpret. We'll also put the data into a dataframe.
+
+Let's say that you have given a test to students, but quite a lot of them failed. You want to understand whether this had anything to do with:
+
+* how many hours they studied
+* whether they completed an online self-test that you thoughtfully provided 
+* how much glasses of alcohol they drink per week
+
+You collect your data and end up with the following dataframe (oh, and somehow you had 1000 students).
+
+```{r}
+set.seed(1)
+
+## sample independent variables
+d = data.frame(hours_studied = rpois(n=1000, lambda=12),
+               selftest = rbinom(n=1000, size=1, prob=0.25),
+               alcohol = rpois(n=1000, lambda=10))
+
+## linear prediction 
+mu = -1.5 + 0.4*d$hours_studied + 1.2*d$selftest + -0.2*d$alcohol
+## transform with inverse of "logit" link
+prob = 1 / (1 + exp(-mu))
+## generate x from prediction with binomial error distribution
+d$passed_test = y = rbinom(1000, 1, prob = prob)
+
+head(d)
+```
+
+We can fit the `glm` as before. We now only add `data = d` because our variables our now in a data.frame. Also, this time we do not specify the "logit" link (which is the default). This is the same model as above, but it's good to know that the following syntax also works.
+
+```{r}
+m = glm(passed_test ~ hours_studied + selftest + alcohol, 
+        data=d, family=binomial)
+```
+
+We'll use the `tab_model` function from the `sjPlot` package to make a nice table.
+
+```{r}
+tab_model(m)
+```
+
+In many ways this is very similar to the classic table for ordinary linear regression. The important difference lies in the coefficients, that are now `Odds Ratios`, and the `R2 Tjur`, which is a pseudo R2 measure. 
+
+We can also use the `plot_model` function to visualize various aspects of the model. Here we visualize the predicted values (i.e. average probabilities) for different independent variables.
+
+```{r gtd_example_plot , fig.align='center', fig.height=3, fig.width=5}
+plot_model(m, type='pred', grid = T)
+```
+
+
+### Interpreting coefficients: odds ratios and log odds ratios
+
+First of all, the interpretation of the p-values is the same as in ordinary linear regression. All our coefficients are significant, so in this case we can interpret all of the effects.
+
+We see that our column with coefficients says `Odds Ratios`. Before we discuss what that means, a VERY IMPORTANT word of caution. The actual coefficients in the logistic regression model are `log odds ratios`. To interpret these coefficients it's easier to transform them to `odds ratios`, and in some software (like in `sjPlot's tab_model`) this transformation is default. Always check which values are reported before you 
+
+The transformation is easy to do yourself as well. To go from `log odds ratios` to `odds ratios` you simply take the exponential (the inverse function of the natural log) of the `log odds ratios`. To go back from `odds ratios` to `log odds ratios`, simply apply the natural log function. For reference, note that the log of `odds ratios` for the `hours_studied` variable is close to the coefficient that we used in the data generation above (0.4).
+
+```{r, eval=F}
+log(1.49)
+exp(0.3987761)
+```
+
+For interpretation you'll generally want to use the `odds ratios`, and this is often also what journals want you to report. 
+
+So how to intepret the `odds ratio`? These are, quite straighforwardly, the ratios of the odds (We assume that you know what odds are [^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
+
+For example, the ratio of the `odds of passing the test` for students that (1) `did complete the selftest`, versus the odds of students that (2) `did not complete the selftest`. In our model, that $odds ratio$ is $3.43$, meaning that the odds of passing the test increase by **a factor** of $3.43$ for students that completed the selftest. In other words, the odds of passing the test are almost 3.5 times greater. 
+
+[^3]: We assume that you are familiar with the difference between odds and probabilities. Probability indicate how likely an event is to occur as a value between 0 and 1. Odds is the ratio of `the probability that an event will occur` divided by `the probability that an event will not occur`. For example, if the probability of throwing a six on a six sided die is $1 / 6 = 0.1666...$, then the odds are $0.1666 / (1 - 0.1666) = 0.2.
+For the probability of not throwing six ($5 / 6 = 0.8333...$), this is $0.8333 / (1 - 0.8333) = 5$. So, If probability is below 0.5, then the odds are between 0 and 1. If probability is higher than 0.5, then the odds are between 1 and infinity. 
+
+Carefully think about what `3.5 times greater` means here in terms of probability. Consider a student who, given a certain amount of studying and alcohol use, has a 60\% probability of passing the test without taking the selftest. If he/she would take the selftest, we would expect the odds to be about 3 times greater, so what would the change in probability be? We can calculate this by transforming this probability to odds, multiplying by the odds ratio, and then tranforming the new odds back to probabilities.
+
+```{r}
+prob_to_odds <- function(p) p / (1 - p)
+odds_to_prob <- function(o) o / (1 + o)
+
+odds = prob_to_odds(0.6)         
+odds_to_prob(odds * 3.43)
+```
+
+So in this case, `3.43 times greater` odds means an increase in probability from 0.60 to 0.84.  
+
+It is slightly more complicated for continuous variables, in our case `hours_studied` (number of hours) and `alcohol` (number of glasses). Here, we talk about an increase by a certain factor for every unit increase in the independent variable. For an increase from 0 to 1 this is still simple. If all other independent variables are equal, then if a person studies one hour more, we multiply the odds of passing the test by $1.49$. For increases of more than 1, we need to multiply multiple times. If a person studies 3 hours more, we need to multiply by $1.49$ three times, so $odds * 1.49 * 1.49 * 1.49 = odds * 1.49^3$.
+
+For the number of glasses of alcohol per week the calculation is the same, but note that here we have a negative effect. 
+If all other independent variables are equal, then if a person drink 5 more glasses of alcohol per week, the odds become less than half: $odds * 0.84^5 = odds * 0.418$.
+
+A good way to remember all of this is by remembering the following formula for calculating the probability for a given case. For example, what is the probability of passing the test for a student that:
+
+* studied 10 hours (hours_studied = 10)
+* did the self test (selftest = 1)
+* drinks 7 glasses of alcohol per week (alcohol = 7)
+
+The odds would be:
+
+$$odds = \beta_0 \cdot \beta_1^{hours\_studied} \cdot \beta_2^{selftest} \cdot \beta_3^{alcohol}$$
+
+$$odds = 0.19 \cdot 1.49^{10} \cdot 3.43^1 \cdot 0.84^{7}  $$
+
+
+```{r}
+odds = 0.1939 * 1.4904^10 * 3.4315^1 * 0.8445^7
+```
+
+And the probability is calculated as
+
+$$ prob = \frac{odds}{1+odds}$$
+
+```{r}
+odds / (1 + odds)
+```
+
+So for this person the probability of passing the test is 0.912. To verify that our calculation is correct, we can also use the predict function to get this probability. Given the model, and a dataset with the cases for which we want to predict the response, we compute this as follows.
+
+```{r}
+newdata = data.frame(hours_studied = 10, selftest = 1, alcohol = 7)
+predict(m, newdata=newdata, type = 'response')
+```
+
+This is identical within rounding error.
+
+### Interpreting model fit
+
+In ordinary linear regression it is common to report the R2 measure as an indicator of how wel a model fits the data. The R2 is a value between 0 and 1 that represent the proportion of variance in the dependent variable that is explained by the model. This is possible because we assume that the residuals are normally distributed with constant variance. The model is can then be fit with the Ordinary Least Squares (OLS) method, that minimizes the squared residuals. 
+
+In logistic regression this R2 measure cannot be used. The model parameters are determined with Maximum-likelihood estimation (MLE), that iteratively looks for the model parameters that maximize the likelihood of generating the observed data. We can use this likelihood (and measures based on likelihood) as an indicator of model fit, but there is no straightforward way to calculate a value between 0 and 1 that indicates whether the model explains nothing or everything.
+
+Still, we (and reviewers) often like something similar to an R2 value. So researchers have come op with `Pseudo R2` measures for logistic regression (and other GLMs). The main idea is to have a measure of model fit that is bounded between 0 and 1, where zero means that it does not (or very poorly) fit the data, and 1 means a (near) perfect fit.
+The problem is that there are quite a lot of different pseudo r2 measures [(a nice overview)[https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/]] and there is no consensus on when to use which. This is probably not a discussion you want to be part of, so a practical approach would be to see which measures are used in your field. 
+
+The tab_model function from `sjPlot` by default reports the "coefficient of discrimination" Pseudo R2 proposed by Tjur ([2009](https://www.tandfonline.com/doi/abs/10.1198/tast.2009.08210)). 
+This actually has good appeal, as argued by [someone who's much more into this than us](https://statisticalhorizons.com/r2logistic).
+It's intuitive and easy to calculate. 
+You take the mean of the fitted probabilities for the cases where y = 1, and subtract the mean of the fitted probabilities for the cases where y = 0. 
+
+```{r}
+## (we create pred and y for clarity)
+pred = m$fitted.values
+y = d$passed_test
+
+pred_0 = mean(pred[y == 0])
+pred_1 = mean(pred[y == 1])
+pred_1 - pred_0
+```
+
+Regardless of which Pseudo R2 measure you choose, be carefull not to attach too much meaning to it. It's usefull for comparing models and getting a general indication of how well you can predict a dependent variable, but it's only an indication. 
+
+### Comparing models
+
+You often see that multiple models are reported with increasing complexity (i.e. more variables added). 
+Making a regression table with stepwise models is easy with the tab_model function.
+Here we fit a NULL model (ie. a model without independent variables), and add the variables in 2 steps. 
+Note that in the NULL model we need to provide the value 1 for the intercept (if independent variables are given, the intercept is automatically added).
+
+```{r}
+m_NULL = glm(passed_test ~ 1, data=d, family= binomial)
+m_1 = glm(passed_test ~ hours_studied + selftest, data=d, family= binomial)
+m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, 
+        data=d, family=binomial)
+
+tab_model(m_NULL, m_1, m_2)
+```
+
+It is common to report whether the improvement in model fit of the more complex model is significant. The idea is then that we only use a more complex model if it actually improves the fit to the data. The increase from the NULL model indicates whether the model explains anything at all.
+
+Comparing models in R can be done with the anova function (note that this is different from an Analysis of Variance Model, which is calculated with the `aov` function in R). 
+
+```{r}
+anova(m_NULL, m_1, m_2, test = 'Chisq')
+```
+
+What we see here is that each model offers a significant improvement in fit compared to the former model. 
+
+If you're feeling adventurous. we can look a bit closer at what is compared here.
+For each model the Resid. Df (residual degrees of freedom) and Resid. Dev (Residual Deviance) is reported. The degrees of freedom is $n$ minus the number of parameters. The Resid. Dev (Residual Deviance) is the log likelihood of a model multiplied by $-2$. 
+We can verify this for the first model, which as 1 parameter (the intercept)
+
+```{r, eval=F}
+1000 - 1              
+logLik(m_NULL) * -2   
+```
+
+Deviance is a measure of how wel a model fits the data, with smaller deviance indicating a better fit. It's similar (but not the same) as the sum of squares in ordinary regression. With a large enough $n$ the difference of the Deviance of two models is approximately chi-square distributed, where the difference in the degrees of freedom of the models is the degrees of freedom for the Chi-square test. 
+
+So what you see in the `Deviance` and `Df` columns of the `anova` output is how much the Deviance and Degrees of freedom decreased from the previous model. 
+The `Pr(>Chi)` column reports the p value of the Chi-squared test.
+We can verify this for the third model, where the Deviance is 38.253 and the Df is 1.
+
+```{r, eval=F}
+pchisq(38.253, df=1, lower.tail=F)
+```
 
 
 
+# Understanding the family argument
 
-# Linear models versus generalized linear models
+The key to really understanding what a GLM does lies in the family argument.
+We saw before that the family argument contains two parts:
 
-The main purpose of this tutorial is to show how to user GLMs in R, so we'll keep the mathematics to a minimum, but a basic understanding of maximum likelihood is usefull for understanding how GLMs work, and why certain elements require different interpretation compared to plain linear regression.
+* The error distribution
+* The link function
 
-## link functions
+It is by changing these that the GLM generalizes linear regression. 
 
-## Least squares versus maximum likelihood
+## A mathematical explanation
+
+If you're comfortable in your algebra, the use of the error distribution and link function is pretty straightforward.
+Recall that ordinary (univariate) linear regression can be written as:
+
+$$ y_i = \beta_0 + \beta_1{x_i} + \epsilon_i $$
+$$ \epsilon_i \sim \mathcal{N}(0, \sigma^2) $$
+
+This shows that the dependent variable $y_i$ equals the linear predictor $\beta_0 + \beta_1{x_i} plus the residual \epsilon_i, and that this residual is drawn from a normal distribution.
+We can rewrite this in a different way, that makes it easier to understand the relation to GLMs.  
+
+$$ \mu_i = \beta_0 + \beta_1{x_i} $$
+$$ y_i \sim \mathcal{N}(\mu_i, \sigma^2) $$
+
+Here $\mu_i$ is the expected value of $y_i$, i.e. the point on the regression line. 
+We assume that the real value of $y_i$ is normally distributed around this mean.
+Thus, $\mu$ is the mean parameter of the Gaussian distribution.
+
+The idea of GLMs is that we can use another `distribution` here instead of the normal distribution. 
+The `link` function then serves to link the linear prediction of the model to the parameter for this probability distribution.
+We can write this as follows[^4]:
+
+[^4]: For different distribution, different symbols are normally used to indicate the parameter, such as $\lambda_i$ for the Poisson parameter. Here we consistently use \mu_i to emphasize that in all cases the link function links the linear prediction to the parameter for the distribution.
+
+$$ \mathcal{link}(\mu_i) = \beta_0 + \beta_1{x_i} $$
+$$ y_i \sim \mathcal{Distribution}(\mu_i, ...) $$
+
+We can now use different distributions[^5], as long as the link function ensures that $\mu_i$ is a suitable value. 
+For instance, for a `binomial` distribution the input is a probability bounded between 0 and 1. 
+The `logit` link function is a non-linear transformation that maps the linear predictor, that can be a value between $-\infty$ and $\infty$, to a value between 0 and 1[^6]. 
+For logistic regression, the formula then becomes:
+
+[^5]: We write $\mathcal{Distribution}(\mu_i, ...)$ to indicate that there *can* be additional parameters (such as the $\sigma^2$ in a Gaussian distribution). But this is not necessarily the case. In the binomial distribution there is only the probability, and in Poisson there is only the lambda (which is both the mean and variance).
+
+[^6]: We have seen this transformation in the section `Ordinary linear regression versus logistic regression`. For the logistic regression the line curves to stay between 0 and 1.
+
+
+$$  \mathcal{logit}(\mu_i) = \ln{\frac{\mu_i}{1 - \mu_i}} =\beta_0 + \beta_1{x_i} $$
+$$ y_i \sim \mathcal{Binomial}(\mu_i) $$
+
+For the Poisson distribution, the default link function is the natural log. So the formula becomes:
+
+$$ \ln{\mu_i} = \beta_0 + \beta_1{x_i} $$
+$$ y_i \sim \mathcal{Poisson}(\mu_i) $$
+
+You can also fit a linear regression with a Gaussian distribution. The result will be very similar to ordinary linear regression, but not identical because it will be fit with MLE instead of than OLS. As seen above, we do not need a link function to map $\mu_i$ to the parameter of the normal distribution. However, in the GLM framework it is then more accurate to say the the link function is the `identity` function (i.e. a function that returns the same value as its argument).
+
+$$ \mathcal{identity}(\mu_i) = \mu_i = \beta_0 + \beta_1{x_i} $$
+$$ y_i \sim \mathcal{Gaussian}(\mu_i, \sigma^2) $$
+
+
+## A visual explanation
+
+We can also see the effects of changing the distribution and link function in action.
+For this visual explanation we'll keep the R code hidden, to focus only on the visuals.
+
+```{r, echo=F}
+set.seed(1)
+x = round(runif(100, 1, 40))   ## sample x from a uniform distribution
+mu = exp(-2 + 0.1*x)           ## linear prediction with inverse of the "log" link
+y = 1+rpois(n=100, lambda=mu)    ## generate y from prediction with Poisson error distribution
+
+nice_plot <- function(m) {
+  x = m$model$x
+  y = m$model$y
+  x_sim = seq(min(x), max(x), by=0.1)
+  newdata = data.frame(x=x_sim)
+  if (class(m)[1] == 'glm') {
+    ilink <- family(m)$linkinv
+    pd = cbind(newdata, predict(m, newdata=newdata, type='link', se.fit=T)[1:2])
+    pd = transform(pd, fit = ilink(fit), upr = ilink(fit + (2 * se.fit)),
+                  lwr = ilink(fit - (2 * se.fit)))
+  } else {
+    pd = cbind(newdata, predict(m, newdata=newdata, interval='predict'))
+  } 
+  plot(x,y, bty='n')
+  lines(pd$x, pd$fit, lwd=2, col='green')
+  lines(pd$x, pd$upr, col='blue')
+  lines(pd$x, pd$lwr, col='blue')
+}
+```
+
+Say that we have the following data.
+
+```{r, echo=F, glm_visual_exp1, fig.align='center', fig.height=3, fig.width=5}
+plot(x,y, bty='n')
+```
+
+There is an exponential increase, and the variance in y seems to increase as x gets larger. This violates both the linearity and homoscedacity assumption of linear regression. 
+
+Instead, we will fit a GLM with a `poisson` distribution and `log` link function. Let's add these separately to show what each part does. 
+First, we'll fit a `Gaussian` (i.e. normal) distribution with a `log` link.
+
+```{r, eval=F}
+glm(y~x, family=gaussian('log'))
+```
+
+```{r, glm_visual_exp2, fig.align='center', fig.height=3, fig.width=5}
+nice_plot(glm(y~x, family=gaussian('log')))
+```
+
+The green line shows the predicted values, and the blue lines show the prediction interval. 
+The `log` link has caused the line to curve along with the data. 
+However, the prediction interval does not become wider to account for the larger variance as `x` increases.
+
+Now we'll fit the `Poisson` distribution with the `log` link.
+
+```{r, eval=F}
+glm(y~x, family=poisson('log'))
+```
+
+```{r, glm_visual_exp3, fig.align='center', fig.height=3, fig.width=5}
+nice_plot(glm(y~x, family=poisson('log')))
+```
+
+This time we do see that the confidence interval becomes wider as `x` increases. 
+
+For reference, let's also look at the poisson distribution with an identity link (the identity link does not transform the prediction, so this is a linear relation)
+
+```{r, eval=F}
+glm(y~x, family=poisson('identity'))
+```
+
+```{r, glm_visual_exp4, fig.align='center', fig.height=3, fig.width=5}
+nice_plot(glm(y~x, family=poisson('identity')))
+```
+
+Now there's a linear relation but the prediction interval increases as `x` increases due to the poisson distribution. 
+
+In conclusion, we choose the `link` function to map the linear prediction to a different (possibly non-linear) relation that better fits the data. You can imagine this as the line changing (e.g, curving). We choose the `distribution` to better model the error of the prediction.   
+
+Finally, note that we cannot use any link function for any distribution. 
+A binomial distribution requires that the link function maps the linear prediction to values between 0 and 1.
+Often you do want to stick to the default link function for a distribution.
+Here we only demonstrated what happens if you don't in order to show the different effects of the distribution and link function.
+
+
+# Exercise
+
+To play around with logistic regression, we have written a function to generate some data yourself. 
+
+```{r}
+gen_data <- function(b0, b1, y_name, x_name){
+  set.seed(1)
+  d = data.frame(x = runif(10000, 0,10))
+  mu = log(b0) + log(b1)*d$x
+  prob = 1 / (1 + exp(-mu))
+  d$y = rbinom(10000, 1, prob = prob)
+  colnames(d) = c(x_name, y_name)
+  d
+}
+```
+
+To use this function you need to give four arguments
+
+* b0: the odds ratio for the intercept
+* b1: the odds ratio for the effect of x, with x being a variable on a 10 point scale
+* y_name: the name of your dependent variable
+* x_name: the name of your independent variable
+
+For example, data that states that the more someone has `the best words`, the more likely he or she is to become `president`
+
+```{r}
+d = gen_data(b0 = 0.0001, b1 = 3, y_name = 'president', x_name = 'best_words')
+m = glm(president ~ best_words, data = d, family=binomial)
+tab_model(m)
+```
+
+The excercise is to generate different data to see how this affects the odds ratios and the Pseudo R2. (You can, but are not forced to, change the x_name and y_name).
+
+Try to create data in which:
+
+* The effect is positive
+* The effect is negative
+* There is no effect
+* R2 Tjur is close to 1
+
+
 

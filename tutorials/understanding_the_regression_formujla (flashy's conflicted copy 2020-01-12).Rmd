@@ -19,10 +19,10 @@ library(printr)
 
 # This tutorial
 
-This tutorial shows you how to implement logistic regression yourself, using only basic R functions. 
-The purpose is purely educational, since R perfectly well supports logistic regression.  
-Throughout the tutorial we'll use some formulas, but don't worry if these make you uncomfortable. 
-We'll try to clarify each formula by also showing the R code and using visualizations.
+This tutorial walks you through the formula of a regression model. It is not intended as a first introduction into regression analysis, but serves to help you develop an intuition for 
+
+In particular, we will focus on developing an understanding of the residual term, which is important to understand in order to more on to more complex models, specifically generalized linear models and multilevel models.
+
 
 # From linear to logistic regression
 
@@ -32,7 +32,7 @@ A regression model with a single independent variable is then expressed as:
 
 $$y_i = \beta_0 + \beta_1{x}_i + \epsilon_i$$
 Here $y$ is the dependent variable and $x$ is the independent variable. 
-The beta parameters represent the intercept $\beta_0$ and the regression coefficient $\beta_1$. 
+The beta parameters represent the intercept $\beta_0$ and the coefficient $\beta_1$ for $x$. 
 Given the independent variable and the parameters, we *predict* $y$ as $\beta_0 + \beta_1{x}_i$.
 The error of the prediction (i.e. the real $y$ minus the predicted $y$) is represented by the residual term $\epsilon$.
 This residuals ($\epsilon_1$, $\epsilon_2$, ..., $\epsilon_n$) are assumed to be independent and normally distributed with mean 0. 
@@ -79,84 +79,55 @@ Here we fit the model, print the model summary, and plot a scatterplot with the 
 m = lm(y ~ x)
 summary(m)
 plot(x,y, col='grey')
-abline(m, col='red')
+abline(m, col='green')
 ```
 
 We see that the coefficients ($\beta0 = 3.05$; $\beta1 = 0.29$) are indeed very close to the values we used  ($b0 = 3.05$; $b1 = 0.29$) to create the data (they're only not identical because after we added e this new and slightly different model is a better fit). 
 
-A nice thing about this visualization is that it intuitively shows the structural and random part of the regression equation. The structural part is represented by the line, which is the predicted value:
+A nice thing about this visualization is that it intuitively distinguishes the structural and random part of the regression equation. The structural part is represented by the line, which is the predicted value:
 
+$$\beta_0 + \beta_1{x}_i$$
 $$3.05 + 0.29x_i$$
-$$3.05 + 0.29x_i$$
-The random part is the residual, which is represented as the distance between the dot of an observation, and the line. In other words, the residual (that which remains) is the observed value y, minus the predicted value:
+The random part is the residual, which is represented by the distance between the line and the dot. You can think of the residual (i.e. that which remains) as the value by which the model fails to correctly predict y. This is why its also sometimes called the *noise* of the model, or the *error*. 
 
-$$e_i = 3.05 + 0.29x_i$$
-
-
+Let's look at an example. Here we highlight the y value for the 15th observation in our data in blue. The residual is represented as a red line.
 
 ```{r}
-pred = m$fitted.values
-resid = m$residuals
-
-#i = 15
-#points(x[i], y[i], col='blue', pch=10)
-#segment()
+i = 15
+points(x[i], y[i], col='blue', pch=10)
+segments(x[i], y[i], y1 = m$fitted.values[i], col='red')
 ```
 
+For this observation, the regression formula is:
+
+$$\color{blue}{y_i} = \color{green}{\beta_0 + \beta_1{x}_i} + \color{red}{\epsilon_i}$$
+$$\color{blue}{5.90} = \color{green}{3.05 + 0.29*7.37 + \color{red}{0.68}$$
+
+Understanding the random component of the regression equation also paves the way to undestanding the $R2$ measure. This is a value between 0 and 1 that represent the proportion of variance in $y$ that is explained by the model. 
+
+Recall that the residuals are normally distributed with mean 0. The lower the variance of this distribution, the better the model fit. If the variance is zero (i.e. all dots exactly on the regression line) then the model perfectly explains/predicts $y$ ($R2 = 1$). The higher the variance of the residuals, the more variance in $y$ that is unexplained. 
+
+The total variance in $y$ is calculated as the sum of the squared difference from the mean of $y$. The variance of the residual is calculated as the sum of the squared difference of the 
+
+This means that no variance in y would be unexplained. 
 
 
-Now let's visualize this as a scatterplot.
+How much variance the model explains is essentially 
 
 ```{r}
-plot(x,y)
+sum_of_sq <- function(x) sum(x^2)
+resid_ss = sum_of_sq(m$residuals)
+total_ss = sum_of_sq(y - mean(y))
+1 - (resid_ss / total_ss)
 ```
 
-
-
-
-
-Now that we have data (the $y$ and $x$ variables), we can apply regression analysis  
-
-
-
-
-The purpose of regression analysis is to 
-
-
-```{r}
-plot(x,y)
-```
-
-
-
-
-To 
-
-
-
-
-Here, Y is 
-
-For a single independent variable, the 
-
-
-With a single independent v
-
-For example, 
+If the value is 0, then $x$ does not provide any information for predicting $y$. If the value is 1, then there is a deterministic relation between $x$ and $y$. In other words, this would me
 
 
 
 
 
 
-Logistic regression is applied when the dependent variable is binary, meaning that it can only have the values 0 and 1. 
+# Exercise
 
-
-```{r}
-?binomial
-library(tidyverse)
-d = mutate(iris, setosa = as.numeric(Species == 'setosa'))
-plot(d$Sepal.Length, d$setosa)
-m = lm(setosa ~ Sepal.Length, data=d)
-abline(m)
-```
+As an excersise, please use the code above to create and analyze 
