@@ -47,11 +47,13 @@ So when is it inappropriate to use ordinary linear regression? You'll commonly h
 * the residuals are not normally distributed
 * the variance of the residuals is not constant (heteroscedacity)
 
-As you might have recognized, these are violations of key assumptions of ordinary linear regression (linear relationship, multivariate normality, homoscedacity). This is where GLMs come in as a possible solution.
-
-Let's first look at an example where this is the case. As an introduction to GLMs we'll first take a look at logistic regression analysis.
+As you might have recognized, these are violations of key assumptions of ordinary linear regression (linear relationship, multivariate normality, homoscedacity).
+If you need a refresher on the linear regression assumptions, [this source](http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/R/R5_Correlation-Regression/R5_Correlation-Regression7.html) offers a clear and concise overview, and specifically discusses the standard R `lm` diagnistic plots. 
 
 ## Ordinary linear regression versus logistic regression 
+
+Let's take a look at what happens if we apply ordinary linear regression if we have a binary dependent variable. 
+We'll show how a logistic regression, a popular type of GLM, makes more sense in this case.
 
 For reference, we first take a look at a case where linear regression works well.
 
@@ -64,12 +66,11 @@ y = rnorm(200, mu, 3)       ## generate y from prediction with a normal error di
 
 ## fit linear model and plot
 m = lm(y~x)
-plot_model(m, type='pred', show.data=T)
+plot_model(m, type='pred', show.data=T, ci.lvl = NA)
 ```
 
 This is perfect data for an ordinary linear regression analysis.
 There is a linear relation and the residuals are normally distributed around the regression line with a constant variance. 
-
 
 ### Fitting a linear model on binary data
 
@@ -84,12 +85,12 @@ prob = 1 / (1 + exp(-mu))         ## transform linear predictor with inverse of 
 y = rbinom(200, 1, prob = prob)   ## sample y from probabilities with binomial error distribution
 ```
 
-Then we fit the linear model, make a scatterplot and add the regression line.
+Then we fit the linear model, and make a scatterplot with the regression line.
 
 ```{r, glm_lm_on_binary, fig.align='center', fig.height=3, fig.width=5}
 ## fit linear model and plot
 m_lm = lm(y ~ x)
-plot_model(m_lm, type='pred', show.data=T)
+plot_model(m_lm, type='pred', show.data=T, ci.lvl=NA)
 ```
 
 In the scatterplot we see that (as expected) there are only 2 values on the y-axis: 0 and 1. 
@@ -98,13 +99,19 @@ This is also reflected in the regression line.
 
 So why are we not happy?
 It is clear that a linear model is not a good fit for this data.
-Since y is binary, most predicted values of y (i.e. the line) are literally impossible. 
-There is also the problem that the prediction (necessarily) has values above 1 and below 0. 
+Most predicted values of y (i.e. the line) are literally impossible.
 While the model captures that higher values of x are more likely to have y values of 1, for values above 15 we now actually get errors because we predict that y is higher than 1.
-
 The residuals are also nonnormal with nonconstant variance.
 For low values of x, almost all residuals are negative, and for high values of x almost all values are positive. 
 We also would not want constant variance of the residuals with regard to x. If x is very low or very high then we have a much better prediction of y, whereas for center values of x such as 5 we are very uncertain. 
+
+As an excercise, you could also look at the diagnistic plots to investigate the assumption or normality and homoscedacity.
+
+```{r, eval=F}
+plot(m, which = 1)
+plot(m, which = 2)
+influence.measures(m)
+```
 
 ### Fitting a logistic regression model on binary data
 
@@ -190,6 +197,17 @@ tab_model(m)
 
 In many ways this is very similar to the classic table for ordinary linear regression. The important difference lies in the coefficients, that are now `Odds Ratios`, and the `R2 Tjur`, which is a pseudo R2 measure. 
 
+### When to use logistic regression
+
+Logistic regression is a rather exceptional case, because if the dependent variable is binary there is little doubt that you'll want to use a binomial distribution. There are some alternatives to the `logit` link, such as `probit`, but we won't discuss them here. Logit is a popular choice because it often makes sense, and is relatively easy to interpret.
+
+It is generally a good idea to have a look at how your model fits the data. A convenient tool is the `plot_model` function from the `sjPlot` package, which can visualize the predicted values (i.e. marginal probabilities) for different independent variables.
+
+```{r gtd_example_plot , fig.align='center', fig.height=5, fig.width=7}
+plot_model(m, type='pred', grid = T)
+```
+
+
 ### Interpreting coefficients: odds ratios and log odds ratios
 
 First of all, the interpretation of the p-values is the same as in ordinary linear regression. All our coefficients are significant, so in this case we can interpret all of the effects.
@@ -205,7 +223,7 @@ exp(0.3987761)
 
 For interpretation you'll generally want to use the `odds ratios`, and this is often also what journals want you to report. 
 
-So how to intepret the `odds ratio`? These are, quite straighforwardly, the ratios of the odds (We assume that you know what odds are [^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
+So how to intepret the `odds ratio`? These are, quite straighforwardly, the ratios of the odds (note that odds are not probabilities[^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
 
 For example, the ratio of the `odds of passing the test` for students that (1) `did complete the selftest`, versus the odds of students that (2) `did not complete the selftest`. In our model, that $odds ratio$ is $3.43$, meaning that the odds of passing the test increase by **a factor** of $3.43$ for students that completed the selftest. In other words, the odds of passing the test are 3.43 times greater. 
 
@@ -308,9 +326,7 @@ m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binom
 
 We can now pass all models in the correct order to the `tab_model` function.
 
-```{r, eval=F}
-## this is temporarly not working, because sjPlot can't handle null models. 
-## Seems to be a dpeendency issue 
+```{r}
 tab_model(m_0, m_1, m_2)
 ```
 
@@ -344,15 +360,6 @@ pchisq(38.253, df=1, lower.tail=F)
 ```
 
 
-### When to use logistic regression
-
-Logistic regression is a rather exceptional case, because if the dependent variable is binary there is little doubt that you'll want to use a binomial distribution. There are some alternatives to the `logit` link, such as `probit`, but we won't discuss them here. Logit is a popular choice because it often makes sense, and is relatively easy to interpret.
-
-It is generally a good idea to have a look at how your model fits the data. A convenient tool is the `plot_model` function from the `sjPlot` package, which can visualize the predicted values (i.e. marginal probabilities) for different independent variables.
-
-```{r gtd_example_plot , fig.align='center', fig.height=5, fig.width=7}
-plot_model(m, type='pred', grid = T)
-```
 
 
 ## Poisson regression
@@ -361,20 +368,19 @@ Now we will fit and interpret a Poisson regression model. Several aspects of thi
 
 Again we start by generating some data. We'll pretend that 
 
-* the dependent variable is the number of times a tweet is retweeted
+* the dependent variable is the number of times a tweet is retweeted within 1 week after publication.
 * the independent variable is how funny the tweet was on a scale from 1 to 10.
 
-We know that our dependent variable `retweets` is a count variable (i.e. is only has positive integers), and we think the number of retweets will be higher for `funny` tweets. We don't think this relation will be linear, because tweets that have been retweeted reach a wider audience and as such become more likely to be retweeted more. 
-And indeed, this is what we see in the scatterplot.
+The dependent variable `retweets` is a count variable (i.e. it only has positive integers), and we think the number of retweets will be higher for `funny` tweets. We don't think this relation will be linear, because tweets that have been retweeted reach a wider audience and as such become more likely to be retweeted more. 
 
 The typical Poisson regression is a GLM with a Poisson distribution and log link function.
 To generate the example data we transform the linear prediction with the inverse of the log link (the exponential) to get the expected values. We then draw y from a Poisson distribution with the expected value as the `lambda` parameter, which is both the mean and variance of the Poisson distribution.
 
 ```{r}
 set.seed(1)
-x = runif(100, 1, 10)          ## sample x from a uniform distribution
-mu = exp(-2 + 0.3*x)           ## linear prediction with inverse of the "log" link
-y = rpois(n=100, lambda=mu)    ## generate y from prediction with Poisson error distribution
+x = runif(1000, 1, 10)        ## sample x from a uniform distribution
+mu = exp(-2 + 0.3*x)          ## linear prediction with inverse of the "log" link
+y = rpois(n=1000, lambda=mu)  ## generate y from prediction with Poisson error distribution
 d = data.frame(retweets=y, funny=x)
 ```
 
@@ -391,18 +397,6 @@ tab_model(m)
 ```
 
 This is again very similar to the classic table for ordinary linear regression. The important difference lies in the coefficients, that are now `Incidence Rate Ratios`, and the `R2 Nagelkerke`, which is a pseudo R2 measure. 
-
-### Interpreting Coefficients
-
-To be added
-
-### Interpreting model fit
-
-To be added
-
-### Comparing model fit
-
-This works the same as for logistic regression analysis, which is discussed above.
 
 ### When to use Poisson regression
 
@@ -423,6 +417,44 @@ In the current example, the Poisson model is a good fit to the data (but yeah, w
 ```{r glm_poisson_fit, fig.align='center', fig.height=3, fig.width=5}
 plot_model(m, type='pred', show.data=T, grid=T)
 ```
+
+
+### Interpreting Coefficients
+
+The interpretation of the coefficients is similar to logistic regression, but slightly easier. 
+Firstly, note that again we can interpret the p-values as in ordinary linear regression. 
+In this case we can interpret the effect of `funny`.
+
+Like in logistic regression, the coefficients in the model are in logged form, and to interpret them it's easier to exponentiate them. 
+The `tab_model` function performs this transformation by default.
+As with logistic regression, make sure to always check whether the coefficients are shown in log form or as the incidence rate ratios, to prevent misinterpretation.
+
+The incidence rate indicates the frequency of an event within a given time span. In our case this event is a retweet.
+The incidence rate ratio for a dependent variable indicates how the incidence rate changes as a dependent variable increases by 1 unit. 
+So, a tweet that scores $5$ on funny, has $1.34$ times the incidence rate of a tweet that scored $4$.
+A tweet that scores $7$ on funny, has $1.34^3$ times the incidence rate of a tweet that scored $4$.
+
+We can interpret the intercept as the base rate, and calculate the expected number of retweets for a tweet that scores $9$ on humor.
+
+```{r}
+0.14 * 1.34^9
+```
+
+So even a very funny tweet on average is only retweeted about twice. 
+If our imaginative data turn out to be true, there is a concernable amount of humor lost on twitter.
+
+### Interpreting model fit
+
+Like logistic regression, it is not possible to calculate the R2 measure, and the best we can do is to use some form of Pseudo R2. 
+For logistic regression we used the Tjur Pseudo R2, but this was based on the difference of the mean of the predicted values for y=1 and y=0. 
+For Poisson regression the default Pseudo R2 reported by the sjPlot package is Nagelkerke. 
+
+The discussion is the same here. Pseudo R2 is useful but not without fault, so use it wisely and don't report it as explained variance. 
+
+### Comparing model fit
+
+This works the same as for logistic regression analysis, which is discussed above.
+
 
 
 # Understanding the family argument
@@ -510,7 +542,7 @@ nice_plot <- function(m) {
   } else {
     pd = cbind(newdata, predict(m, newdata=newdata, interval='predict'))
   } 
-  plot(x,y, bty='n', xlim=c(0,35))
+  plot(x,y, bty='n')
   lines(pd$x, pd$fit, lwd=2, col='green')
   lines(pd$x, pd$upr, col='blue')
   lines(pd$x, pd$lwr, col='blue')
@@ -537,8 +569,7 @@ nice_plot(glm(y~x, family=gaussian('log')))
 ```
 
 The green line shows the predicted values, and the blue lines show the prediction interval. 
-The `log` link has caused the line to curve along with the data. 
-However, the prediction interval does not become wider to account for the larger variance as `x` increases.
+The `log` link has caused the line to curve along with the data, but you hardly see the interval becoming wider to account for the larger variance as `x` increases.
 
 Now we'll fit the `Poisson` distribution with the `log` link.
 
@@ -550,7 +581,7 @@ glm(y~x, family=poisson('log'))
 nice_plot(glm(y~x, family=poisson('log')))
 ```
 
-This time we do see that the confidence interval becomes (slightly) wider as `x` increases. 
+Using the poisson distirbution we see that the prediction interval becomes wider as `x` increases. 
 
 For reference, let's also look at the poisson distribution with an identity link (the identity link does not transform the prediction, so this is a linear relation)
 

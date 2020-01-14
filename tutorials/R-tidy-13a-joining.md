@@ -4,6 +4,7 @@ Kasper Welbers & Wouter van Atteveldt
 2018-09
 
 -   [Joining data](#joining-data)
+    -   [Data](#data)
     -   [Downloading and preparing the data](#downloading-and-preparing-the-data)
 -   [Simplest case: `inner_join`](#simplest-case-inner_join)
 -   [Specifying columns](#specifying-columns)
@@ -13,6 +14,11 @@ Joining data
 ============
 
 In many cases, you need to combine data from multiple data sources. For example, you can combine a sentiment analysis of tweets with metadata about the tweets; or data on election results with data about the candidates ideological positions or details on the races.
+
+This tutorial will teach you the `inner_join` and other `_join` commands used to combine two data sets on shared columns. See [R4DS Chapter 13: Relational Data](http://r4ds.had.co.nz/relational-data.html) for more information and examples.
+
+Data
+----
 
 For this tutorial, we will look at data describing the US presidential primaries. These data can be downloaded from the [Houston Data Visualisation github page](https://github.com/houstondatavis/data-jam-august-2016), who in turn got it from [Kaggle](https://www.kaggle.com/benhamner/2016-us-election).
 
