@@ -36,46 +36,6 @@ install.packages('sjPlot')
 library(sjPlot)
 ```
 
-# GLM in R: the short version
-
-Maybe you already know what a GLM is, and you just want to know how to run it in R. Maybe you already completed this tutorial and just want to refresh your memory. In that case, this section is probably all you need.
-
-For this quick demonstration, we'll generate data with a log link function and Poisson error distribution. We'll pretend that our dependent variable is the number of times a tweet is retweeted, and the independent variable is how funny the tweet was on a scale from 1 to 10.
-We know that our dependent variable `retweets` is a count variable, and we think the number of retweets will be higher for `funny` tweets. We don't think this relation will be linear, because tweets that have been retweeted reach a wider audience and as such become more likely to be retweeted more. 
-
-```{r}
-set.seed(1)
-x = runif(100, 1, 10)          ## sample x from a uniform distribution
-mu = exp(-2 + 0.3*x)           ## linear prediction with inverse of the "log" link
-y = rpois(n=100, lambda=mu)    ## generate y from prediction with Poisson error distribution
-d = data.frame(retweets=y, funny=x)
-```
-
-To fit a GLM model, R has the `glm` function. This works just like the regular `lm` function for linear models. The only difference is that the error distribution and link function need to be specified. For this we use the `family` argument, which takes a family object. For Poisson regression the code is as follows.
-
-```{r}
-m = glm(retweets ~ funny, d, family=poisson(link = 'log'))
-```
-
-We can inspect the model with the `summary` function, but there are also packages such as `sjPlot` that print the data in a nice table and with additional information such as pseudo R measures. 
-
-```{r}
-tab_model(m)
-```
-
-`sjPlot` also has a nice function for plotting the data with the fitted values. 
-
-```{r glm_tldr_plot, fig.align='center', fig.height=3, fig.width=5}
-plot_model(m, type = 'pred', show.data=T)
-```
-
-Here we see how the GLM fits the data. Note the exponential increase (due to the log link function) and the increase in variance along with x (due to the Poisson distribution)
-
-You can consult the help page for `?family` For the available distributions and link functions.
-
-```{r, eval=F}
-?family
-```
 
 # When to use a GLM
 
@@ -104,8 +64,7 @@ y = rnorm(200, mu, 3)       ## generate y from prediction with a normal error di
 
 ## fit linear model and plot
 m = lm(y~x)
-plot(x,y, bty='n')
-abline(m, col='green')
+plot_model(m, type='pred', show.data=T)
 ```
 
 This is perfect data for an ordinary linear regression analysis.
@@ -130,8 +89,7 @@ Then we fit the linear model, make a scatterplot and add the regression line.
 ```{r, glm_lm_on_binary, fig.align='center', fig.height=3, fig.width=5}
 ## fit linear model and plot
 m_lm = lm(y ~ x)
-plot(x,y, bty='n')
-abline(m_lm, col='green')
+plot_model(m_lm, type='pred', show.data=T)
 ```
 
 In the scatterplot we see that (as expected) there are only 2 values on the y-axis: 0 and 1. 
@@ -164,19 +122,11 @@ For logistic regression, we only need to pass the `binomial` function to `family
 m_glm = glm(y ~ x, family = binomial(link = 'logit'))
 ```
 
-Now we can again make the scatterplot to see how the new predictions fit the data.
-However, we cannot use the `abline` function for this, because this can only add straight lines.
-Instead, we'll calculate the predictions for the possible values of petal length.
+We can again use the same `plot_model` function to inspect the fit. 
+However, since the line is not linear, we'll need to compute predictions for all values of x to get a smooth line (see documentation of the `terms` argument in `plot_model`).
 
 ```{r glm_glm_on_binary, fig.align='center', fig.height=3, fig.width=5}
-## create sequence of x values from lowest to highest in our data
-x_min_to_max = seq(min(x), max(x), by = 0.1)
-## predict y for these values
-y_hat = predict(m_glm, newdata = data.frame(x = x_min_to_max), type = 'response')
-## create the scatterplot
-plot(x, y, bty='n')
-## add regression line
-lines(x_min_to_max, y_hat, col='green')
+plot_model(m_glm, type='pred', show.data=T, terms='x [all]')
 ```
 
 Our new line bends in order to fit the observations with low and high x.
@@ -189,11 +139,11 @@ The predicted response of the logistic regression model (i.e. the green line) is
 This has implications for how to interpret the model coefficients and model fit, as discussed in the next section.
 
 
-# Interpreting a GLM
+# Fitting and interpreting a GLM
 
 The output of a GLM looks very similar to that of ordinary linear regression. However, coefficients will often have to be interpreted very differently, and the interpretation of model fit is somewhat different. 
-In this tutorial we'll focus on the interpretation of logistic regression, which introduces you to key concepts that are the same or similar in other GLMs. 
-
+In this tutorial we'll focus on the interpretation of logistic regression and Poisson regression, which are commonly used models. 
+This also introduces you to key concepts that are the same or similar in other GLMs. 
 
 ## Logistic regression
 
@@ -225,7 +175,7 @@ d$passed_test = y = rbinom(1000, 1, prob = prob)
 head(d)
 ```
 
-We can fit the `glm` as before. We now only add `data = d` because our variables our now in a data.frame. Also, this time we do not specify the "logit" link (which is the default). This is the same model as above, but it's good to know that the following syntax also works.
+We can fit the `glm` as before. We now only add `data = d` because our variables are now in a data.frame. Also, this time we do not specify the "logit" link (which is the default). This is the same model as above, but it's good to know that the following syntax also works.
 
 ```{r}
 m = glm(passed_test ~ hours_studied + selftest + alcohol, 
@@ -239,13 +189,6 @@ tab_model(m)
 ```
 
 In many ways this is very similar to the classic table for ordinary linear regression. The important difference lies in the coefficients, that are now `Odds Ratios`, and the `R2 Tjur`, which is a pseudo R2 measure. 
-
-We can also use the `plot_model` function to visualize various aspects of the model. Here we visualize the predicted values (i.e. average probabilities) for different independent variables.
-
-```{r gtd_example_plot , fig.align='center', fig.height=3, fig.width=5}
-plot_model(m, type='pred', grid = T)
-```
-
 
 ### Interpreting coefficients: odds ratios and log odds ratios
 
@@ -312,7 +255,7 @@ $$ prob = \frac{odds}{1+odds}$$
 odds / (1 + odds)
 ```
 
-So for this person the probability of passing the test is 0.912. To verify that our calculation is correct, we can also use the predict function to get this probability. Given the model, and a dataset with the cases for which we want to predict the response, we compute this as follows.
+So for this person the probability of passing the test is 0.917. To verify that our calculation is correct, we can also use the predict function to get this probability. Given the model, and a dataset with the cases for which we want to predict the response, we compute this as follows.
 
 ```{r}
 newdata = data.frame(hours_studied = 10, selftest = 1, alcohol = 7)
@@ -347,20 +290,28 @@ pred_1 - pred_0
 
 Regardless of which Pseudo R2 measure you choose, be carefull not to attach too much meaning to it. It's usefull for comparing models and getting a general indication of how well you can predict a dependent variable, but it's only an indication. 
 
-### Comparing models
+### Comparing model fit
 
-You often see that multiple models are reported with increasing complexity (i.e. more variables added). 
-Making a regression table with stepwise models is easy with the tab_model function.
+You often see that regression models are reported with increasing complexity (i.e. more variables added). 
+These models are referred to as nested models, because the more complex models contain all the terms of the less complex models.
+This is often represented as a regression table with the least complex model (sometimes a NULL or base model) on the left, and towards the right increasingly complex models.
+
+Here we show you how to do that in R for logistic regression, but same approach is actually identical for other GLMs (and also multilevel models).
 Here we fit a NULL model (ie. a model without independent variables), and add the variables in 2 steps. 
 Note that in the NULL model we need to provide the value 1 for the intercept (if independent variables are given, the intercept is automatically added).
 
 ```{r}
-m_NULL = glm(passed_test ~ 1, data=d, family= binomial)
+m_0 = glm(passed_test ~ 1, data=d, family= binomial)
 m_1 = glm(passed_test ~ hours_studied + selftest, data=d, family= binomial)
-m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, 
-        data=d, family=binomial)
+m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binomial)
+```
 
-tab_model(m_NULL, m_1, m_2)
+We can now pass all models in the correct order to the `tab_model` function.
+
+```{r, eval=F}
+## this is temporarly not working, because sjPlot can't handle null models. 
+## Seems to be a dpeendency issue 
+tab_model(m_0, m_1, m_2)
 ```
 
 It is common to report whether the improvement in model fit of the more complex model is significant. The idea is then that we only use a more complex model if it actually improves the fit to the data. The increase from the NULL model indicates whether the model explains anything at all.
@@ -368,7 +319,7 @@ It is common to report whether the improvement in model fit of the more complex 
 Comparing models in R can be done with the anova function (note that this is different from an Analysis of Variance Model, which is calculated with the `aov` function in R). 
 
 ```{r}
-anova(m_NULL, m_1, m_2, test = 'Chisq')
+anova(m_0, m_1, m_2, test = 'Chisq')
 ```
 
 What we see here is that each model offers a significant improvement in fit compared to the former model. 
@@ -379,7 +330,7 @@ We can verify this for the first model, which as 1 parameter (the intercept)
 
 ```{r, eval=F}
 1000 - 1              
-logLik(m_NULL) * -2   
+logLik(m_0) * -2   
 ```
 
 Deviance is a measure of how wel a model fits the data, with smaller deviance indicating a better fit. It's similar (but not the same) as the sum of squares in ordinary regression. With a large enough $n$ the difference of the Deviance of two models is approximately chi-square distributed, where the difference in the degrees of freedom of the models is the degrees of freedom for the Chi-square test. 
@@ -392,6 +343,86 @@ We can verify this for the third model, where the Deviance is 38.253 and the Df 
 pchisq(38.253, df=1, lower.tail=F)
 ```
 
+
+### When to use logistic regression
+
+Logistic regression is a rather exceptional case, because if the dependent variable is binary there is little doubt that you'll want to use a binomial distribution. There are some alternatives to the `logit` link, such as `probit`, but we won't discuss them here. Logit is a popular choice because it often makes sense, and is relatively easy to interpret.
+
+It is generally a good idea to have a look at how your model fits the data. A convenient tool is the `plot_model` function from the `sjPlot` package, which can visualize the predicted values (i.e. marginal probabilities) for different independent variables.
+
+```{r gtd_example_plot , fig.align='center', fig.height=5, fig.width=7}
+plot_model(m, type='pred', grid = T)
+```
+
+
+## Poisson regression
+
+Now we will fit and interpret a Poisson regression model. Several aspects of this are similar or identical to logistic regression, so rest assured, we'll need less words.
+
+Again we start by generating some data. We'll pretend that 
+
+* the dependent variable is the number of times a tweet is retweeted
+* the independent variable is how funny the tweet was on a scale from 1 to 10.
+
+We know that our dependent variable `retweets` is a count variable (i.e. is only has positive integers), and we think the number of retweets will be higher for `funny` tweets. We don't think this relation will be linear, because tweets that have been retweeted reach a wider audience and as such become more likely to be retweeted more. 
+And indeed, this is what we see in the scatterplot.
+
+The typical Poisson regression is a GLM with a Poisson distribution and log link function.
+To generate the example data we transform the linear prediction with the inverse of the log link (the exponential) to get the expected values. We then draw y from a Poisson distribution with the expected value as the `lambda` parameter, which is both the mean and variance of the Poisson distribution.
+
+```{r}
+set.seed(1)
+x = runif(100, 1, 10)          ## sample x from a uniform distribution
+mu = exp(-2 + 0.3*x)           ## linear prediction with inverse of the "log" link
+y = rpois(n=100, lambda=mu)    ## generate y from prediction with Poisson error distribution
+d = data.frame(retweets=y, funny=x)
+```
+
+Now we can git a GLM with the `poisson` family with `log` link function. 
+
+```{r}
+m = glm(retweets ~ funny, data=d, family=poisson('log'))
+```
+
+And show the regression table.
+
+```{r}
+tab_model(m)
+```
+
+This is again very similar to the classic table for ordinary linear regression. The important difference lies in the coefficients, that are now `Incidence Rate Ratios`, and the `R2 Nagelkerke`, which is a pseudo R2 measure. 
+
+### Interpreting Coefficients
+
+To be added
+
+### Interpreting model fit
+
+To be added
+
+### Comparing model fit
+
+This works the same as for logistic regression analysis, which is discussed above.
+
+### When to use Poisson regression
+
+Where logistic regression makes sense for a binary dependent variable, Poisson regression is often a good approach for (non-negative) count data with a low mean. 
+In our data, this is clearly the case.
+There are many tweets with zero retweets, and for more retweets the number of tweets decreases exponentially.
+
+```{r}
+table(d$retweets)
+```
+
+If count data has a high mean, a normal distribution can be a good enough approximation. But with a low mean you'll have the problem that the distribution is highly skewed, and values cannot be lower than zero (so the bell curve of the normal distribution would be abruply cut off).
+
+A common alternative for this type of data is a negative binomial generalized linear model (in R, you can use the `glm.nb` function from the `MASS` package), that can be better if the Poisson model is overdispersed. We won't discuss this issue in this introduction to GLMs, but [this page](https://www.theanalysisfactor.com/overdispersion-in-count-models-fit-the-model-to-the-data-dont-fit-the-data-to-the-model/) provides a nice and simple example.
+
+In the current example, the Poisson model is a good fit to the data (but yeah, we generated the data ourselves)
+
+```{r glm_poisson_fit, fig.align='center', fig.height=3, fig.width=5}
+plot_model(m, type='pred', show.data=T, grid=T)
+```
 
 
 # Understanding the family argument
@@ -479,7 +510,7 @@ nice_plot <- function(m) {
   } else {
     pd = cbind(newdata, predict(m, newdata=newdata, interval='predict'))
   } 
-  plot(x,y, bty='n')
+  plot(x,y, bty='n', xlim=c(0,35))
   lines(pd$x, pd$fit, lwd=2, col='green')
   lines(pd$x, pd$upr, col='blue')
   lines(pd$x, pd$lwr, col='blue')
@@ -519,7 +550,7 @@ glm(y~x, family=poisson('log'))
 nice_plot(glm(y~x, family=poisson('log')))
 ```
 
-This time we do see that the confidence interval becomes wider as `x` increases. 
+This time we do see that the confidence interval becomes (slightly) wider as `x` increases. 
 
 For reference, let's also look at the poisson distribution with an identity link (the identity link does not transform the prediction, so this is a linear relation)
 
