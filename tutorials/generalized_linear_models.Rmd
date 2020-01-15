@@ -325,7 +325,7 @@ m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binom
 
 We can now pass all models in the correct order to the `tab_model` function.
 
-```{r}
+```{r, eval=F}
 tab_model(m_0, m_1, m_2)
 ```
 
