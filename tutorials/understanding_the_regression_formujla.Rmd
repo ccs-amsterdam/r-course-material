@@ -94,6 +94,8 @@ Let's look at an example. Here we highlight the y value for the 15th observation
 
 ```{r}
 i = 15
+plot(x,y, col='grey')
+abline(m, col='green')
 points(x[i], y[i], col='blue', pch=10)
 segments(x[i], y[i], y1 = m$fitted.values[i], col='red')
 ```

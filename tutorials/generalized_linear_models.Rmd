@@ -17,6 +17,7 @@ library(printr)
 
 # Generalized linear models (GLM)
 
+> In statistics, the generalized linear model (GLM) is a flexible generalization of ordinary linear regression that allows for response variables that have error distribution models other than a normal distribution. The GLM generalizes linear regression by allowing the linear model to be related to the response variable via a link function and by allowing the magnitude of the variance of each measurement to be a function of its predicted value. [Wikipedia](https://en.wikipedia.org/wiki/Generalized_linear_model)
 
 In this tutorial you will learn how to use GLMs[^1] in R, focusing initially on logistic and Poisson regression (for binary and count data). As you will see, GLMs can be applied more broadly, and if you understand logistic and Poisson regression this is relatively straightforward to do. The goal of this tutorial is to get you started with fitting and interpreting GLMs, so we'll keep the mathematics to a minimum.  
 
@@ -43,18 +44,16 @@ As the name implies, Generalized Linear Models are a generalization of ordinary 
 
 So when is it inappropriate to use ordinary linear regression? You'll commonly hear: "when the dependent variable is not normally distributed". This is not the whole story, but it is a good place to start. If your dependent variable is not normally distributed, then the following issues are more likely to occur:
 
-* there is no linear relation between the dependent variable and the independent variable (or in multivariate analysis, the linear combination of independent variables)
+* there is no linear relation between the dependent variable and the independent variable (or in multiple analysis, the linear combination of independent variables)
 * the residuals are not normally distributed
 * the variance of the residuals is not constant (heteroscedacity)
 
-As you might have recognized, these are violations of key assumptions of ordinary linear regression (linear relationship, multivariate normality, homoscedacity).
+As you might have recognized, these are violations of key assumptions of ordinary linear regression (linear relationship, normality, homoscedacity).
 If you need a refresher on the linear regression assumptions, [this source](http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/R/R5_Correlation-Regression/R5_Correlation-Regression7.html) offers a clear and concise overview, and specifically discusses the standard R `lm` diagnistic plots. 
 
 ## Ordinary linear regression versus logistic regression 
 
 Let's take a look at what happens if we apply ordinary linear regression if we have a binary dependent variable. 
-We'll show how a logistic regression, a popular type of GLM, makes more sense in this case.
-
 For reference, we first take a look at a case where linear regression works well.
 
 ```{r glm_lm_on_normal, fig.align='center', fig.height=3, fig.width=5}
