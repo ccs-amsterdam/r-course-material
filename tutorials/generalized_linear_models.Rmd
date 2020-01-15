@@ -186,6 +186,8 @@ We can fit the `glm` as before. We now only add `data = d` because our variables
 ```{r}
 m = glm(passed_test ~ hours_studied + selftest + alcohol, 
         data=d, family=binomial)
+tab_model(m)
+
 ```
 
 We'll use the `tab_model` function from the `sjPlot` package to make a nice table.
@@ -333,7 +335,7 @@ It is common to report whether the improvement in model fit of the more complex 
 
 Comparing models in R can be done with the anova function (note that this is different from an Analysis of Variance Model, which is calculated with the `aov` function in R). 
 
-```{r}
+```{r, eval=F}
 anova(m_0, m_1, m_2, test = 'Chisq')
 ```
 

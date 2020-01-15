@@ -375,7 +375,104 @@ head(d)</code></pre>
 </table>
 <p>We can fit the <code>glm</code> as before. We now only add <code>data = d</code> because our variables are now in a data.frame. Also, this time we do not specify the “logit” link (which is the default). This is the same model as above, but it’s good to know that the following syntax also works.</p>
 <pre class="r"><code>m = glm(passed_test ~ hours_studied + selftest + alcohol, 
-        data=d, family=binomial)</code></pre>
+        data=d, family=binomial)
+tab_model(m)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+passed_test
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Odds Ratios
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.19
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.09 – 0.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+hours_studied
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.49
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.40 – 1.59
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+selftest
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+3.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.19 – 5.54
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+alcohol
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.84
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.80 – 0.89
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+1000
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+R<sup>2</sup> Tjur
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.281
+</td>
+</tr>
+</table>
 <p>We’ll use the <code>tab_model</code> function from the <code>sjPlot</code> package to make a nice table.</p>
 <pre class="r"><code>tab_model(m)</code></pre>
 <table style="border-collapse:collapse; border:none;">
@@ -552,40 +649,6 @@ m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binom
 <p>It is common to report whether the improvement in model fit of the more complex model is significant. The idea is then that we only use a more complex model if it actually improves the fit to the data. The increase from the NULL model indicates whether the model explains anything at all.</p>
 <p>Comparing models in R can be done with the anova function (note that this is different from an Analysis of Variance Model, which is calculated with the <code>aov</code> function in R).</p>
 <pre class="r"><code>anova(m_0, m_1, m_2, test = 'Chisq')</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">Resid. Df</th>
-<th align="right">Resid. Dev</th>
-<th align="right">Df</th>
-<th align="right">Deviance</th>
-<th align="right">Pr(&gt;Chi)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">999</td>
-<td align="right">1120.2545</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="right">997</td>
-<td align="right">872.0951</td>
-<td align="right">2</td>
-<td align="right">248.15938</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="right">996</td>
-<td align="right">833.8421</td>
-<td align="right">1</td>
-<td align="right">38.25294</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
 <p>What we see here is that each model offers a significant improvement in fit compared to the former model.</p>
 <p>If you’re feeling adventurous. we can look a bit closer at what is compared here. For each model the Resid. Df (residual degrees of freedom) and Resid. Dev (Residual Deviance) is reported. The degrees of freedom is <span class="math inline">\(n\)</span> minus the number of parameters. The Resid. Dev (Residual Deviance) is the log likelihood of a model multiplied by <span class="math inline">\(-2\)</span>. We can verify this for the first model, which as 1 parameter (the intercept)</p>
 <pre class="r"><code>1000 - 1              

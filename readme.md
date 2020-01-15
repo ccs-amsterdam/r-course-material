@@ -32,7 +32,8 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 |----|---|
 | [Basic statistics](tutorials/simple_modeling.md) | stats: lm, aov, t.test |
 | [Advanced statistics overview](tutorials/advanced_modeling.md) | stats: glm, lme4: lmer, glmer |
-| [Advanced statistics in depth: Generalized linear models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/generalized_linear_models.html) | stats: glm, family, sjPlot: tab_model, plot_model |
+| [Generalized linear models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/generalized_linear_models.html) | stats: glm, family, sjPlot: tab_model, plot_model |
+| [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
 
 
 # Text analysis 
