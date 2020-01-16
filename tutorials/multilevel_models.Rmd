@@ -45,6 +45,7 @@ Different subjects might have different reaction speeds in general, and might al
 
 To account for this, multilevel models can have `random intercepts` and `random slopes`. By using random intercepts, each Subject has its own intercept, which accounts for differences between subjects in overall reaction speed. Random slopes can be applied for each independent variable in the model, so that each Subject also has its own slope (i.e. coefficient) for this variable. This can be used simply to controll for implications of nested data (to not violate the independence assumption in linear regression). But moreover, it can be used to better investigate variance and effects at different levels. For instance, to what extent student learning success is explained by individual level factors (doing homework, participating in class) or class level factors (class size, experience of teacher).
 
+
 ## Multilevel modeling in R: a visual explanation
 
 We will not try to explain exactly how multilevel modeling works. This is a workshop and several books in its own right. However, after this tutorial you will hopefully understand why its important to properly model data with multiple levels, and realize that it is fairly easy to fit multilevel models in R.
@@ -335,3 +336,12 @@ Similarly, the `lme4` package has the `glmer` function, which can be seen as the
 In terms of syntax, using `glmer` is very similar to `lmer`, and like in `glm`, you need to specify a `family` (e.g., binomial for logistic regression, poisson for poisson regression).
 
 In other words, if you know GLM and multilevel modeling in R, you're pretty much set to also use Generalized Multilevel Regression Models.
+
+# Knowing what multilevel model to use
+
+This tutorial mainly serves as a general introduction. 
+There are many more things that you can do with multilevel models, and many more things to discuss.
+If you want to use multilevel modeling, and you're not yet an expert (or don't want to be), a good start is to see what types of models are used in your own field.
+And, as always, always try to look around with Google to see if you can find tutorials more specialized to your own field.
+
+To get a gist of the diverse ways in which you can use multilevel models, we recommend [this excellent tutorial] (https://rpsychologist.com/r-guide-longitudinal-lme-lmer). It's mainly written for clinical psychology, but the models can be applied more generally for experimental and other research.

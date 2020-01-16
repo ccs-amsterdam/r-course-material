@@ -212,6 +212,7 @@ $(document).ready(function () {
 <li><a href="#analyzing-the-data-with-multilevel-regression">Analyzing the data with multilevel regression</a></li>
 <li><a href="#multilevel-logistic-or-poisson-regression-with-glmer">Multilevel Logistic or Poisson regression with glmer()</a></li>
 </ul></li>
+<li><a href="#knowing-what-multilevel-model-to-use">Knowing what multilevel model to use</a></li>
 </ul>
 </div>
 
@@ -1456,6 +1457,11 @@ Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
 <p>The <code>lmer</code> function can be seen as the <code>lm</code> function for multilevel models. Similarly, the <code>lme4</code> package has the <code>glmer</code> function, which can be seen as the <code>glm</code> function for multilevel models. In terms of syntax, using <code>glmer</code> is very similar to <code>lmer</code>, and like in <code>glm</code>, you need to specify a <code>family</code> (e.g., binomial for logistic regression, poisson for poisson regression).</p>
 <p>In other words, if you know GLM and multilevel modeling in R, you’re pretty much set to also use Generalized Multilevel Regression Models.</p>
 </div>
+</div>
+<div id="knowing-what-multilevel-model-to-use" class="section level1">
+<h1>Knowing what multilevel model to use</h1>
+<p>This tutorial mainly serves as a general introduction. There are many more things that you can do with multilevel models, and many more things to discuss. If you want to use multilevel modeling, and you’re not yet an expert (or don’t want to be), a good start is to see what types of models are used in your own field. And, as always, always try to look around with Google to see if you can find tutorials more specialized to your own field.</p>
+<p>To get a gist of the diverse ways in which you can use multilevel models, we recommend [this excellent tutorial] (<a href="https://rpsychologist.com/r-guide-longitudinal-lme-lmer" class="uri">https://rpsychologist.com/r-guide-longitudinal-lme-lmer</a>). It’s mainly written for clinical psychology, but the models can be applied more generally for experimental and other research.</p>
 </div>
 
 
