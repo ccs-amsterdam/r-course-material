@@ -1,0 +1,389 @@
+---
+title: "Working with time series data"
+author: "Kasper Welbers & Wouter van Atteveldt"
+date: "January 2020"
+output: 
+  html_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r, echo=F, message=F, warning=F}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
+library(printr)
+```
+
+# This tutorial
+
+In this tutorial we'll discuss the basics of working with time series data. 
+We focus on the initial problem of preparing a time series for analysis, by looking for and fixing missing observations and creating a time series object.
+
+We do not discuss the analysis of time-series here, but instead refer to existing tutorials that do a great job at it. 
+
+* For a great introduction we recommend the tutorial by [Tavish Srivastava](https://www.analyticsvidhya.com/blog/2015/12/complete-tutorial-time-series-modeling/). The tutorial is low on code, but introduces you to the key concepts in a clear, visual way. 
+* [Great explanation](https://anomaly.io/seasonal-trend-decomposition-in-r/index.html) of decomposing time-series into seasonality, trends, and stochastic fluctuations. Good for understanding difference between additive and multiplicative time series. 
+* [This tutorial](http://rstudio-pubs-static.s3.amazonaws.com/288218_117e183e74964557a5da4fc5902fc671.html) offers a great overview of time series objects in R, and usefull thing and techniques to be aware of. Every part has a quick description and effective R code. 
+
+```{r}
+library(tidyverse)
+```
+
+# Cleaning up your time series
+
+For this part of the tutorial we'll use stock exchange data. We can download this data directly into R using the quantmod package, which allows us to get the data directly from Yahoo.
+
+```{r, eval=F}
+install.packages('quantmod')
+```
+```{r, message=F}
+library(quantmod)
+```
+
+In this example, we'll first use the symbol TSLA to get the Tesla Inc stock data.
+For other organizations, you can search [the Yahoo finance page](https://finance.yahoo.com).
+For reference, [ticker symbols](https://en.wikipedia.org/wiki/Ticker_symbol)  are simply unique company identifiers.
+
+```{r, warning=F, cache=T, message=F}
+start_date = as.Date('2010-07-01')
+end_date = as.Date('2018-12-31')
+
+tesla = getSymbols('TSLA', from=start_date, to=end_date, src='yahoo', auto.assign = F)
+```
+
+The `tesla` data is automatically in the `zoo` time series format.
+This is actually what we want, but for this example we will first force it into a regular tibble,
+because we want you to be able to create this time series object yourself.
+It's also convenient to understand the following code in case you ever need to go back from a zoo timeseries to tibble.
+In a zoo timeseries object (that we'll discuss below), the date is not a column, but kept separately as the `index`. We can extract this index with the `index()` function, and we can transform the rest of the time series directly to a tibble with `as_tibble`.
+We then use `bind_cols`, which is a dplyr function for pasting the columns of tibbles together, to paste the date column to this tibble.
+
+```{r}
+tesla = bind_cols(date = index(tesla), as_tibble(tesla))
+```
+
+## Inspecting the data and dealing with missing values
+
+The first step is always to look at your data to see whether it is complete over the whole time period.
+It could be that the time period we requested is not fully available, in which case we will have to `filter` (or `subset`) the data to only include the periode where we have data.
+Here we plot the `Close` value of the day over time to see what we're dealing with.
+
+```{r}
+ggplot(tesla, aes(x=date, y=TSLA.Open)) + geom_line()
+```
+
+We don't see any large blocks of missing data, so we can safely assume that if there is data missing, it is only one or a few days at a time. If we're just going to look at graphs of time-series, we probably will not notice the difference. However, if we want to perform statistical analysis, we will have to be more accurate.
+
+### Finding holes in the data
+
+Now, missing data can be structural or incidental. Structural holes in the data are more easy to spot, because they occur repeatedly in the data. If we simply take a look at the top of our data, we see that there is no stock market data for weekends.
+
+```{r}
+head(tesla)
+```
+
+Of course, looking at data will only take us so far. We can also use code to extract usefull pieces of information. For instance, we can extract the weekdays and see how often each day occurs in our data. 
+To get weekdays, we can use the `weekdays` function given a date vector. 
+We then use `table` to count how often each day occurs.
+
+```{r}
+wd = weekdays(tesla$date)
+table(wd)
+```
+
+Now we now for certain that our data does not contain any weekend days. Also, we see that some days occur slightly more than others, which indicates that there might also be incidental holes in our data. 
+
+So how can we find these holes? One trick is to join the time series data to a full sequence of dates that we're interested in. If we first make a vector with all the dates that we want, and then join this to all the dates that we have, we can see which dates are missing. R has various `seq` (sequence) functions. In this case we'll use the `seq.Date` function for a sequence of dates[^1]. 
+
+[^1]: A small note on notation. See that we use `as.Date('2008-01-01')` here? This is because seq.Date requires date objects. However, in some functions of the tidyverse we before simply used `'yyyy-mm-dd'` without clarifying this is a date. This is because some functions assume that if you pass a string (text) to a function that expects a date, you'll probably mean `as.Date('yyyy-mm-dd')`. This is simply shorthand. The safest approach is to always use `as.Date()`, but if you know what you're doing you can afford yourself some slack.
+
+
+```{r}
+## all dates from 2008 to 2018 in steps of 1 day
+all_dates = seq.Date(from = as.Date('2010-07-01'), to = as.Date('2018-12-31'), by = 1)
+```
+
+To join these dates to our time series, we first make a tibble with this date as the only column, and then left join it with the time series.
+
+```{r}
+tesla = tibble(date = all_dates) %>%
+  left_join(tesla, by='date')
+```
+
+Let's again look at the first 10 rows of the data
+
+```{r}
+head(tesla, 10)
+```
+
+Now that all days are added, we see NA's for days where we don't have data.
+
+### Fixing holes in the data
+
+Missing data in time-series is quite problematic. In time-series values are not entirely independent, so dropping one value is not just a single lost case, but affects other cases as well. One way to deal with this is to aggregate the data. If we look at the level of monts, a few missing days wont make a dent. However, sometimes we do not want to aggregate. If we are looking for short-term effects, we need to look at the short term.  
+
+In that case, we need to think carefully about what to do with holes in our data. Firstly, let's again consider the missing weekends. For some analyses, we could simply drop the weekends, because it is a matter of fact that there was no data. However, it is not as if stock prices do not matter in the weekend. There is no single right answer here: it really depends on your data.
+If you are working with count data, missing data might actually represent zeros.
+For example, if you analyze the number of newspaper articles about Tesla per day, there might be holes in the data on days where there is no news.
+In this case, the NA values should be replaced with zeroes.
+
+For stock market data (and many time-series) this is not the case. The stock price surely wasn't zero at those points, we simply do not know what it was.
+Instead, we want to estimate what the value 'probably' was. 
+There are several techniques for estimating these NAs.
+* One common trick is to use the `na.locf` funtion (also in the `zoo` package), that replace each NA value with the previous value in the same column (locf means 'last observation carried forward'). 
+* Another approach is to use linear interpolation with the `na.approx` function. For illustration, in the following vector we can guess by linear interpolation that the missing values are `2` and `4.66` and `6.33`.
+
+```{r}
+x = c(1,NA, 3,NA,NA,8)
+na.approx(x)
+```
+
+Note that the last NA is removed, since for NAs at the start or end, we don't know the value before or after it. 
+
+We can use na.approx to fix specific column, but if our data is in a time series format, we can actually apply it on all columns of the entire time series.
+So in the next step we'll first show how we can create a time series object.
+
+## Creating a zoo time-series object
+
+Here we'll use the zoo function from the zoo package to create a `zoo` object, which is a special type of matrix for time-series analysis.
+This function requires 2 arguments:
+
+* *x* should be a numeric vector or matrix where each column is a time series. This can also be a data.frame with only numeric column.
+* *order.by* is the index vector by which observations in x are ordere. For instance, a Date vector
+
+In our data, we thus want to pass all columns except for `date` to *x*, and then pass date to *order.by*
+
+```{r}
+tesla_ts = zoo(tesla[,-1], order.by = tesla$date)
+```
+
+Now `tesla_ts` is a special time-series object. 
+Among other things, if we perform generic functions such as `plot`, we know get useful results for working with time series.
+
+```{r, tesla_zoo_plot, fig.height=6, fig.width=5}
+plot(tesla_ts)
+```
+
+As explained above, we can now also use the na.approx function on the entire data, which will fill all NA values with linear approximation, and remove rows with NA values at the top and bottom of the data.
+
+```{r}
+tesla_ts = na.approx(tesla_ts)
+```
+
+Now finally we have data to be proud of. 
+
+Before we move on, think carefully about the fact that we are making *choices* here about how to clean our data. As with all choices, some are not only better than others, but they can also be abused. For some analysis, whether or not to remove weekends or how to fill certain holes might very well affect the results of an analysis.
+
+## Visualizing time-series
+
+Now that we have some nice time-series, we can do some better visualizations.
+A great package for visualizing time series is dygraphs.
+
+```{r, eval=F}
+install.packages('dygraphs')
+```
+```{r}
+library(dygraphs)
+```
+
+dygraphs understands zoo objects, so this is really easy to apply.
+Here we'll plot the first 4 column in `tesla_ts`. 
+We also add a special rangeselector to the plot, which will allow us to zoom in on specific parts.
+
+```{r tesla_dyg_plot1, fig.width=8, fig.height=5}
+dygraph(tesla_ts[, 1:4]) %>%
+  dyRangeSelector()
+```
+
+You initially might only see one line, but thats because the four values shown here are really close together (which makes sense, as its four versions of the stock price on the same day).
+If you want to see the differences, you can use the range selector (at the bottom) to zoom in. 
+Also, note that as you hover your mouse over the graph, the precise values are given in the top right corner.
+
+If you're interested in more general developments rather than short-term fluctuations, it can be useful to calculate a moving average. 
+Instead of plotting the exact values, the averages of a given number of observations is used, which smoothens out the line.
+
+```{r tesla_dyg_plot2, fig.width=8, fig.height=5}
+dygraph(tesla_ts[, 1:4]) %>%
+  dyRangeSelector() %>%
+  dyRoller(rollPeriod = 60)
+```
+
+Sometimes you have time series on completely different scales, especially when you combine different types of data. In the tesla stock data, the `TSLA.Volume` column has much higher values than the other column. 
+If you want to plot this data, you need to somehow account for this, because otherwise the time series with lower values will be too small to see.
+One solution is to transform the time series to the same scale, e.g. by taking the z values, but this also has its downsides. 
+Another solution in the case where there are only 2 completely different scales is to use a secondary y axis.
+Just make sure to properly label them.
+
+```{r tesla_dyg_plot3, fig.width=8, fig.height=5}
+dygraph(tesla_ts) %>%
+  dyRangeSelector() %>%
+  dyAxis("y", label = "Price") %>%
+  dyAxis("y2", label = "Volume") %>%
+  dySeries("TSLA.Volume", axis=('y2'))
+```
+
+This type of interactive graph can be really usefull for exploring time series.
+Plus, it just looks pretty cool.
+
+# Stationarity
+
+For analyzing time series, we need our time-series to be `stationary`. 
+That is, properties such as mean, variance and autoregression should be constant over time. 
+
+## Testing whether a time series is stationary
+
+We will discuss three ways for checking stationarity.
+
+1. The first test for stationarity is just looking at the graph. In a stationary time series there should be little to no trend (the mean should be constant), the variance should not change over time, and there should not be too much seasonality.
+2. The Augmented Dickey-Fuller (ADF) test is a statistical test that, if significant, suggests that the time series is stationary.
+3. The third test is to look at the autocorrelation. That is, to what extent are the values in a time series correlated to the previous values? Strong autocorrelation indicates that a time series can be predicted by its own history. If a time series can be predicted by very far back (e.g., 20 days) it is very likely to be non-stationary. 
+
+For the Augmented Dickey-Fuller test we'll need the tseries package
+
+```{r, eval=F}
+install.packages('tseries')
+```
+```{r}
+library(tseries)
+```
+
+For illustration, we will use the data created above, focusing on the Close value. 
+
+First, let's plot the time series.
+
+```{r tesla_zoo_close}
+plot.zoo(tesla_ts[,'TSLA.Close'])
+```
+
+Thisis very clearly a non-stationary time-series.
+Before 2013 the mean was very low, with a strong rise in 2013 and again in 2017.
+Also, as it typical for stock market data, prices don't just jump from 100 to 500 and back within a few days, but crawl about slowly, changing by small steps each time. 
+Note that non-stationary means that something is `moving`.
+
+We can confirm our suspicions with the ADF test.
+
+```{r}
+adf.test(tesla_ts[,'TSLA.Close'])
+```
+
+The test is not significant (p=0.928), suggesting that it is non-stationary. 
+Now let's look at the autocorrelation. For this we can use the `acf` function. 
+
+```{r tesla_acf}
+acf(tesla_ts$TSLA.Close, na.action=na.pass)
+```
+
+The x-axis shows the lag in days, and the y-axis shows for this lag how strong the correlation is. The blue lines indicate the 95\% confidence interval of the correlation test. We see that the autocorrelation is till very strong up to further than 30 days back.
+This is a clear indicator of non-stationarity. 
+The values are so strongly determined by its moving mean, that based on today's value we have a very good idea (correlation > 0.9) what the value will be in 30 days.
+
+## Transforming non-stationar time series
+
+We have seen that the data is non-stationary, so the next step is to make it stationary.
+There are different ways to correct non-stationary time series, but here we'll focus on differencing.
+That is, instead of using the absolute values, we use the difference between values and the previous values. 
+ 
+Take a second to think about why this makes the data more stationary. 
+We change our perspective from looking at what the stock prices are each day, to how much they increased/decreased compared to yesterday.
+It doesn't really matter what the prices are any longer. 
+What matters is how the prices change from day to day.
+
+In the next line we add the diff variable using the `diff()` function. What this does is no more than taking each day's value minus the value of the day before.
+
+```{r}
+tesla_ts$TSLA.Close_diff = diff(tesla_ts$TSLA.Close)
+head(tesla_ts[,c('TSLA.Close','TSLA.Close_diff')])
+```
+
+The first value of the diff transformation is NA, because for the first value there is no previous value to take the difference off.
+We can use the na.omit function to drop all NA rows.
+Then we plot the data.
+
+```{r tesla_made_stat}
+tesla_ts = na.omit(tesla_ts)  
+plot(tesla_ts[,c('TSLA.Close','TSLA.Close_diff')])
+```
+
+In the plot 
+
+```{r}
+adf.test(na.omit(tesla_ts$TSLA.Close_diff))    ## we use na.omit, because the first value of a diff is NA
+acf(tesla_ts$TSLA.Close_diff, na.action=na.pass)
+```
+
+The ADF test suggests that the series is stationary (even though there still is an issue with the increase of variance over time).
+
+The acf plot shows that autocorrelation is also mostly gone, and no longer statistically significant. Note that we do see a sudden significant correlation at lag 24. This is simply because with a confidence intervall of 95\% (1 in 20), there are likely to be some 'significant' correlations by sheer chance.   
+
+# A warning on using time-series in regression analysis
+
+We mentioned before that for time series analysis it is important to have stationary time-series. 
+To help you understand why, we will show an example of how not accounting for trends and autocorrelation can lead to ridiculous conclusion.
+
+Above we obtained time series about the stock market values of Tesla. 
+Here we will show you that if we just randomly simulate a time series with an upward trend over time, we can very strongly predict the stock market values of Tesla (if we're not doing it properly. 
+
+```{r}
+set.seed(1)
+sim = arima.sim(n = nrow(tesla_ts), list(order = c(1,0,0), ar=0.8))
+sim = sim + (1:length(sim)) * 0.005
+tesla_ts$sim = zoo(sim, order.by=index(tesla_ts))
+plot(tesla_ts$sim)
+```
+
+So this is our bogus time series. 
+We've joined it to our tesla time series data.
+If we want to analyze whether this time series predicts the tesla Close value, we can fit a linear regression model in which the Tesla Close value is the dependent variable, and the independent variable is the lag of sim.
+
+We can calculate the lag of a column with the `lag` function.
+Here we calculate 1 day lag for our simulated data.
+
+```{r}
+tesla_ts$sim_l1 = lag(tesla_ts$sim, 1)
+```
+
+Now we fit the model. As independent variables we include both sim and sim_l1.
+In other words, can we the value of Tesla Close by the randomly simulated value on the same day and/or the day before?
+
+```{r}
+library(sjPlot)
+m = lm(TSLA.Close ~ sim + sim_l1, data=tesla_ts)
+tab_model(m)
+```
+
+Wow, we can almost perfectly predict the market!!
+Unless, this is complete nonsense. 
+What we're predicting here is, off course, purely the upward trend.
+
+If you use a time series as a dependent variable in a regression analysis, you want to account for the fact that the time series observations are not independent. 
+In this case, we know the autocorrelation of TSLA.Close to be very high. 
+We can control for autocorrelation by including the lag of the dependent variable as an independent variable.
+Here we use only a lag of order 1.
+
+```{r}
+library(sjPlot)
+tesla_ts$TSLA.Close_l1 = lag(tesla_ts$TSLA.Close, 1)
+m = lm(TSLA.Close ~ TSLA.Close_l1 + sim + sim_l1, data=tesla_ts)
+tab_model(m)
+```
+
+And gone is all our hope that we could predict the market... The only thing that is predicting TSLA.CLose now is the previous value of TSLA.Close.
+
+Still, it is not ideal that we have a model with an R2 value of 99.8% (meaning that almost all variance in y is explained). 
+Here we can see what happens if we use the `TSLA.Close_diff`.
+First, we make a lag for this column, and then repeat the analysis.
+
+```{r}
+tesla_ts$TSLA.Close_diff_l1 = lag(tesla_ts$TSLA.Close_diff, 1)
+m = lm(TSLA.Close_diff ~ TSLA.Close_diff_l1 + sim + sim_l1, data=tesla_ts)
+tab_model(m)
+```
+
+Now almost all explained variance is gone. 
+The only interesting thing is that given yesterdays change (increase/decrease) in the market we can slighlty predict todays change. 
+This is probably still an afterimage of the trend, which despite being differenced away, still means that on average we have had more increases than decreases.
+
+Long story short: be very aware of autocorrelation if you use correlate different time or use time series in regression analysis. 
+If y is a time-series, include the lag of y as an independent variable, and consider differencing y.
+

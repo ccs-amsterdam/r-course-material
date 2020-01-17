@@ -253,6 +253,7 @@ m1 = lm(exam_grade ~ 1 + hours_studied, data=d)
 m2 = lm(exam_grade ~ 1 + hours_studied + wealth, data=d)
 
 tab_model(m0, m1, m2)
+anova(m0, m1, m2)
 ```
 
 ### Using dummy variables for class_ids
@@ -265,6 +266,7 @@ Here we do this, but since this would result in a very long table (25 rows for d
 
 ```{r, eval=F}
 m3 = lm(exam_grade ~ 1 + hours_studied + wealth + class_id, data=d)
+tab_model(m3)
 tab_model(m3, rm.terms = paste('class_id', letters, sep=''))
 ```
 
@@ -295,6 +297,7 @@ m4 = lmer(exam_grade ~ 1 + hours_studied + wealth + teacher_exp + (1 + hours_stu
 This can be a bit complicated issue (e.g. see [this](https://stats.stackexchange.com/questions/110004/how-scared-should-we-be-about-convergence-warnings-in-lme4) and the top answer]). One solution is centering some of you variables. In our case, the hours_studied and wealth variables have rather high numbers. Here we center them by subtracting the mean, and in our case that solves the issue.
 
 ```{f}
+hist(d$hours_studied)
 d = mutate(d, hours_studied = hours_studied - mean(hours_studied),
               wealth = wealth - mean(wealth))
 m4 = lmer(exam_grade ~ 1 + hours_studied + wealth + teacher_exp + (1 + hours_studied | class_id), data=d)
