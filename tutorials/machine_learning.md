@@ -1,7 +1,7 @@
 R Tidyverse: Data Summarization with group\_by, summarize, and mutate
 ================
 Kasper Welbers & Wouter van Atteveldt
-2019-03
+2020-01
 
 # Introduction
 
