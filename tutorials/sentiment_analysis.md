@@ -1,7 +1,7 @@
-R text analysis: sentiment analysis and context searches
+Supervised Sentiment Analysis in R
 ================
 Wouter van Atteveldt & Kasper Welbers
-2018-11
+2020-01
 
 -   [Introduction](#introduction)
 -   [Getting a DTM](#getting-a-dtm)

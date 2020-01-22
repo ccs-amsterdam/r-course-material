@@ -1,7 +1,7 @@
 ---
-title: 'R text analysis: sentiment analysis and context searches'
+title: 'Supervised Sentiment Analysis in R'
 author: "Wouter van Atteveldt & Kasper Welbers"
-date: "2018-11"
+date: "2020-01"
 output: 
   github_document:
     toc: yes

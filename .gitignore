@@ -3,11 +3,10 @@
 .RData
 .Ruserdata
 *.Rproj
-
 # downloaded resources
 udpipe_models/*
 tutorials/udpipe_models/*
-
-
 *.rda
 tutorials/*.rda
+.httr-oauth
+
