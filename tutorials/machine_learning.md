@@ -70,7 +70,7 @@ Model 1: a decision tree
 
 The most easily explainable model is probably the decision tree. A decision tree is a series of tests which are run in series, ending in a decision. For example, a simple tree could be: If someone is a house owner, assume good credit. If not, if they have a savings account, they're good credit, but otherwise they are a bad credit risk.
 
-In caret, we can train a decision tree using the `rpart` method. The following code trains a model on the data, prediction species from all other variables (`species ~ .`), using the `train.set` created above.
+In caret, we can train a decision tree using the `rpart` method. The following code trains a model on the data, prediction species from all other variables (`class ~ .`), using the `train.set` created above.
 
 ``` r
 library(caret)

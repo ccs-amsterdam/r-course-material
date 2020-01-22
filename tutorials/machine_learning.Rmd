@@ -83,7 +83,7 @@ For example, a simple tree could be: If someone is a house owner, assume good cr
 they're good credit, but otherwise they are a bad credit risk.
 
 In caret, we can train a decision tree using the `rpart` method. 
-The following code trains a model on the data, prediction species from all other variables (`species ~ .`),
+The following code trains a model on the data, prediction species from all other variables (`class ~ .`),
 using the `train.set` created above. 
 
 
