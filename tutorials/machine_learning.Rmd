@@ -1,5 +1,5 @@
 ---
-title: 'R Tidyverse: Data Summarization with group_by, summarize, and mutate'
+title: 'Supervised Machine Learning in R'
 author: "Kasper Welbers & Wouter van Atteveldt"
 date: "2020-01"
 output: 
