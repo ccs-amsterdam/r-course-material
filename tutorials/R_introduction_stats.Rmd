@@ -327,7 +327,7 @@ R was originally designed by and for statisticians, so it comes as no surprise t
 
 For this example we'll keep it simple, and only run a linear regression model using the `lm` (linear model) function. 
 For statistical functions, R works with a `formula`, in which you specify what the dependent and independent variables are. 
-For linear regression, the formula is `y ~ x1 + x2 + ...`, where y is the dependent variable, and x1, x2, etc. are independent variables (note that this bears resemblance to the actual regression formula).
+For linear regression, the formula is ```y ~ x1 + x2 + ...```, where y is the dependent variable, and x1, x2, etc. are independent variables (note that this bears resemblance to the actual regression formula).
 In the following line of code, we fit a linear regression model where the dependent variable is `income`, and the independent variables are `college`, `population` and `pop_change`. 
 
 ```{r}
@@ -384,6 +384,6 @@ plot_model(m, type='pred', show.data=T, grid = T)
 
 You've now only seen the very surface of what you can do with R, but hopefully you've developed a taste for more. While there is certainly an initial hurdle of getting into R, once you get past the basics it becomes much more fun and you'll learn new things much faster. Learning a programming language really is similar to learning a regular language. Once you know the basics, you can start learning by doing, and at that point progress becomes much easier and more rewarding. 
 
-So how do you get past that initial hurdle? First, you will need to find learning material that fits your learning style. Our own [github page](https://github.com/ccs-amsterdam/r-course-material) might be a good place to start, but there are many other tutorials available, many of which are free. There is also the excellent [R for data science](https://r4ds.had.co.nz/) book, which has a free online version.
+So how do you get past that initial hurdle? First, you will need to find learning material that fits your learning style. Our own [github page](https://github.com/ccs-amsterdam/r-course-material) might be a good place to start. Here you can find more information on [Data and functions](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_basics_2_data_and_functions.md) in R, and the series of tutorials on Data mangling in the tidyverse is a good concise introduction for all your data mangling needs. Other than that, there are many other tutorials available online, many of which are free. There is also the excellent [R for data science](https://r4ds.had.co.nz/) book, which has a free online version.
 
 Once you have learned the basics, it is mainly a matter of practice. To keep you motivated, we recommend picking up a project that interests you. This can be something that you need for work or studies, but also simply something fun. 
