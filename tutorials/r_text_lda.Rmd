@@ -1,7 +1,7 @@
 ---
 title: "Fitting LDA Models in R"
 author: "Wouter van Atteveldt & Kasper Welbers"
-date: "November 2019"
+date: "2020-03"
 output: 
   github_document:
     toc: yes
@@ -79,14 +79,14 @@ And we can find this document in the original texts by looking up the document i
 ```{r}
 docs = docvars(dfm)
 topdoc = names(topic.docs)[1]
-docid = which(rownames(docs) == topdoc)
+docid = which(docnames(dfm) == topdoc)
 texts[docid]
 ```
 
 Finally, we can see which president prefered which topics:
 
 ```{r lda-heatmap}
-docs = docs[rownames(docs) %in% rownames(dtm), ]
+docs = docs[docnames(dfm) %in% rownames(dtm), ]
 tpp = aggregate(posterior(m)$topics, by=docs["President"], mean)
 rownames(tpp) = tpp$President
 heatmap(as.matrix(tpp[-1]))

@@ -1,7 +1,7 @@
 Supervised Sentiment Analysis in R
 ================
 Wouter van Atteveldt & Kasper Welbers
-2020-01
+2020-03
 
 -   [Introduction](#introduction)
 -   [Getting a DTM](#getting-a-dtm)
@@ -33,25 +33,21 @@ For this tutorial, the main lessons of these papers are that you should always v
 Getting a DTM
 =============
 
-The main primitive for dictionary analysis is the document-term matrix (DTM). For more information on creating a DTM from a vector (column) of text, see the [tutorial on basic text analysis with quanteda](R_texrt_3_quanteda.md). For this tutorial, it is important to make sure that the preprocessing options (especially stemming) match those in the dictionary: if the dictionary entries are not stemmed, but the text is, they will not match. In case of doubt, it's probably best to skip stemming altogether.
+The main primitive for dictionary analysis is the document-term matrix (DTM). For more information on creating a DTM from a vector (column) of text, see the [tutorial on basic text analysis with quanteda](R_text_3_quanteda.md). For this tutorial, it is important to make sure that the preprocessing options (especially stemming) match those in the dictionary: if the dictionary entries are not stemmed, but the text is, they will not match. In case of doubt, it's probably best to skip stemming altogether.
 
-For this example, we'll download a corpus of UK immigration news from Github. For easier re-use, we will save just the data frame with texts as an RDS file locally:
-
-``` r
-download.file("https://github.com/quanteda/quanteda.corpora/raw/master/data/data_corpus_immigrationnews.rda", destfile="immigration.rda")
-```
+For this example, we'll use the state of the union speeches (per paragraph) corpus included in the corpustools package. (Originally, we used the immigrationnews corpus from [quanteda.corpora](https://github.com/quanteda/quanteda.corpora), but these do not yet work with the new quanteda.)
 
 ``` r
-load("immigration.rda")
+library(quanteda)
+library(corpustools)
+corp = corpus(sotu_texts, docid_field = 'id', text_field = 'text')
 ```
-
-NOTE: when downloading data from the internet, it's often a good idea to cache remote downloads like this to a local file, and set `eval=F` on the chunk that downloads the file. That way, it's clear where the file came from, but it doesn't re-download it every time you knit the document.
 
 Now, we can create a dtm as normal:
 
 ``` r
 library(quanteda)
-dtm = data_corpus_immigrationnews %>% dfm(remove=stopwords("english"), remove_punct=T) %>% dfm_trim(min_docfreq=10)
+dtm = corp %>% dfm(remove=stopwords("english"), remove_punct=T) %>% dfm_trim(min_docfreq=5)
 dtm
 ```
 
@@ -160,15 +156,18 @@ sample_ids = sample(docnames(dtm), size=50)
 ```
 
 ``` r
-docs = data_corpus_immigrationnews$documents 
-docs = docs %>% mutate(document=rownames(docs)) %>% as_tibble()
+## convert quanteda corpus to data.frame
+docs = docvars(corp)
+docs$document = docnames(corp)
+docs$text = texts(corp)
+
 docs %>% filter(document %in% sample_ids) %>% mutate(manual_sentiment="") %>% write_csv("to_code.csv")
 ```
 
 Then, you can open the result in excel, code the documents by filling in the sentiment column, and read the result back in and combine with your results above. Note that I rename the columns and turn the document identifier into a character column to facilitate matching it:
 
 ``` r
-validation = read_csv("to_code.csv") %>% inner_join(result)
+validation = read_csv("to_code.csv") %>% mutate(document=as.character(document)) %>% inner_join(result)
 ```
 
 Now let's see if my (admittedly completely random) manual coding matches the sentiment score. We can do a correlation:
@@ -182,11 +181,11 @@ We can also get a 'confusion matrix' if we create a nominal value from the senti
 ``` r
 validation = validation %>% 
   mutate(sent_nom = cut(sentiment1, breaks=c(-1, -0.1, 0.1, 1), labels=c("-", "0", "+")))
-cm = table(validation$manual_sentiment, validation$sent_nom)
+cm = table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
 cm
 ```
 
-This shows the amount of errors in each category. For example, 13 documents were classified as positive ("+") but manually coded as negative (-1). Total accuracy is the sum of the diagonal of this matrix (3+1+13=17) divided by total sample size (50), or 34%
+This shows the amount of errors in each category. For example, 17 documents were classified as positive ("+") but manually coded as negative (-1). Total accuracy is the sum of the diagonal of this matrix (0+2+13=15) divided by total sample size (50), or 31.25%
 
 ``` r
 sum(diag(cm)) / sum(cm)
@@ -198,7 +197,8 @@ Improving a dictionary
 To improve a sentiment dictionary, it is important to see which words in the dictionary are driving the results. The easiest way to do this is to use `textstat_frequency` function and then using the tidyverse filter function together with the `%in%` operator to select only rows where the feature is in the dictionary:
 
 ``` r
-textstat_frequency(dtm) %>% as_tibble() %>% filter(feature %in% HL_dict$positive)
+freqs = textstat_frequency(dtm)
+freqs %>% as_tibble() %>% filter(feature %in% HL_dict$positive)
 ```
 
 As you can see, the most frequent 'positive' words found are 'like' and 'work'. Now, it's possible that these are actually used in a positive sense ("I like you", "It works really well"), but it is equally possible that they are used neutrally, especially the word "like".
@@ -206,7 +206,7 @@ As you can see, the most frequent 'positive' words found are 'like' and 'work'. 
 To find out, the easiest method is to get a keyword-in-context list for the term:
 
 ``` r
-head(kwic(data_corpus_immigrationnews, "like"))
+head(kwic(corp, "like"))
 ```
 
 From this, it seems that the word `like` here is not used as a positive verb, but rather as a neutral preposition. To remove it from the list of positive words, we can use the `setdiff` (difference between two sets) function:
@@ -246,7 +246,7 @@ install.packages("corpustools")
 
 ``` r
 library(corpustools)
-t = create_tcorpus(data_corpus_immigrationnews$documents, text_colum="texts", doc_column="id")
+t = create_tcorpus(sotu_texts, doc_column="id")
 ```
 
 Highlighting dictionary hits
@@ -275,23 +275,23 @@ In many cases, you want to look only at the words immediately surrounding your s
 
 This technique is useful for all forms of dictionary analysis, for example to see how a certain issue or person is described or framed, or to see what issue a party is associated with; but especially for sentiment analysis it can help find sentiment that is actually related to a specific actor or issue.
 
-For this tutorial, we limit the tcorpus to words occurring within 10 words of 'ukip':
+For this tutorial, we limit the tcorpus to words occurring within 10 words of 'war':
 
 ``` r
-ukip = subset_query(t, "ukip", window=10)
+war = subset_query(t, "war", window=10)
 ```
 
-The last step is to convert the tcorpus back to a regular dtm object. We can then use the methods from quanteda to clean it by removing infrequent words, stopwords, lowercasing it, and removing all words that contain anything apart from letters (e.g. punctuation, numbers). Note that the last step is done using a regular expression, see for example [regexone.com](https://regexone.com/) for a gentle introduction.
+The last step is to convert the tcorpus back to a regular dfm object. We can then use the methods from quanteda to clean it by removing infrequent words, stopwords, lowercasing it, and removing all words that contain anything apart from letters (e.g. punctuation, numbers). Note that the last step is done using a regular expression, see for example [regexone.com](https://regexone.com/) for a gentle introduction.
 
 ``` r
-dtm_ukip = get_dfm(ukip, feature='token') %>% dfm_trim(min_docfreq=10) %>% dfm_remove(stopwords('english')) %>% 
+dtm_war = get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
   dfm_tolower %>% dfm_remove("[^a-z]", valuetype="regex")
 ```
 
 Now let's have a look at the top words:
 
 ``` r
-head(textstat_frequency(dtm_ukip))
+head(textstat_frequency(dtm_war))
 ```
 
-As you can see, ukip is (not surprisingly) the most frequent word, followed by party and Farage (the name of the UKIP leader). You can now use this dtm in a sentiment analysis, and e.g. compare sentiment for the context around different actors or issues.
+As you can see, war is (not surprisingly) the most frequent word, followed by terror, fight and iraq. You can now use this dtm in a sentiment analysis, and e.g. compare sentiment for the context around different actors or issues.

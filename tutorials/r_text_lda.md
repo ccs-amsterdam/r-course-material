@@ -1,7 +1,7 @@
 Fitting LDA Models in R
 ================
 Wouter van Atteveldt & Kasper Welbers
-November 2019
+2020-03
 
 -   [Introduction](#introduction)
     -   [Inspecting LDA results](#inspecting-lda-results)
@@ -44,13 +44,13 @@ We can use `terms` to look at the top terms per topic:
 terms(m, 5)
 ```
 
-| Topic 1 | Topic 2 | Topic 3    | Topic 4   | Topic 5 | Topic 6 | Topic 7    | Topic 8 | Topic 9 | Topic 10   |
-|:--------|:--------|:-----------|:----------|:--------|:--------|:-----------|:--------|:--------|:-----------|
-| great   | upon    | government | us        | can     | nations | government | us      | world   | government |
-| years   | shall   | people     | god       | every   | peace   | public     | let     | peace   | shall      |
-| states  | duties  | states     | day       | america | war     | business   | can     | freedom | congress   |
-| now     | country | union      | president | must    | foreign | revenue    | new     | people  | may        |
-| upon    | people  | every      | new       | country | united  | can        | must    | free    | law        |
+| Topic 1      | Topic 2  | Topic 3  | Topic 4    | Topic 5 | Topic 6    | Topic 7 | Topic 8 | Topic 9 | Topic 10 |
+|:-------------|:---------|:---------|:-----------|:--------|:-----------|:--------|:--------|:--------|:---------|
+| government   | people   | can      | government | years   | government | must    | peace   | us      | war      |
+| states       | shall    | may      | congress   | world   | public     | life    | world   | let     | states   |
+| union        | citizens | one      | shall      | now     | revenue    | people  | can     | america | nations  |
+| people       | upon     | shall    | people     | us      | can        | liberty | nations | new     | great    |
+| constitution | fellow   | citizens | executive  | history | business   | upon    | must    | must    | united   |
 
 The `posterior` function gives the posterior distribution of words and documents to topics, which can be used to plot a word cloud of terms proportional to their occurrence:
 
@@ -61,8 +61,8 @@ topwords = head(sort(words, decreasing = T), n=50)
 head(topwords)
 ```
 
-    ##    nations      peace        war    foreign     united     states 
-    ## 0.02084942 0.01905361 0.01779653 0.01582114 0.01564156 0.01312741
+    ## government     public    revenue        can   business     people 
+    ## 0.02217061 0.01937509 0.01313894 0.01270886 0.01163366 0.01034342
 
 Now we can plot these words:
 
@@ -81,27 +81,28 @@ topic.docs = sort(topic.docs, decreasing=T)
 head(topic.docs)
 ```
 
-    ##   1949-Truman.43 1805-Jefferson.3  1901-McKinley.2   1949-Truman.25 
-    ##        0.9181818        0.9093023        0.9050000        0.8882353 
-    ##   1813-Madison.7 1889-Harrison.22 
-    ##        0.8714286        0.8627907
+    ##  1889-Harrison.26  1889-Harrison.25 1933-Roosevelt.10      1909-Taft.13 
+    ##         0.9020000         0.8204545         0.7958333         0.7947368 
+    ##    1949-Truman.27   1921-Harding.23 
+    ##         0.7888889         0.7864865
 
 And we can find this document in the original texts by looking up the document id in the document variables `docvars`:
 
 ``` r
 docs = docvars(dfm)
 topdoc = names(topic.docs)[1]
-docid = which(rownames(docs) == topdoc)
+docid = which(docnames(dfm) == topdoc)
 texts[docid]
 ```
 
-    ##                                                                                                                                      1949-Truman.43 
-    ## "In addition, we will provide military advice and equipment to free nations which will cooperate with us in the maintenance of peace and security."
+    ## Corpus consisting of 1 document and 4 docvars.
+    ## 1889-Harrison.26 :
+    ## "It will be the duty of Congress wisely to forecast and estim..."
 
 Finally, we can see which president prefered which topics:
 
 ``` r
-docs = docs[rownames(docs) %in% rownames(dtm), ]
+docs = docs[docnames(dfm) %in% rownames(dtm), ]
 tpp = aggregate(posterior(m)$topics, by=docs["President"], mean)
 rownames(tpp) = tpp$President
 heatmap(as.matrix(tpp[-1]))
