@@ -96,21 +96,24 @@ In the scatterplot we see that (as expected) there are only 2 values on the y-ax
 We see that cases where `y = 1` are more common for higher x values, which indicates that there is a positive effect of x on y.
 This is also reflected in the regression line.
 
-So why are we not happy?
-It is clear that a linear model is not a good fit for this data.
-Most predicted values of y (i.e. the line) are literally impossible.
-While the model captures that higher values of x are more likely to have y values of 1, for values above 15 we now actually get errors because we predict that y is higher than 1.
-The residuals are also nonnormal with nonconstant variance.
-For low values of x, almost all residuals are negative, and for high values of x almost all values are positive. 
-We also would not want constant variance of the residuals with regard to x. If x is very low or very high then we have a much better prediction of y, whereas for center values of x such as 5 we are very uncertain. 
-
-As an excercise, you could also look at the diagnistic plots to investigate the assumption or normality and homoscedacity.
+But while the model does capture the overal relation, there are some issues.
+Firstly, most predicted values of y (i.e. the line) cannot actually be values of y, which only has the values 0 and 1.
+As a result, the R2 value as a measure of model fit, that looks at the squared distance of the dots to the line, does not really have a meaningfull interpreation.
+It is possible, to some extent, to think of the predicted values as probabilities, but then what does it mean when y is lower than 0 or higher than 1?
+If we would check our model diagnostics, we would see that the residuals tend to be nonnormal with nonconstant variance.
+We will not discuss these diagnostics here, but you can run the code below yourself if you want to explore this yourself.
 
 ```{r, eval=F}
 plot(m, which = 1)
 plot(m, which = 2)
 influence.measures(m)
 ```
+
+In conclusion, there are some issues with using a linear regression model when you have a binary dependent variable. 
+The logistic regression model that we discuss next is a flavour of GLM designed to address these issues. 
+
+But before we move on, we should mention that, *given some extra care*, it is possible to use ordinary linear regression with a binary dependent variable.
+Although the logistic regression model is generally preferred by many, in some disciplines it is also quite common to use a [linear probability model](https://en.wikipedia.org/wiki/Linear_probability_model). While this is essentially a linear regression model, some additional steps and precautions should be taken to address the issues mentioned above. For instance, using [Heteroscedastic Robust Standard Errors](https://www.r-econometrics.com/methods/hcrobusterrors/) to calculate reliable p-values. So, if you see someone use a linear regression model with a binary dependent variable, it is not necessarily *wrong*, as long as they know what they are doing. 
 
 ### Fitting a logistic regression model on binary data
 
@@ -289,7 +292,82 @@ In ordinary linear regression it is common to report the R2 measure as an indica
 
 In logistic regression this R2 measure cannot be used. The model parameters are determined with Maximum-likelihood estimation (MLE), that iteratively looks for the model parameters that maximize the likelihood of generating the observed data. We can use this likelihood (and measures based on likelihood) as an indicator of model fit, but there is no straightforward way to calculate a value between 0 and 1 that indicates whether the model explains nothing or everything.
 
-Still, we (and reviewers) often like something similar to an R2 value. So researchers have come op with `Pseudo R2` measures for logistic regression (and other GLMs). The main idea is to have a measure of model fit that is bounded between 0 and 1, where zero means that it does not (or very poorly) fit the data, and 1 means a (near) perfect fit.
+Here we discuss how we can use likelihood, and specifically the *deviance* measure, to compare different models in order to find the model that best fits the data. In addition, we discuss the concept of `Pseudo R2` measures, that are sometimes reported as a helpfull tool for interpreting model fit.
+
+#### Comparing models
+
+The most important use of model fit measures is the possibility to compare *nested models*.
+By *nested models*, we mean models with the same dependent variable, where one model is *more complex* compared to the other.   
+By *more complex*, we mean having more parameters, which you get by adding more independent variables. 
+For instance, say we have two models that try to predict whether a student passes a test. 
+If one model has only the independent variable `hours_studied`, and the other model has both `hours_studied` and `selftest`, then the second model is more complex. 
+
+We want to be able to say whether the second model offers a *statistically significant* improvement in model fit. 
+Why statistically significant? Well, we can be pretty damn certain that the more complex model has a higher model fit. 
+By adding more independent variables, it simply has more information to work with. 
+Even if we add a completely random independent variable, it is still likely to give us a slightly better model fit because it has more parameters to tweak.
+Therefore, we want to test whether the increase in model fit is significant, in a way that takes into account how many variables were added.
+In other words, we want to test whether adding the independent variable `selftest` improves the model, and improves it more than we would expect based on sheer coincidence. 
+
+By comparing model fit this way, we can also test whether a model predicts anything about the dependent variable at all.
+To do so, we compare the model to a model without any independent variables (so the only parameter is the intercept).
+
+Doing these comparisons in R is actually pretty straighforward. You simply fit multiple models, and then use the `anova` function to compare them.
+Here we show an example for logistic regression, but the approach is actually identical for other GLMs (and also multilevel models).
+Here we first fit an empty model, and then add the variables in 2 steps. 
+Note that in the empty model we need to provide the value 1 for the intercept (if independent variables are given, the intercept is automatically added).
+
+```{r}
+m_0 = glm(passed_test ~ 1, data=d, family= binomial)
+m_1 = glm(passed_test ~ hours_studied + selftest, data=d, family= binomial)
+m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binomial)
+```
+
+A nice feature of the `tab_model` function is that we can pass multiple models, and it will show them nicely side-by-side.
+For comparing models, it then makes sense to sort these models by complexity, with the least complex model on the left, and the most complex model on the right. 
+
+```{r, eval=F}
+tab_model(m_0, m_1, m_2)
+```
+
+Comparing models in R can be done with the `anova` function (note that while this is called anova, it is different from the statistical analysis where you compare the means of different groups). Here we also just pass multiple models to compare to the function. Note that the order of the models is important, because each model will only be compared to the previous model. This is sufficient, because if `m_2` has better fit than `m_1`, it also has better fit than `m_0`. 
+
+```{r, eval=F}
+anova(m_0, m_1, m_2)
+```
+
+Each row represents a model, in the same order in which they have been passed to `anova()`.
+In the `Resid. Dev` column we see the Residual Deviance[^deviance] for each model.
+This Residual Deviance has a similar interpretation as the sum of squares in ordinary regression: the closer the value is to zero, the better the model fit.
+Thus, if we compare multiple models, models with a lower Deviance have a better model fit.
+
+[^deviance]: Deviance is a measure that is obtained by comparing two models based on their likelihood of generating the observed data. The Residual Deviance of a model is obtained by comparing the modell to the *saturated model*. That is, a model in which every observation has it's own parameter, so that it has the best possible (and often perfect) prediction of the data. You can think of the Residual Deviance as the extent to which the model *deviates* from a model that best fits the data. 
+
+Let's compare the first and second row, for `m_0` and `m_1`, respectively.
+To see whether model fit improves from `m_0` to `m_1`, we look at how much the Residual Deviance decreases.
+This is also the value that is reported in the column named `Deviance` ($1120.25 - 872.10 = 248.16$)[^deviance].
+Since the value decreased by 248.16, we know that the model fit improved (Deviance got closer to zero).
+
+But how do we now if this decrease in Deviance is significant?
+For this we use a $Chi^2$ test (which we asked for above in the `anova` function).
+In the `Pr(>Chi)` column we see the p value (in scientific notation and with the conventional stars).
+This indicates whether the model was a significant improvement compared to the previous model (one row higher).
+
+In case you are wondering, this $Chi^2$ test uses the value in the `Deviance` and `Df` columns.
+Recall that we wanted to take into account how many variables we added in `m_1` compared to `m_0`. 
+Adding variables decreases the degrees of freedom (Resid. Df) of the model, and in the `Df` column we see that we lost 2 Df (in `m_2` we added the variables `hours_studied` and `selftest`).
+Now, it turns out that with a large enough $n$ the difference of the Deviance of two models is approximately chi-square distributed, where the difference in the degrees of freedom of the models is the degrees of freedom for the Chi-square test.
+So, comparing `m_2` and `m_3`, we can take the decrease in Deviance (38.253) and Df (1) and look up these values in a HUGE $Chi^2$ distribution table, or use the following function to do this.
+
+```{r, eval=F}
+pchisq(38.253, df=1, lower.tail=F)
+```
+
+Of course, you do not need to calculate this yourself, as this is also the value that is reported in the anova output (if you use the `test = 'Chisq'` argument as we do above). 
+
+### Pseudo R2
+
+In addition to comparing models, we (and reviewers) often do like something similar to an R2 value, because it tells us something about how good a model is on a scale from worthless (0) to perfect (1). So smart people have come op with `Pseudo R2` measures for logistic regression (and other GLMs). The main idea is to have a measure of model fit that is bounded between 0 and 1, where zero means that it does not (or very poorly) fit the data, and 1 means a (near) perfect fit.
 The problem is that there are quite a lot of different pseudo r2 measures [(a nice overview)[https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/]] and there is no consensus on when to use which. This is probably not a discussion you want to be part of, so a practical approach would be to see which measures are used in your field. 
 
 The tab_model function from `sjPlot` by default reports the "coefficient of discrimination" Pseudo R2 proposed by Tjur ([2009](https://www.tandfonline.com/doi/abs/10.1198/tast.2009.08210)). 
@@ -299,7 +377,7 @@ You take the mean of the fitted probabilities for the cases where y = 1, and sub
 
 ```{r}
 ## (we create pred and y for clarity)
-pred = m$fitted.values
+pred = m_2$fitted.values
 y = d$passed_test
 
 pred_0 = mean(pred[y == 0])
@@ -309,63 +387,9 @@ pred_1 - pred_0
 
 Regardless of which Pseudo R2 measure you choose, be carefull not to attach too much meaning to it. It's usefull for comparing models and getting a general indication of how well you can predict a dependent variable, but it's only an indication. 
 
-### Comparing model fit
-
-You often see that regression models are reported with increasing complexity (i.e. more variables added). 
-These models are referred to as nested models, because the more complex models contain all the terms of the less complex models.
-This is often represented as a regression table with the least complex model (sometimes a NULL or base model) on the left, and towards the right increasingly complex models.
-
-Here we show you how to do that in R for logistic regression, but same approach is actually identical for other GLMs (and also multilevel models).
-Here we fit a NULL model (ie. a model without independent variables), and add the variables in 2 steps. 
-Note that in the NULL model we need to provide the value 1 for the intercept (if independent variables are given, the intercept is automatically added).
-
-```{r}
-m_0 = glm(passed_test ~ 1, data=d, family= binomial)
-m_1 = glm(passed_test ~ hours_studied + selftest, data=d, family= binomial)
-m_2 = glm(passed_test ~ hours_studied + selftest + alcohol, data=d, family=binomial)
-```
-
-We can now pass all models in the correct order to the `tab_model` function.
-
-```{r, eval=F}
-tab_model(m_0, m_1, m_2)
-```
-
-It is common to report whether the improvement in model fit of the more complex model is significant. The idea is then that we only use a more complex model if it actually improves the fit to the data. The increase from the NULL model indicates whether the model explains anything at all.
-
-Comparing models in R can be done with the anova function (note that this is different from an Analysis of Variance Model, which is calculated with the `aov` function in R). 
-
-```{r, eval=F}
-anova(m_0, m_1, m_2, test = 'Chisq')
-```
-
-What we see here is that each model offers a significant improvement in fit compared to the former model. 
-
-If you're feeling adventurous. we can look a bit closer at what is compared here.
-For each model the Resid. Df (residual degrees of freedom) and Resid. Dev (Residual Deviance) is reported. The degrees of freedom is $n$ minus the number of parameters. The Resid. Dev (Residual Deviance) is the log likelihood of a model multiplied by $-2$. 
-We can verify this for the first model, which as 1 parameter (the intercept)
-
-```{r, eval=F}
-1000 - 1              
-logLik(m_0) * -2   
-```
-
-Deviance is a measure of how wel a model fits the data, with smaller deviance indicating a better fit. It's similar (but not the same) as the sum of squares in ordinary regression. With a large enough $n$ the difference of the Deviance of two models is approximately chi-square distributed, where the difference in the degrees of freedom of the models is the degrees of freedom for the Chi-square test. 
-
-So what you see in the `Deviance` and `Df` columns of the `anova` output is how much the Deviance and Degrees of freedom decreased from the previous model. 
-The `Pr(>Chi)` column reports the p value of the Chi-squared test.
-We can verify this for the third model, where the Deviance is 38.253 and the Df is 1.
-
-```{r, eval=F}
-pchisq(38.253, df=1, lower.tail=F)
-```
-
-
-
-
 ## Poisson regression
 
-Now we will fit and interpret a Poisson regression model. Several aspects of this are similar or identical to logistic regression, so rest assured, we'll need less words.
+Now we will fit and interpret a Poisson regression model. Several aspects of this are similar or identical to logistic regression, so rest assured, we'll need less words. However, this also means that if you skipped the logistic regression part, this section might be a bit too to-the-point.
 
 Again we start by generating some data. We'll pretend that 
 
@@ -411,31 +435,32 @@ table(d$retweets)
 
 If count data has a high mean, a normal distribution can be a good enough approximation. But with a low mean you'll have the problem that the distribution is highly skewed, and values cannot be lower than zero (so the bell curve of the normal distribution would be abruply cut off).
 
-A common alternative for this type of data is a negative binomial generalized linear model (in R, you can use the `glm.nb` function from the `MASS` package), that can be better if the Poisson model is overdispersed. We won't discuss this issue in this introduction to GLMs, but [this page](https://www.theanalysisfactor.com/overdispersion-in-count-models-fit-the-model-to-the-data-dont-fit-the-data-to-the-model/) provides a nice and simple example.
-
-In the current example, the Poisson model is a good fit to the data (but yeah, we generated the data ourselves)
+In the current example, the Poisson model is a good fit to the data (but yeah, we literally used a Poisson distribution to sample it)
 
 ```{r glm_poisson_fit, fig.align='center', fig.height=3, fig.width=5}
 plot_model(m, type='pred', show.data=T, grid=T)
 ```
 
+A common alternative for this type of data is a negative binomial generalized linear model (in R, you can use the `glm.nb` function from the `MASS` package), that can be better if the Poisson model is overdispersed. We won't discuss this issue in this introduction to GLMs, but [this page](https://www.theanalysisfactor.com/overdispersion-in-count-models-fit-the-model-to-the-data-dont-fit-the-data-to-the-model/) provides a nice and simple example.
 
 ### Interpreting Coefficients
 
 The interpretation of the coefficients is similar to logistic regression, but slightly easier. 
 Firstly, note that again we can interpret the p-values as in ordinary linear regression. 
-In this case we can interpret the effect of `funny`.
+So here we can say that the effect of `funny` is statistically significant.
 
 Like in logistic regression, the coefficients in the model are in logged form, and to interpret them it's easier to exponentiate them. 
 The `tab_model` function performs this transformation by default.
 As with logistic regression, make sure to always check whether the coefficients are shown in log form or as the incidence rate ratios, to prevent misinterpretation.
 
-The incidence rate indicates the frequency of an event within a given time span. In our case this event is a retweet.
-The incidence rate ratio for a dependent variable indicates how the incidence rate changes as a dependent variable increases by 1 unit. 
+The column with the coefficients is labeled the "Incidence Rate Ratios".
+The *incidence rate* of an event is the frequency of an event within a given time span. In our case is the number of retweets in one week.
+The coefficients, which are *incidence rate ratios* indicate how this incidence rate changes as an independent variable increases by 1 unit. 
 So, a tweet that scores $5$ on funny, has $1.34$ times the incidence rate of a tweet that scored $4$.
-A tweet that scores $7$ on funny, has $1.34^3$ times the incidence rate of a tweet that scored $4$.
+A tweet that scores $7$ on funny, has $1.34^3$ times ($1.34 * 1.34 * 1.34$) the incidence rate of a tweet that scored $4$.
 
-We can interpret the intercept as the base rate, and calculate the expected number of retweets for a tweet that scores $9$ on humor.
+If we want to get the *incidence rate* for a particular (linear combination of) independent variable(s), we take the intercept as the base rate, 
+and calculate the expected number of retweets for a tweet that scores $9$ on humor.
 
 ```{r}
 0.14 * 1.34^9
@@ -476,7 +501,7 @@ Recall that ordinary (univariate) linear regression can be written as:
 $$ y_i = \beta_0 + \beta_1{x_i} + \epsilon_i $$
 $$ \epsilon_i \sim \mathcal{N}(0, \sigma^2) $$
 
-This shows that the dependent variable $y_i$ equals the linear predictor $\beta_0 + \beta_1{x_i} plus the residual \epsilon_i, and that this residual is drawn from a normal distribution.
+This shows that the dependent variable $y_i$ equals the linear predictor $\beta_0 + \beta_1{x_i}$ plus the residual $\epsilon_i$, and that this residual is drawn from a normal distribution.
 We can rewrite this in a different way, that makes it easier to understand the relation to GLMs.  
 
 $$ \mu_i = \beta_0 + \beta_1{x_i} $$
@@ -598,8 +623,8 @@ Now there's a linear relation but the prediction interval increases as `x` incre
 
 In conclusion, we choose the `link` function to map the linear prediction to a different (possibly non-linear) relation that better fits the data. You can imagine this as the line changing (e.g, curving). We choose the `distribution` to better model the error of the prediction.   
 
-Finally, note that we cannot use any link function for any distribution. 
-A binomial distribution requires that the link function maps the linear prediction to values between 0 and 1.
+Be aware that we cannot use every link function for every distribution.
+For instance, the parameter for a binomial distribution is a probability, so the link function needs to map the linear prediction to values between 0 and 1.
 Often you do want to stick to the default link function for a distribution.
 Here we only demonstrated what happens if you don't in order to show the different effects of the distribution and link function.
 
