@@ -18,7 +18,7 @@ This is a set of tutorials designed to teach using the tidyverse functions for d
 The chapter numbers are relevant chapters from the excellent (and freely available) book ["R for Data Scientists" (R4DS)](http://r4ds.had.co.nz/)
 
 | Handout | Tutorial | R4DS ch. | Core packages / functions |
-|----|---|---|
+|----|---|---| --- |
 | [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) | 4 | (base R functions) |
 | Fun with R | [Fun with R](https://www.youtube.com/watch?v=eYCV8kIsgGs&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=2) | 3 | tidyverse,ggplot2,igraph |
 | [Transforming Data](tutorials/R-tidy-5-transformation.md) | |  5 | dplyr: filter, select, arrange, mutate | 
