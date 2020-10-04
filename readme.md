@@ -17,15 +17,15 @@ Below we list the relevant handouts/tutorials. Each links to the md file, see th
 This is a set of tutorials designed to teach using the tidyverse functions for data cleaning, reshaping, visualizing etc.
 The chapter numbers are relevant chapters from the excellent (and freely available) book ["R for Data Scientists" (R4DS)](http://r4ds.had.co.nz/)
 
-| Handout | Tutorial | R4DS ch. | Core packages / functions |
+| Handout | Video Tutorial | R4DS ch. | Core packages / functions |
 |----|---|---| --- |
 | Fun with R | [Fun with R](https://www.youtube.com/watch?v=eYCV8kIsgGs&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=2) | 3 | tidyverse,ggplot2,igraph |
 | [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) | 4 | (base R functions) |
 | [Transforming Data](tutorials/R-tidy-5-transformation.md) | [Importing and Cleaning](https://www.youtube.com/watch?v=CATqkFiZljU&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=3) |  5 | dplyr: filter, select, arrange, mutate | 
 | [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | [Grouping and Summarizing](https://www.youtube.com/watch?v=lde7wLORQpo&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=4) | 5 | dplyr: group_by, summarize |
 | [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) |  |7 | ggplot2  |
-| [Reshaping data](tutorials/r-tidy-12-reshaping.md) |  |12 | tidyr: spread, gather |
-| [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) |  |13 | dplyr: inner_join, left_join, etc. | 
+| [Reshaping data](tutorials/r-tidy-12-reshaping.md) | [Reshaping](https://www.youtube.com/watch?v=j4lZWJ3Osr8&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=5) |12 | tidyr: spread, gather |
+| [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | [Joining](https://www.youtube.com/watch?v=gg87Nv98VhQ&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=6) |13 | dplyr: inner_join, left_join, etc. | 
 | [Basic string (text) handling](tutorials/R-tidy-14-strings.md) |  |14 | readr: str_detect, str_extract etc., iconv |
 
 # Statistical Analysis
