@@ -22,7 +22,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | Fun with R | [Fun with R](https://www.youtube.com/watch?v=eYCV8kIsgGs&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=2) | 3 | tidyverse,ggplot2,igraph |
 | [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) | 4 | (base R functions) |
 | [Transforming Data](tutorials/R-tidy-5-transformation.md) | [Importing and Cleaning](https://www.youtube.com/watch?v=CATqkFiZljU&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=3) |  5 | dplyr: filter, select, arrange, mutate | 
-| [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | | 5 | dplyr: group_by, summarize |
+| [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | [Grouping and Summarizing](https://www.youtube.com/watch?v=lde7wLORQpo&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=4) | 5 | dplyr: group_by, summarize |
 | [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) |  |7 | ggplot2  |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) |  |12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) |  |13 | dplyr: inner_join, left_join, etc. | 
