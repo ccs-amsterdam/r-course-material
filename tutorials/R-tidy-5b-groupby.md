@@ -1,4 +1,4 @@
-R Tidyverse: Data Summarization with group\_by, summarize, and mutate
+R Tidyverse: Data Summarization 
 ================
 Kasper Welbers & Wouter van Atteveldt
 2019-03
