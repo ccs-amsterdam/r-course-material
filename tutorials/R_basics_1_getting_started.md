@@ -197,7 +197,7 @@ m
 
     ## Document-feature matrix of: 58 documents, 9,205 features (92.6% sparse).
 
-We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2% sparse, which means that 89.2% of the cells in the DTM have the value zero. In general, DTM's are very sparse, because individual documents (rows) contain only a small portion of all the words in the vocabulary (columns).
+We now have a DTM with 58 documents and 9,205 terms. The DTM is 92.6% sparse, which means that 92.6% of the cells in the DTM have the value zero. In general, DTM's are very sparse, because individual documents (rows) contain only a small portion of all the words in the vocabulary (columns).
 
 The entire DTM is pretty big, so we cannot visualize it entirely. Here we print a subset of only the first 10 documents and first 10 terms.
 
