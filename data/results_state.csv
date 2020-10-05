@@ -1,52 +1,291 @@
-fips,state,population,pop_change,over65,female,white,college,income
-1000,Alabama,4849377,1.4,15.3,51.5,69.7,22.6,23680
-2000,Alaska,736732,3.7,9.4,47.4,66.9,27.5,32651
-4000,Arizona,6731484,5.3,15.9,50.3,83.7,26.9,25358
-5000,Arkansas,2966369,1.7,15.7,50.9,79.7,20.1,22170
-6000,California,38802500,4.2,12.9,50.3,73.2,30.7,29527
-8000,Colorado,5355866,6.5,12.7,49.8,87.7,37,31109
-9000,Connecticut,3596677,0.6,15.5,51.2,81.2,36.5,37892
-10000,Delaware,935614,4.2,16.4,51.6,70.8,28.9,29819
-11000,District Of Columbia,658893,9.5,11.3,52.6,43.6,52.4,45290
-12000,Florida,19893297,5.8,19.1,51.1,77.8,26.4,26236
-13000,Georgia,10097343,4.2,12.4,51.2,62.1,28,25182
-15000,Hawaii,1419561,4.4,16.1,49.4,26.7,30.1,29305
-16000,Idaho,1634464,4.3,14.3,49.9,93.5,25.1,22568
-17000,Illinois,12880580,0.4,13.9,50.9,77.5,31.4,29666
-18000,Indiana,6596855,1.7,14.3,50.7,86.1,23.2,24635
-19000,Iowa,3107126,2,15.8,50.3,92.1,25.7,27027
-20000,Kansas,2904021,1.8,14.3,50.2,86.8,30.3,26929
-21000,Kentucky,4413457,1.7,14.8,50.8,88.3,21.5,23462
-22000,Louisiana,4649676,2.6,13.6,51.1,63.4,21.8,24442
-23000,Maine,1330089,0.1,18.3,51,95,27.9,26824
-24000,Maryland,5976407,3.5,13.8,51.5,60.1,36.8,36354
-25000,Massachusetts,6745408,3,15.1,51.5,82.6,39.4,35763
-26000,Michigan,9909877,0.3,15.4,50.9,79.9,25.9,25681
-27000,Minnesota,5457173,2.9,14.3,50.3,85.7,32.6,30913
-28000,Mississippi,2994079,0.9,14.3,51.4,59.7,20.1,20618
-29000,Missouri,6063589,1.2,15.4,50.9,83.5,26.2,25649
-30000,Montana,1023579,3.5,16.7,49.8,89.4,28.7,25373
-31000,Nebraska,1881503,3,14.4,50.2,89.4,28.5,26899
-32000,Nevada,2839099,5.1,14.2,49.7,76.2,22.4,26589
-33000,New Hampshire,1326813,0.8,15.9,50.6,94,33.7,33134
-34000,New Jersey,8938175,1.7,14.7,51.2,73,35.8,36027
-35000,New Mexico,2085572,1.3,15.3,50.5,82.8,25.8,23763
-36000,New York,19746227,1.9,14.7,51.5,70.4,33.2,32382
-37000,North Carolina,9943964,4.3,14.7,51.3,71.5,27.3,25284
-38000,North Dakota,739482,9.9,14.2,48.7,89.1,27.2,29732
-39000,Ohio,11594163,0.5,15.5,51.1,83,25.2,26046
-40000,Oklahoma,3878051,3.4,14.5,50.5,75.1,23.5,24208
-41000,Oregon,3970239,3.6,16,50.5,87.9,29.7,26809
-42000,Pennsylvania,12787209,0.7,16.7,51.1,82.9,27.5,28502
-44000,Rhode Island,1055173,0.2,15.7,51.5,85.1,31.3,30469
-45000,South Carolina,4832482,4.5,15.8,51.4,68.3,25.1,23943
-46000,South Dakota,853175,4.8,15.3,49.7,85.7,26.2,25740
-47000,Tennessee,6549352,3.2,15.1,51.3,78.9,23.8,24409
-48000,Texas,26956958,7.2,11.5,50.4,80,26.7,26019
-49000,Utah,2942902,6.5,10,49.7,91.4,30.3,23873
-50000,Vermont,626562,0.1,16.9,50.7,95,34.8,29167
-51000,Virginia,8326289,4.1,13.8,50.8,70.5,35.2,33493
-53000,Washington,7061530,5,14.1,50,80.7,31.9,30742
-54000,West Virginia,1850326,-0.1,17.8,50.6,93.7,18.3,22966
-55000,Wisconsin,5757564,1.2,15.2,50.3,87.8,26.8,27523
-56000,Wyoming,584153,3.6,14,49,92.7,24.7,28902
+state,party,candidate,votes
+Alabama,Democrat,Bernie Sanders,76399
+Alabama,Democrat,Hillary Clinton,309928
+Alabama,Republican,Ben Carson,87517
+Alabama,Republican,Donald Trump,371735
+Alabama,Republican,John Kasich,37970
+Alabama,Republican,Marco Rubio,159802
+Alabama,Republican,Ted Cruz,180608
+Alaska,Democrat,Bernie Sanders,440
+Alaska,Democrat,Hillary Clinton,99
+Alaska,Republican,Ben Carson,2401
+Alaska,Republican,Donald Trump,7346
+Alaska,Republican,John Kasich,892
+Alaska,Republican,Marco Rubio,3318
+Alaska,Republican,Ted Cruz,7973
+Arizona,Democrat,Bernie Sanders,163400
+Arizona,Democrat,Hillary Clinton,235697
+Arizona,Republican,Donald Trump,249916
+Arizona,Republican,John Kasich,53040
+Arizona,Republican,Ted Cruz,132147
+Arkansas,Democrat,Bernie Sanders,64868
+Arkansas,Democrat,Hillary Clinton,144580
+Arkansas,Republican,Ben Carson,23173
+Arkansas,Republican,Donald Trump,133144
+Arkansas,Republican,John Kasich,15098
+Arkansas,Republican,Marco Rubio,101235
+Arkansas,Republican,Ted Cruz,123873
+California,Democrat,Bernie Sanders,1502043
+California,Democrat,Hillary Clinton,1940580
+California,Republican,Donald Trump,1174829
+California,Republican,John Kasich,176620
+California,Republican,Ted Cruz,144125
+Colorado,Democrat,Bernie Sanders,71928
+Colorado,Democrat,Hillary Clinton,49256
+Connecticut,Democrat,Bernie Sanders,152410
+Connecticut,Democrat,Hillary Clinton,170075
+Connecticut,Republican,Donald Trump,123367
+Connecticut,Republican,John Kasich,60481
+Connecticut,Republican,Ted Cruz,24969
+Delaware,Democrat,Bernie Sanders,36659
+Delaware,Democrat,Hillary Clinton,55950
+Delaware,Republican,Donald Trump,42472
+Delaware,Republican,John Kasich,14225
+Delaware,Republican,Ted Cruz,11110
+Florida,Democrat,Bernie Sanders,566603
+Florida,Democrat,Hillary Clinton,1097400
+Florida,Republican,Donald Trump,1077221
+Florida,Republican,John Kasich,159412
+Florida,Republican,Marco Rubio,636653
+Florida,Republican,Ted Cruz,403640
+Georgia,Democrat,Bernie Sanders,214332
+Georgia,Democrat,Hillary Clinton,543008
+Georgia,Republican,Ben Carson,80503
+Georgia,Republican,Donald Trump,501707
+Georgia,Republican,John Kasich,72303
+Georgia,Republican,Marco Rubio,315979
+Georgia,Republican,Ted Cruz,305109
+Hawaii,Democrat,Bernie Sanders,23531
+Hawaii,Democrat,Hillary Clinton,10127
+Hawaii,Republican,Donald Trump,5677
+Hawaii,Republican,John Kasich,1413
+Hawaii,Republican,Marco Rubio,1759
+Hawaii,Republican,Ted Cruz,4379
+Idaho,Democrat,Bernie Sanders,18640
+Idaho,Democrat,Hillary Clinton,5065
+Idaho,Republican,Donald Trump,62478
+Idaho,Republican,John Kasich,16517
+Idaho,Republican,Marco Rubio,35347
+Idaho,Republican,Ted Cruz,100942
+Illinois,Democrat,Bernie Sanders,975659
+Illinois,Democrat,Hillary Clinton,1012175
+Illinois,Republican,Donald Trump,551464
+Illinois,Republican,John Kasich,279778
+Illinois,Republican,Marco Rubio,123066
+Illinois,Republican,Ted Cruz,430395
+Indiana,Democrat,Bernie Sanders,335256
+Indiana,Democrat,Hillary Clinton,303382
+Indiana,Republican,Donald Trump,590460
+Indiana,Republican,John Kasich,83913
+Indiana,Republican,Ted Cruz,406280
+Iowa,Democrat,Bernie Sanders,69452
+Iowa,Democrat,Hillary Clinton,69733
+Iowa,Democrat,Martin O'Malley,752
+Iowa,Democrat,Uncommitted,43
+Iowa,Republican,Ben Carson,17393
+Iowa,Republican,Carly Fiorina,3485
+Iowa,Republican,Chris Christie,3284
+Iowa,Republican,Donald Trump,45419
+Iowa,Republican,Jeb Bush,5238
+Iowa,Republican,John Kasich,3472
+Iowa,Republican,Marco Rubio,43164
+Iowa,Republican,Mike Huckabee,3345
+Iowa,Republican,Rand Paul,8479
+Iowa,Republican,Rick Santorum,1782
+Iowa,Republican,Ted Cruz,51663
+Kansas,Democrat,Bernie Sanders,26450
+Kansas,Democrat,Hillary Clinton,12593
+Kansas,Republican,Donald Trump,17062
+Kansas,Republican,John Kasich,7795
+Kansas,Republican,Marco Rubio,12189
+Kansas,Republican,Ted Cruz,35207
+Kentucky,Democrat,Bernie Sanders,210626
+Kentucky,Democrat,Hillary Clinton,212550
+Kentucky,Republican,Donald Trump,82493
+Kentucky,Republican,John Kasich,33134
+Kentucky,Republican,Marco Rubio,37579
+Kentucky,Republican,Ted Cruz,72503
+Louisiana,Democrat,Bernie Sanders,72240
+Louisiana,Democrat,Hillary Clinton,221615
+Louisiana,Republican,Donald Trump,124818
+Louisiana,Republican,John Kasich,19355
+Louisiana,Republican,Marco Rubio,33804
+Louisiana,Republican,Ted Cruz,113949
+Maine,Democrat,Bernie Sanders,2201
+Maine,Democrat,Hillary Clinton,1214
+Maryland,Democrat,Bernie Sanders,281275
+Maryland,Democrat,Hillary Clinton,533247
+Maryland,Republican,Donald Trump,236623
+Maryland,Republican,John Kasich,100089
+Maryland,Republican,Ted Cruz,82038
+Massachusetts,Democrat,Bernie Sanders,586716
+Massachusetts,Democrat,Hillary Clinton,603784
+Massachusetts,Democrat,No Preference,8152
+Massachusetts,Republican,Ben Carson,16277
+Massachusetts,Republican,Donald Trump,311313
+Massachusetts,Republican,John Kasich,113783
+Massachusetts,Republican,Marco Rubio,112822
+Massachusetts,Republican,Ted Cruz,60473
+Michigan,Democrat,Bernie Sanders,595222
+Michigan,Democrat,Hillary Clinton,576795
+Michigan,Republican,Donald Trump,483751
+Michigan,Republican,John Kasich,321655
+Michigan,Republican,Marco Rubio,123673
+Michigan,Republican,Ted Cruz,330015
+Mississippi,Democrat,Bernie Sanders,36348
+Mississippi,Democrat,Hillary Clinton,182447
+Mississippi,Republican,Donald Trump,191755
+Mississippi,Republican,John Kasich,35817
+Mississippi,Republican,Marco Rubio,20768
+Mississippi,Republican,Ted Cruz,147065
+Missouri,Democrat,Bernie Sanders,309071
+Missouri,Democrat,Hillary Clinton,310602
+Missouri,Republican,Donald Trump,382093
+Missouri,Republican,John Kasich,92533
+Missouri,Republican,Marco Rubio,57006
+Missouri,Republican,Ted Cruz,380367
+Montana,Democrat,Bernie Sanders,63168
+Montana,Democrat,Hillary Clinton,55194
+Montana,Republican,Donald Trump,114056
+Montana,Republican,John Kasich,10622
+Montana,Republican,Ted Cruz,14476
+Nebraska,Democrat,Bernie Sanders,19120
+Nebraska,Democrat,Hillary Clinton,14340
+Nebraska,Republican,Donald Trump,121287
+Nebraska,Republican,John Kasich,22526
+Nebraska,Republican,Ted Cruz,36418
+Nevada,Democrat,Bernie Sanders,5641
+Nevada,Democrat,Hillary Clinton,6296
+Nevada,Republican,Ben Carson,3619
+Nevada,Republican,Donald Trump,34531
+Nevada,Republican,John Kasich,2709
+Nevada,Republican,Marco Rubio,17940
+Nevada,Republican,Ted Cruz,16079
+New Hampshire,Democrat,Bernie Sanders,151584
+New Hampshire,Democrat,Hillary Clinton,95252
+New Hampshire,Republican,Ben Carson,6509
+New Hampshire,Republican,Carly Fiorina,11706
+New Hampshire,Republican,Chris Christie,21069
+New Hampshire,Republican,Donald Trump,100406
+New Hampshire,Republican,Jeb Bush,31310
+New Hampshire,Republican,John Kasich,44909
+New Hampshire,Republican,Marco Rubio,30032
+New Hampshire,Republican,Ted Cruz,33189
+New Jersey,Democrat,Bernie Sanders,323259
+New Jersey,Democrat,Hillary Clinton,554237
+New Jersey,Republican,Donald Trump,356697
+New Jersey,Republican,John Kasich,59506
+New Jersey,Republican,Ted Cruz,27521
+New Mexico,Democrat,Bernie Sanders,103856
+New Mexico,Democrat,Hillary Clinton,110451
+New Mexico,Republican,Donald Trump,73530
+New Mexico,Republican,John Kasich,7870
+New Mexico,Republican,Ted Cruz,13825
+New York,Democrat,Bernie Sanders,763469
+New York,Democrat,Hillary Clinton,1054083
+New York,Republican,Donald Trump,524932
+New York,Republican,John Kasich,217904
+New York,Republican,Ted Cruz,126151
+North Carolina,Democrat,Bernie Sanders,460316
+North Carolina,Democrat,Hillary Clinton,616383
+North Carolina,Republican,Donald Trump,458151
+North Carolina,Republican,John Kasich,144299
+North Carolina,Republican,Marco Rubio,87858
+North Carolina,Republican,Ted Cruz,418740
+North Dakota,Democrat,Bernie Sanders,253
+North Dakota,Democrat,Hillary Clinton,101
+Ohio,Democrat,Bernie Sanders,513549
+Ohio,Democrat,Hillary Clinton,679266
+Ohio,Republican,Donald Trump,727585
+Ohio,Republican,John Kasich,956762
+Ohio,Republican,Marco Rubio,59418
+Ohio,Republican,Ted Cruz,267592
+Oklahoma,Democrat,Bernie Sanders,174054
+Oklahoma,Democrat,Hillary Clinton,139338
+Oklahoma,Republican,Ben Carson,28572
+Oklahoma,Republican,Donald Trump,130141
+Oklahoma,Republican,John Kasich,16515
+Oklahoma,Republican,Marco Rubio,119562
+Oklahoma,Republican,Ted Cruz,157941
+Oregon,Democrat,Bernie Sanders,320746
+Oregon,Democrat,Hillary Clinton,251739
+Oregon,Republican,Donald Trump,240804
+Oregon,Republican,John Kasich,59096
+Oregon,Republican,Ted Cruz,61590
+Pennsylvania,Democrat,Bernie Sanders,719955
+Pennsylvania,Democrat,Hillary Clinton,918689
+Pennsylvania,Republican,Donald Trump,892702
+Pennsylvania,Republican,John Kasich,304793
+Pennsylvania,Republican,Ted Cruz,340201
+Rhode Island,Democrat,Bernie Sanders,66720
+Rhode Island,Democrat,Hillary Clinton,52493
+Rhode Island,Republican,Donald Trump,39059
+Rhode Island,Republican,John Kasich,14929
+Rhode Island,Republican,Ted Cruz,6393
+South Carolina,Democrat,Bernie Sanders,95977
+South Carolina,Democrat,Hillary Clinton,271514
+South Carolina,Republican,Ben Carson,53326
+South Carolina,Republican,Donald Trump,239851
+South Carolina,Republican,Jeb Bush,57863
+South Carolina,Republican,John Kasich,56206
+South Carolina,Republican,Marco Rubio,165881
+South Carolina,Republican,Ted Cruz,164790
+South Dakota,Democrat,Bernie Sanders,25958
+South Dakota,Democrat,Hillary Clinton,27046
+South Dakota,Republican,Donald Trump,44866
+South Dakota,Republican,John Kasich,10659
+South Dakota,Republican,Ted Cruz,11352
+Tennessee,Democrat,Bernie Sanders,120333
+Tennessee,Democrat,Hillary Clinton,245304
+Tennessee,Republican,Ben Carson,64846
+Tennessee,Republican,Donald Trump,332702
+Tennessee,Republican,John Kasich,45243
+Tennessee,Republican,Marco Rubio,180989
+Tennessee,Republican,Ted Cruz,211159
+Texas,Democrat,Bernie Sanders,475561
+Texas,Democrat,Hillary Clinton,935080
+Texas,Republican,Ben Carson,117780
+Texas,Republican,Donald Trump,757618
+Texas,Republican,John Kasich,120257
+Texas,Republican,Marco Rubio,502223
+Texas,Republican,Ted Cruz,1239370
+Utah,Democrat,Bernie Sanders,61333
+Utah,Democrat,Hillary Clinton,15666
+Utah,Republican,Donald Trump,24864
+Utah,Republican,John Kasich,29773
+Utah,Republican,Ted Cruz,122567
+Vermont,Democrat,Bernie Sanders,115863
+Vermont,Democrat,Hillary Clinton,18335
+Vermont,Republican,Ben Carson,2544
+Vermont,Republican,Donald Trump,19968
+Vermont,Republican,John Kasich,18543
+Vermont,Republican,Marco Rubio,11778
+Vermont,Republican,Ted Cruz,5929
+Virginia,Democrat,Bernie Sanders,275507
+Virginia,Democrat,Hillary Clinton,503358
+Virginia,Republican,Ben Carson,60093
+Virginia,Republican,Donald Trump,355960
+Virginia,Republican,John Kasich,96519
+Virginia,Republican,Marco Rubio,327042
+Virginia,Republican,Ted Cruz,173193
+Washington,Democrat,Bernie Sanders,19159
+Washington,Democrat,Hillary Clinton,7140
+Washington,Republican,Donald Trump,403003
+Washington,Republican,John Kasich,52129
+Washington,Republican,Ted Cruz,55719
+West Virginia,Democrat,Bernie Sanders,123860
+West Virginia,Democrat,Hillary Clinton,86354
+West Virginia,Republican,Donald Trump,156245
+West Virginia,Republican,John Kasich,13685
+West Virginia,Republican,Ted Cruz,18208
+Wisconsin,Democrat,Bernie Sanders,567936
+Wisconsin,Democrat,Hillary Clinton,432767
+Wisconsin,Republican,Donald Trump,386370
+Wisconsin,Republican,John Kasich,155200
+Wisconsin,Republican,Ted Cruz,531129
+Wyoming,Democrat,Bernie Sanders,156
+Wyoming,Democrat,Hillary Clinton,124
+Wyoming,Republican,Donald Trump,70
+Wyoming,Republican,John Kasich,0
+Wyoming,Republican,Marco Rubio,189
+Wyoming,Republican,Ted Cruz,644
