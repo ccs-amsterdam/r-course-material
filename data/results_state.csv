@@ -1,4 +1,4 @@
-fips,area_name,population,pop_change,over65,female,white,college,income
+fips,state,population,pop_change,over65,female,white,college,income
 1000,Alabama,4849377,1.4,15.3,51.5,69.7,22.6,23680
 2000,Alaska,736732,3.7,9.4,47.4,66.9,27.5,32651
 4000,Arizona,6731484,5.3,15.9,50.3,83.7,26.9,25358
