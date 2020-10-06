@@ -31,6 +31,8 @@ In R, every vector (column) has a data type, which you can inspect using `class(
 
 In most cases, you want you texts to be stored as `character`, but many default functions (like `data.frame` and `read.csv`) store text colunms as `factor` -- while the tidyverse equivalents of `tibble` and `read_csv` use `character` by default.
 
+**NOTE: This changed in R 4.0, data.frame and read.csv now use character by default for textual columns**
+
 In most cases, in R you can convert object types using `as.character`:
 
 ``` r
