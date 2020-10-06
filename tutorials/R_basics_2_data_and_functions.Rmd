@@ -523,6 +523,7 @@ as.character(x)
 The *logical* data type only has two values: **TRUE** and **FALSE** (which can be abbreviated to **T** and **F**). You will not often encounter logical values in your data, but you will use them in many operations such as subsetting and transforming data, as you will see when we discuss data structures. Understanding a bit about logical values will help you understand how these operations work.
 
 For now, we will focus on how logical values result from comparisons, and how logical operators can be used. 
+
 ### Date
 
 Date is not one of the basic data types in R, but in social scientific research we often work with calendar dates and times. This requires a special data type, because there are many limitations or complications if we try to express dates and times as character or numeric values. Two of the most common date classes in native R (i.e. not requiring additional packages) are *Date*, which only handles calendar dates, and *POSIXlt*, that handles both calendar dates and times. 
