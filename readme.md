@@ -23,7 +23,7 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) | 4 | (base R functions) |
 | [Transforming Data](tutorials/R-tidy-5-transformation.md) | [Importing and Cleaning](https://www.youtube.com/watch?v=CATqkFiZljU&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=3) |  5 | dplyr: filter, select, arrange, mutate | 
 | [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | [Grouping and Summarizing](https://www.youtube.com/watch?v=lde7wLORQpo&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=4) | 5 | dplyr: group_by, summarize |
-| [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) |  |7 | ggplot2  |
+| [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | [ggplot 1](https://www.youtube.com/watch?v=wO5mrVaCB28&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=7) |7 | ggplot2  |
 | [Reshaping data](tutorials/r-tidy-12-reshaping.md) | [Reshaping](https://www.youtube.com/watch?v=j4lZWJ3Osr8&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=5) |12 | tidyr: spread, gather |
 | [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | [Joining](https://www.youtube.com/watch?v=gg87Nv98VhQ&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=6) |13 | dplyr: inner_join, left_join, etc. | 
 | [Basic string (text) handling](tutorials/R-tidy-14-strings.md) |  |14 | readr: str_detect, str_extract etc., iconv |
