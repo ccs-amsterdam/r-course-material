@@ -131,7 +131,7 @@ Regular expressions
 
 The example above showed how to extract or replace a fixed part of a string. In many cases, however, we want to find, replace, or extract certain patterns in a string (for example, dates, email addresses, or html tags).
 
-For this purpose, R (like most other languages) use *regular expressions*, a very powerful wat to write text patterns. Although a full overview of regular expressions is beyond the scope of this handout (there's full books written on the subject!), below are some examples of what you can do.
+For this purpose, R (like most other languages) use *regular expressions*, a very powerful way to write text patterns. Although a full overview of regular expressions is beyond the scope of this handout (there's full books written on the subject!), below are some examples of what you can do.
 
 Note: To find a regular expression in a text, I use the `str_view` command, which is quite useful for designing/debugging expressions:
 
@@ -171,7 +171,7 @@ str_view(txt, "I'm \\w+\\b")       # matches "I'm XXX" phrases
 str_view(txt,  "#\\w+")            # matches #hashtags
 ```
 
-Note, the email address pattern is far from complete, and will match addresses with subdomains, numbers, and many other possibiliteis. It turns out emails are surprisingly complex to match - but the pattern below should do pretty well for all but the most arcane addresses:
+Note, the email address pattern is far from complete, and will match addresses with subdomains, numbers, and many other possibilities. It turns out emails are surprisingly complex to match - but the pattern below should do pretty well for all but the most arcane addresses:
 
 ``` r
 regex_email = regex("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
