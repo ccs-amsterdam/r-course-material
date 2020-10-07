@@ -195,6 +195,14 @@ d = dfm(small_corpus, remove=stopwords("english"), remove_punct=T)
 textplot_wordcloud(d, min_count = 1)
 ```
 
+**Update: This doesn't work anymore in the most recent quanteda version. We're trying to find a direct replacement, but in the meantime you can use:**
+
+```r
+d = document_term_frequencies(tokens, "doc_id", "lemma") %>% document_term_matrix() %>% as.dfm() 
+# and if desired do additional processing with dfm_remove, dfm_trim etc:
+d = dfm_remove(d, stopwords('en'))
+```
+
 More interesting, however, is to e.g. select only the verbs: Note that here I skip the corpus steps to show how you can also work directly with the texts and tokens:
 
 ``` r
