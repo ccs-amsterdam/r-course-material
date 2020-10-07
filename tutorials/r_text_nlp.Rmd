@@ -16,15 +16,18 @@ library(printr)
 
 For text analysis it is often useful to POS tag and lemmatize your text, especially with non-English data.
 R does not really have built-in functions for that, but there are libraries that connect to external tools to help you do this.
-This handout reviews spacy, which has a great R library and support for a number of (western) languages. 
+This handout first reviews spacy, which has a great R library and support for a number of (western) languages.
+Then it will provide brief instructions for using UDpipe, which has native support in R.
 
-# Installing Spacyr
+# Spacyr
+
+## Installing Spacyr
 
 Spacy is a python package with processing models for 6 different languages, which makes it attractive to use if you need e.g. French or German lemmatizing.
 
 To install it, you need to install the `spacy` module in python and download the appropriate language model. This depends on your computer and can be tricky to get right. The sections below give some instructions on how to do this depending on your OS, see https://spacy.io/usage/ for more information. 
 
-## Installing Spacy using anaconda (esp. for Windows):
+### Installing Spacy using anaconda (esp. for Windows):
 
 1. Install [anaconda](https://www.anaconda.com/)
 2. In Anaconda navigator, create a virtual environment, e.g. named 'spacy', based on python 3
@@ -35,7 +38,7 @@ python -m spacy download de_core_news_sm
 ```
 tions on how to do this depending on your OS, see https://spacy.io/usage/ for more information. 
 
-## Installing Spacy using pip (esp. for Mac/Linux):
+### Installing Spacy using pip (esp. for Mac/Linux):
 
 1. Open a terminal (ubuntu: control-alt-T, mac: finder -> terminal)
 2. For mac, install xcode using `xcode-select --install`
@@ -46,7 +49,7 @@ spacy-env/bin/pip install spacy
 spacy-env/bin/python -m spacy download de_core_news_sm
 ```
 
-## Initializing spacyr
+### Initializing spacyr
 
 The next step is to initialize spacyr by pointing it to your installed environment. 
 
@@ -69,7 +72,7 @@ library(spacyr)
 spacy_initialize("de_core_news_sm", python_executable =  path.expand("~/env/spacy/bin/python"))
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 As said, getting spacy and spacyr installed can be tricky. If you get an error message on initializing spacyr, it might help to install spacyr and reticulate directly from source. Before installing, clean your environment (with the broomstick icon) and restart R using the Session menu. 
 
@@ -81,7 +84,7 @@ install_github("quanteda/spacyr")
 
 If that doesn't help, you can try installnig spacy the other way (following the instructions above), and/or googling your error message. 
 
-# Using Spacy(r)
+## Using Spacy(r)
 
 With spacy successfully installed and spacyr initialized, we can now use it to parse text:
 
@@ -92,7 +95,7 @@ head(tokens)
 
 
 
-## Extracting information from spacy output
+### Extracting information from spacy output
 
 Before we go on, let's get a more realistic example: a German wikinews article about Volkswagen. 
 
@@ -147,7 +150,7 @@ tokens2 = nounphrase_consolidate(tokens)
 head(tokens2)
 ```
 
-## Reading spacy output into Quanteda
+### Reading spacy output into Quanteda
 
 It can be very useful to read spacy output back in quanteda. 
 For example, we might wish to do a word cloud, dictionary analysis, or topic model of only the nouns in a text.
@@ -190,7 +193,7 @@ tokens %>% entity_consolidate %>% as.tokens(use_lemma=T, include_pos = "pos") %>
  textplot_wordcloud(min_count = 1)
 ```
 
-# Closing the door
+## Closing the door
 
 Spacyr keeps a python process running, which can consume quite a lot of memory. When you are done with spacy (but want to continue with R), you can finalize spacy:
 
@@ -199,4 +202,63 @@ spacy_finalize()
 ```
 
 After this, you will have to initialize spacy again before you can parse new text. 
+
+
+
+# UDPipe
+
+`udpipe` is an R package that can do many preprocessing steps for a variety of languages including English, French, German and Dutch. If you call it for a language you have not previously used, it will automatically download the language model.
+
+For this example, we will use a very short text, as it can take (very) long to process large amounts of text. 
+
+```{r}
+small_text = c("Pelosi says Trump is welcome to testify in impeachment inquiry, if he chooses", "House speaker pushes back against president’s accusations that process is stacked against him as Schumer echoes her suggestion")
+```
+
+Now, let's lemmatize and tag this corpus:
+
+```{r}
+library(udpipe)
+tokens = udpipe(small_text, "english", parser="none")
+head(tokens[,c('doc_id','sentence_id','token_id','token','lemma','upos')])
+```
+
+The output `tokens` contains the tokens in a data.frame format, where each row is a token and the columns provide information about the token (e.g., lemma, part-of-speech tag). 
+This is also often referred to as a tokenlist representation.
+As you can see, 'is' is lemmatized to 'be', and Pelosi and Trump are both recognized as proper nouns (names).
+
+Now we can create a document-term matrix from these tokens. 
+More specifically, we want to create a document-term matrix in the quanteda format (i.e. a document-feature matrix).
+This is not a terribly complicated conversion, but it's also not trivial, especially if we want to also include document variables in the DTM.
+For convenience, we therefore use the `corpustools` package.
+This is a package that we developed ourselves for the main purpose of working with tokenlist data.
+It therefore supports creating a tokenlist (using the `udpipe` package), and converting a tokenlist to a document-term matrix (with support for the `quanteda` dfm).
+
+Like `quanteda`, corpustool can create a corpus from a data.frame, which makes it easy to include document variables.
+Here we first convert a quanteda corpus to a data.frame, and then create a `corpustools` corpus using a udpipe model.
+We'll only parse the first 5 documents for this example.
+
+```{r}
+library(corpustools)
+corp_dt = convert(data_corpus_inaugural, 'data.frame')
+tc = create_tcorpus(corp_dt[1:5,], udpipe_model = 'english-ewt')
+```
+
+The `tc` object is a tcorpus (token corpus), which contains both the tokenlist and the meta data.
+With the `get_dfm` function, we can create a quanteda dfm. 
+The only thing we need to specify is that we want to use the lemma for the columns.
+
+```{r}
+d = get_dfm(tc, 'lemma')
+```
+
+We can now also create a DTM for only a selection of part-of-speech tags. 
+This can be done by either first subsetting the tcorpus, or by providing a subset
+expression in the `get_dfm` function.
+Here we creata a DTM containing only nouns and proper names, and as a simple example create a wordcloud of the most common verbs in the corpus.
+
+```{r}
+d = get_dfm(tc, 'lemma', subset_tokens = POS %in% c('NOUN','PROPN'))
+textplot_wordcloud(d, max_words = 50)
+```
 

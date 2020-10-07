@@ -97,6 +97,7 @@ You can convert the texts directly into a corpus object as above:
 corp2 = corpus(texts)
 corp2
 ```
+
 # Step 2: Creating the DTM (or DFM)
 
 Many text analysis techniques only use the frequencies of words in documents. This is also called the bag-of-words assumption, because texts are then treated as bags of individual words. Despite ignoring much relevant information in the order of words and syntax, this approach has proven to be very powerfull and efficient.
@@ -159,50 +160,6 @@ dtm
 
 Now we have about 5000 features left. See `?dfm_trim` for more options. 
 
-## NLP Preprocessing with UDPipe
-
-In many cases, especially for languages with a richer morphology than English, it can be useful to use tools from computational linguistics to preprocess the data. In particular, *lemmatization* often works better for stemming, and *Part of Speech tagging* can be a great way to select e.g. only the names or verbs in a document. 
-
-`udpipe` is an R package that can do many preprocessing steps for a variety of languages including English, French, German and Dutch. If you call it for a language you have not previously used, it will automatically download the language model.
-
-For this example, we will use a very short text, as it can take (very) long to process large amounts of text. 
-
-```{r}
-small_text = c("Pelosi says Trump is welcome to testify in impeachment inquiry, if he chooses", "House speaker pushes back against president’s accusations that process is stacked against him as Schumer echoes her suggestion")
-small_corpus = corpus(small_text)
-```
-
-Now, let's lemmatize and tag this corpus:
-
-```{r}
-library(tidyverse)
-library(udpipe)
-tokens = udpipe(texts(small_corpus), "english", parser="none")
-tokens %>% as_tibble() %>% select(token_id:xpos)
-```
-
-As you can see, 'is' is lemmatized to 'be', and Pelosi and Trump are both recognized as proper nouns (names).
-
-We can create a dfm of all lemmata, assinging to udpipe tokens to the corpus and proceeding as normal:
-
-```{r}
-small_corpus$tokens <-  as.tokens(split(tokens$lemma, tokens$doc_id))
-d = dfm(small_corpus, remove=stopwords("english"), remove_punct=T)
-textplot_wordcloud(d, min_count = 1)
-```
-
-More interesting, however, is to e.g. select only the verbs:
-Note that here I skip the corpus steps to show how you can also work directly with the texts and tokens:
-
-```{r}
-tokens = udpipe(small_text, "english", parser="none")
-d = tokens %>% filter(upos == "VERB") %>% 
-  with(split(lemma, doc_id)) %>% as.tokens() %>% 
-  dfm(remove=stopwords("german")) %>% 
-textplot_wordcloud(d, min_count=1)
-```
-
-Of course, this is more meaningful if you run it on a larger text. 
 
 # Step 3: Analysis 
 
