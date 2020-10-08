@@ -3,196 +3,236 @@ NLP Processing in R
 Wouter van Atteveldt & Kasper Welbers
 2019-04
 
--   [Installing Spacyr](#installing-spacyr)
-    -   [Installing Spacy using anaconda (esp. for Windows):](#installing-spacy-using-anaconda-esp.-for-windows)
-    -   [Installing Spacy using pip (esp. for Mac/Linux):](#installing-spacy-using-pip-esp.-for-maclinux)
-    -   [Initializing spacyr](#initializing-spacyr)
-    -   [Troubleshooting](#troubleshooting)
--   [Using Spacy(r)](#using-spacyr)
-    -   [Extracting information from spacy output](#extracting-information-from-spacy-output)
-    -   [Reading spacy output into Quanteda](#reading-spacy-output-into-quanteda)
--   [Closing the door](#closing-the-door)
+For text analysis it is often useful to POS tag and lemmatize your text,
+especially with non-English data. Lemmatizing generally works much
+better than stemming, especially for a richly inflected language such as
+German or French. Part-of-Speech (POS) tags identify the type of word
+(noun, verb, etc) so it can be used to e.g. analyse only the verbs
+(actions) or adjectives (descriptions). Finally, you can often
+automatically extract named entities such as people or organizations,
+making it easy to e.g. generate a list of actors in a corpus,
 
-For text analysis it is often useful to POS tag and lemmatize your text, especially with non-English data. R does not really have built-in functions for that, but there are libraries that connect to external tools to help you do this. This handout reviews spacy, which has a great R library and support for a number of (western) languages.
+There are two packages that do this that are both easy to use and
+support multiple languages: `spacyr` and `udpipe`. This handout will
+review both packages and show how they can be used to analyse text and
+convert the results to a tcorpus and/or dfm.
 
-Installing Spacyr
-=================
+# Spacyr
 
-Spacy is a python package with processing models for 6 different languages, which makes it attractive to use if you need e.g. French or German lemmatizing.
+Spacy is a python package with processing models for a number of
+different languages, which makes it attractive to use if you need
+e.g. French or German lemmatizing.
 
-To install it, you need to install the `spacy` module in python and download the appropriate language model. This depends on your computer and can be tricky to get right. The sections below give some instructions on how to do this depending on your OS, see <https://spacy.io/usage/> for more information.
+## Installing spacy(r)
 
-Installing Spacy using anaconda (esp. for Windows):
----------------------------------------------------
+Since it is natively made in python, it uses the `reticulate` package to
+communicate between python and R. Fortunately, installing it has become
+a lot easier by using `miniconda`, basically a prepackaged python
+environment that can be installed directly from R. According to the
+documentation, on Windows you need to run R as administrator to be able
+to install spacyr from R.
 
-1.  Install [anaconda](https://www.anaconda.com/)
-2.  In Anaconda navigator, create a virtual environment, e.g. named 'spacy', based on python 3
-3.  Once that environment is setup up, click the 'Play' button to open a terminal, and run: (replacing `de_core_news_sm` with the model you need)
+To install spacy and spacyr, first install the package as usual, and
+then use spacyr to download and install spacy in the miniconda
+environment:
 
-        conda install -c conda-forge spacy
-        python -m spacy download de_core_news_sm
+``` r
+install.packages("spacyr")
+library(spacyr)
+spacy_install()
+```
 
-    tions on how to do this depending on your OS, see <https://spacy.io/usage/> for more information.
+If asked whether to install miniconda, just answer yes.
 
-Installing Spacy using pip (esp. for Mac/Linux):
-------------------------------------------------
+## Using spacyr
 
-1.  Open a terminal (ubuntu: control-alt-T, mac: finder -&gt; terminal)
-2.  For mac, install xcode using `xcode-select --install`
-3.  In the terminal, type the following commands to create a virtual environment, install spacy, and download the language model of your choice:
-
-        python3 -m venv spacy-env
-        spacy-env/bin/pip install spacy
-        spacy-env/bin/python -m spacy download de_core_news_sm
-
-Initializing spacyr
--------------------
-
-The next step is to initialize spacyr by pointing it to your installed environment.
-
-For anaconda, use the following (substituting the name you picked for the virtual environment and the language model of your choice):
+Before using spacyr, you initialize it with the name of the language
+model you want to use. By default, the English model is installed and
+will be used if you don’t specify another option:
 
 ``` r
 library(spacyr)
-spacy_initialize("de_core_news_sm", condaenv = "spacy")
+spacy_initialize()
 ```
 
-For pip, use the following:
+If all is well, this should give a informational message that it found
+the environment and successfully initialized spacy. You are now ready to
+use spacy for parsing an English sentence:
 
 ``` r
-library(spacyr)
-spacy_initialize("de_core_news_sm", python_executable = path.expand("~/spacy-env/bin/python"))
+txt = c("Spacy was successfully installed", "Is'nt it miraculous?")
+tokens = spacy_parse(txt)
+tokens
 ```
 
-Troubleshooting
----------------
+This yields a dataset with one word on each row, and the columns
+containing the original word (`token`), it’s lemma (i.e. dictionary
+stem, so the lemma of ‘was’ is (to) ‘be’) and it’s part of speech tag
+(`pos`, so adverb, verb, proper name, etc.). The final column identifies
+named entities, i.e. persons, organizations, and locations.
 
-As said, getting spacy and spacyr installed can be tricky. If you get an error message on initializing spacyr, it might help to install spacyr and reticulate directly from source. Before installing, clean your environment (with the broomstick icon) and restart R using the Session menu.
-
-``` r
-if (!require(devtools)) install.packages(devtools)
-install_github("rstudio/reticulate")
-install_github("quanteda/spacyr")
-```
-
-If that doesn't help, you can try installnig spacy the other way (following the instructions above), and/or googling your error message.
-
-Using Spacy(r)
-==============
-
-With spacy successfully installed and spacyr initialized, we can now use it to parse text:
+As a slightly bigger example, this lists all the most common adjectives
+in the two inaugural speeches of Obama:
 
 ``` r
-tokens = spacy_parse("Ich bin ein Berliner")
-head(tokens)
-```
-
-Extracting information from spacy output
-----------------------------------------
-
-Before we go on, let's get a more realistic example: a German wikinews article about Volkswagen.
-
-``` r
-url = "https://gist.githubusercontent.com/vanatteveldt/bf9527ac6510e9b3e5c6b198b917ddd1/raw/45e6f6bfa0abba219935543eb70cca9f675703c7/VW_erneut_unter_Verdacht.txt"
-library(readtext)
-d = readtext(url)
-d$text
-```
-
-We can parse it as earlier:
-
-``` r
-tokens = spacy_parse(d$text, nounphrase = T)
-head(tokens)
-```
-
-Of course, since the resulting tokens are simply a data frame, we can use our normal functions to e.g. list all verbs:
-
-``` r
+library(quanteda)
 library(tidyverse)
-tokens %>% filter(pos=="VERB") %>% group_by(lemma) %>% summarize(n=n()) %>% arrange(-n)
-tokens %>% filter(lemma == "stehen")
+docvars(data_corpus_inaugural)
+speeches = data_corpus_inaugural %>% convert(to="data.frame") %>% filter(President == "Obama") %>% pull(text)
+tokens = spacy_parse(speeches) 
+tokens %>% filter(pos == "ADJ") %>% group_by(lemma) %>% summarize(n=n()) %>% arrange(desc(n)) %>% head()
 ```
 
-And we can quite easily recreate sentences as well by summarizing with the str\_c function:
+As the tokens are just a data frame, it is quite easy to use tidyverse
+to inspect and manipulate the outcome. There are also some built-in
+functions to help deal with multi-word entities or noun phrases:
 
 ``` r
-tokens %>% filter(sentence_id == 3) %>% arrange(token_id) %>% summarize(sentence=str_c(token, collapse=" "))
-tokens %>% filter(sentence_id == 3) %>% arrange(token_id) %>% summarize(sentence=str_c(lemma, pos, sep = "/", collapse=" "))
+entities = entity_extract(tokens)
+head(entities)
 ```
 
-We can extract all entities (which combines multi-word entities):
+As you can see, this ‘merges’ words that form a name together such as
+‘Justice Roberts’. You can also consolidate these so they the original
+tokens are replaced by the new merged token:
 
 ``` r
-entity_extract(tokens)
-entity_extract(tokens) %>% filter(entity_type=="ORG") %>% group_by(entity) %>% summarize(n=n())
+tokens %>% filter(str_detect(token, "Justice|Roberts"))
+tokens2 = entity_consolidate(tokens)
+tokens2 %>% filter(str_detect(token, "Justice|Roberts"))
 ```
 
-Or all noun phrases (requires `nounphrase=T` in the parsing):
+A similar function pair exists to deal with noun phrases, but this
+requires you to enable noun phrase parsing in the original parse call:
+(you could enable dependency parsing in a similar fashion with
+`dependency=T`)
 
 ``` r
-nounphrase_extract(tokens)
+tokens = spacy_parse(speeches, nounphrase = T) 
+nps = nounphrase_extract(tokens)
+head(nps)
 ```
 
-You can also 'consolidate' the entities or nounphrases, meaning that the tokens will actually be replaced by them:
+As you can see, this detects a phrase such as *president Carter* as well
+as *fellow Americans*.
+
+## Using spacy output in quanteda
+
+Spacyr was developed by the same people that made quanteda, so as you
+can guess they collaborate quite well. In fact, the data frame returned
+by spacyr can be directly used in most quanteda functions. Note that the
+`dfm` function itself does not accept a tokens data frame, but there is
+an as.tokens function that
+does:
 
 ``` r
-tokens2 = entity_consolidate(tokens) 
-head(tokens2)
-tokens2 = nounphrase_consolidate(tokens) 
-head(tokens2)
+tokens %>% as.tokens(include_pos="pos", use_lemma=TRUE) %>% dfm() %>% textplot_wordcloud()
 ```
 
-Reading spacy output into Quanteda
-----------------------------------
+## Finalizing spacy
 
-It can be very useful to read spacy output back in quanteda. For example, we might wish to do a word cloud, dictionary analysis, or topic model of only the nouns in a text.
-
-`spacyr` and `quanteda` are both developed by the group of Kenneth Benoit's group, so they are quite easy to integrate.
-
-The `as.tokens` function transforms the tokens dataframe into a quanteda `tokens` object, which can then be used to create a dfm.
-
-For example, this creates a word cloud of all lemmata:
-
-``` r
-library(quanteda)
-tokens %>% as.tokens(use_lemma=T) %>% dfm %>% textplot_wordcloud(min_count = 1)
-```
-
-It is often useful to filter on POS tag before creating the dfm. Unfortunately, you can't use the normal filter operation as that drops the information from the tokens object on which quanteda depends. However, you can extract the tokens with the POS, and then use that to filter:
-
-``` r
-dfm_nouns = tokens %>% as.tokens(include_pos = "pos") %>%
-  tokens_select(pattern = c("*/NOUN")) %>% dfm
-dfm_nouns %>% textplot_wordcloud(min_count = 1)
-```
-
-If you wish to drop the `/NOUN` from the features afterwards, you can access the column names of the dfm directly:
-
-``` r
-library(magrittr)
-colnames(dfm_nouns) %<>% str_remove("/noun")
-dfm_nouns %>% textplot_wordcloud(min_count = 1)
-```
-
-(note: the fancy notation `[x %<>% ...]` is the same as `[x = x %>% ...]`, but you need to library magrittr explicitly)
-
-This also works with the entity consolidation:
-
-``` r
-library(quanteda)
-tokens %>% entity_consolidate %>% as.tokens(use_lemma=T, include_pos = "pos") %>% 
-    tokens_select(pattern = c("*/NOUN", "*/ENTITY")) %>% dfm %>%
- textplot_wordcloud(min_count = 1)
-```
-
-Closing the door
-================
-
-Spacyr keeps a python process running, which can consume quite a lot of memory. When you are done with spacy (but want to continue with R), you can finalize spacy:
+Spacyr keeps a python process running, which can consume quite a lot of
+memory. When you are done with spacy (but want to continue with R), you
+can finalize spacy:
 
 ``` r
 spacy_finalize()
 ```
 
-After this, you will have to initialize spacy again before you can parse new text.
+This saves some memory and allows you to re-initialize it, i.e. with a
+different language model.
+
+## Loading and using other languages
+
+By default, other language models are not included with spacy. You can
+download these models using the built-in download function, for example
+for German:
+
+``` r
+spacy_download_langmodel("de")
+```
+
+To use it, initialize spacy with this model (note that you need to
+finalize an existing session before you can do this):
+
+``` r
+spacy_initialize("de")
+spacy_parse("Ich bin ein Berliner")
+```
+
+Note that if you prefer to install spacy yourself rather than use the
+`miniconda`, you can pass the virtual environment location to the
+initialize and download functions. We would recommend just using the
+miniconda environment though unless for some reason that doesn’t work.
+
+See <https://spacy.io/usage/models> for an overview of available
+languages.
+
+# UDPipe
+
+`udpipe` is an R package that is quite similar to spacy in many regards.
+It is slightly easier to install (but doesn’t collaborate as well with
+quanteda) and both should be comparable in performance.
+
+What is nice about UDPipe is that you can directly call it after
+installing it, and if you use a language for which the model is not
+already install it will automatically download the language model.
+
+So, we can simply call udpipe directly:
+
+``` r
+library(udpipe)
+txt = c("UDPipe was successfully installed as well", "It doesn't even need to be initialized")
+tokens = udpipe(txt, "english", parser="none") %>% as_tibble()
+tokens %>% select(doc_id, token_id:xpos)
+```
+
+Or with german
+text:
+
+``` r
+udpipe("Ich bin ein Berliner", "german", parser="none") %>%  select(doc_id, token_id:xpos)
+```
+
+As you can see, the output is very similar to spacy’s output, although
+confusingly they use different naming conventions. The `xpos` column
+will depend on the language model, but the `upos` (universal
+part-of-speech) will be the same for all languages.
+
+Note that we specified `parser="none"` to disable dependency parsing,
+which would make it quite a lot slower.
+
+## Using udpipe output in quanteda
+
+To use udpipe output in quanteda, you need to first convert it into a
+list of tokens per document:
+
+``` r
+tokens = udpipe(speeches, "english", parser="none")
+tokenlist = split(tokens$lemma, tokens$doc_id)
+names(tokenlist)
+head(tokenlist$doc1)
+```
+
+Now, you can use `as.tokens` and proceed as above:
+
+``` r
+tokenlist %>% as.tokens() %>% dfm() %>% textplot_wordcloud()
+```
+
+Note that we used the lemma above. We can also add the POS tags to the
+text so we get the same output as
+quanteda:
+
+``` r
+split(str_c(tokens$lemma, tokens$upos, sep = "/"), tokens$doc_id) %>% as.tokens() %>% tokens_select("*/NOUN") %>% dfm() %>% textplot_wordcloud()
+```
+
+Of course,for udpipe as well as for spacy we can also do filtering or
+other operations on the tokens data frame before converting it to a
+quanteda object:
+
+``` r
+nouns = tokens %>% filter(upos == "NOUN")
+split(nouns$lemma, nouns$doc_id) %>% as.tokens() %>% dfm() %>% textplot_wordcloud()
+```
