@@ -47,7 +47,7 @@ head(tc$tokens, 10)
 
 The tokenlist is a data.table in which each row is a token. The preprocessed token is given in the separate `feature` column. For all stopwords and features with min\_docfreq &lt; 10, an NA value is given to indicate that this token is filtered out. However, while we would typically not use these NA values in our analysis, we do keep the original position of the token in our tokenlist.
 
-This has a clear tradeoff. One the one hand, it requires much more memory to preserve the full textual information this way. As such, the `corpustools` package is much less memory efficient compared to `quanteda`, and not suitable for very large corpora. On the other hand, keeping all tokens in their original order provides a bridge between the original texts and bag-of-words style analyses.
+This has a clear tradeoff. On the one hand, it requires much more memory to preserve the full textual information this way. As such, the `corpustools` package is much less memory efficient compared to `quanteda`, and not suitable for very large corpora. On the other hand, keeping all tokens in their original order provides a bridge between the original texts and bag-of-words style analyses.
 
 For more information on corpustools, please consult the vignette.
 
