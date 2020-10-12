@@ -14,7 +14,6 @@ editor_options:
 
 ```{r, echo=F}
 knitr::opts_chunk$set(warning=FALSE, results = FALSE, message=FALSE, fig.path = "img/")
-library(printr)
 ```
 
 # This tutorial
@@ -45,7 +44,7 @@ A good way to develop an intuition for this formula is by using it to create a t
 set.seed(1)
 ```
 
-First, we'll create $x$ by taking a random sample of 10 *observations* from a normal distribution, for which we can use the `rnorm` function.
+First, we'll create $x$ by taking a random sample of 200 *observations* from a normal distribution, for which we can use the `rnorm` function. Here we specify that the mean of this distribution is 4, and the standard deviation is 3. 
 
 ```{r}
 x = rnorm(n=200, mean=4, sd=3)

@@ -12,8 +12,7 @@ editor_options:
 
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
-library(printr)
+knitr::opts_chunk$set(eval=F, warning=FALSE, message=FALSE, fig.path = "img/")
 ```
 
 Basic Modeling
@@ -61,14 +60,18 @@ We could also do a paired t-test of average accumulation per year per group by f
 Note that we first remove the NA values (for Spain).
 
 ```{r}
-pergroup = capital %>% na.omit %>% group_by(Year, Group) %>% summarize(Private=mean(Private))
+pergroup = capital %>% 
+  na.omit() %>% 
+  group_by(Year, Group) %>% 
+  summarize(Private=mean(Private))
 ```
 
 Let's plot the data to have a look at the lines:
 
 ```{r modeling_plot}
 library(ggplot2)
-pergroup %>% ggplot + geom_line(aes(x=Year, y=Private, colour=Group))
+pergroup %>% 
+  ggplot + geom_line(aes(x=Year, y=Private, colour=Group))
 ```
 
 So initially capital is higher in the Anglo-Saxon countries, but the European countries overtake quickly and stay higher.
@@ -85,7 +88,21 @@ Now we can do a t.test of two different columns, using the `data$column` notatio
 t.test(pergroup$anglo, pergroup$european, paired=T)
 ```
 
-So, the mean difference per year between the groups is indeed significant. 
+So, the mean difference per year between the groups is indeed significant; t(40) = -6.533, p < 0.001. 
+
+Finally, when reporting a t-test, you will want to report the means and standard deviations. 
+Since we have the vectors for anglo and european, we can simply use the `mean` and `sd` functions.
+With the argument `na.rm = T` (NA remove is TRUE) we say that missing values are ignored (otherwise, the `mean` and `sd` functions would return NA if the vectors have any NA values).
+
+```{r}
+mean(pergroup$anglo, na.rm = T)
+sd(pergroup$anglo, na.rm = T)
+
+mean(pergroup$european, na.rm = T)
+sd(pergroup$european, na.rm = T)
+```
+
+So now we can report that the private capital accumulation per year was lower for Anglo-Saxon countries (M=3.75, SD=0.61) compared to European countries (M=4.21; SD=1.00), and this difference is significant; t(40) = -6.533, p < 0.001. 
 
 Anova
 ===
@@ -103,6 +120,7 @@ plot(capital$Private ~ capital$Country)
 
 So, it seems that in fact a lot of countries are quite similar, with some extreme cases of high capital accumulation.
 (also, it seems that including Japan in the European countries might have been a mistake).
+Note that if you are not seeing all country names on the x-axis, you should make the plotting window wider (i.e. drag the window borders). 
 
 We use the `aov` function for this. There is also a function named `anova`, but this is meant to analyze already fitted models, 
 as will be shown below.
@@ -112,19 +130,31 @@ m = aov(capital$Private ~ capital$Country)
 summary(m)
 ```
 
-So in fact there is a significant difference. We can use `pairwise.t.test` to perform post-hoc comparisons 
-to show us which comparisons are significant:
+So in fact there is a significant difference. 
+However, the Anova only tells us that there is a difference between groups.
+From the box plot we get some idea of the differences between specific countries, but often we also want to know whether there is a significant difference between specific countries.
+For this we can use the `pairwise.t.test` to perform post-hoc comparisons:
 
 ```{r}
 posthoc = pairwise.t.test(capital$Private, capital$Country, p.adj = "bonf")
-round(posthoc$p.value, 2)
+round(posthoc$p.value, 3)
 ```
 
-Linear models
+When you report the results of an Anova, you will often want to report specific means and standard deviations. 
+This is simply a matter of aggregating (i.e. summarizing) the Private capital accumulation grouped by countries.
+
+```{r}
+capital %>%
+  group_by(Country) %>%
+  summarise(M = mean(Private, na.rm = T), SD = sd(Private, na.rm = T))
+```
+
+
+Linear models (linear regression analysis)
 ===
 
-A more generic way of fitting models is using the `lm` command. 
-In fact, `aov` is a wrapper around `lm`. 
+A more generic way of fitting models is using the `lm` command.
+This is how you do ordinary linear regression analysis in R (but more generally, `aov` is also a linear model).
 Let's see how well we can predict the `capital` variable (dependent) by the `country` and `public capital` variables (independent).
 
 The lm function also takes a formula as the first argument. 
@@ -135,7 +165,7 @@ m = lm(Private ~ Country + Public, data=capital)
 summary(m)
 ```
 
-As you can see, R automatically creates dummy values for nominal values, using the first value (U.S. in this case) as reference category.
+As you can see, R automatically creates dummy values for the nominal variable `Country`, using the first value (`U.S.`) as reference category.
 An alternative is to remove the intercept and create a dummy for each country:
 
 ```{r}
@@ -154,23 +184,26 @@ m1 = lm(Private ~ Group + Public, data=capital)
 m2 = lm(Private ~ Group + Public + Group:Public, data=capital)
 ```
 
-A nice package to display multiple regression results side by side is the `screenreg` function from the `texreg` package:
+Here we have created two models.
+A common way to investigate (and report) these models is by showing them side by side in a table.
+There are several packages in R for making nice regression tables (e.g., sjPlot, texreg, stargazer).
+Here we'll use the sjPlot package. 
 
 ```{r}
-## remember to first install with install.packages('texreg')
-library(texreg)
-screenreg(list(m1, m2))
+## remember to first install with install.packages('sjPlot')
+library(sjPlot)
+tab_model(m1, m2)
 ```
 
 So, there is a significant interaction effect which displaces the main effect of public wealth. 
 
-Finally, you can also use the texreg package to create the table in HTML, which makes it easier to copy it to a paper.
-Here we save the HTML to a new file named "model.html", and use the convenient `browseURL()` function to open it in your default webbrowser.
+One of the cool things about sjPlot is that the table is produced in HTML, which makes it easy to copy/paste the table into a .DOC file (if you're working with latex, the `texreg` package is more convenient).
 
-```{r, eval=F}
-texreg::htmlreg(list(m1,m2), file = 'model.html')
+```{r}
+tab_model(m1,m2, file = 'model.html')
 browseURL('model.html')
 ```
+
 
 Comparing and diagnosing models
 ===
@@ -188,15 +221,22 @@ So, the interaction term is in fact a significant improvement of the model.
 Apparently, in European countries private capital is accumulated faster in those times that the government goes into depth. 
 
 After doing a linear model it is a good idea to do some diagnostics.
-We can ask R for a set of standard plots by simply calling `plot` on the model fit. 
-We use the parameter (`par`) `mfrow` here to put the four plots this produces side by side. 
+We can ask R for a set of standard plots by simply calling `plot` on the model fit.
+This will actually create 4 plots, so you'd have to hit `Return` to see them all.
+A nice alternative is to tell R to split the plotting window into multiple rows and columns.
+With the parameter (`par`) `mfrow`, we here set the number of rows and columns to 2, to created a 2x2 grid.
 
 ```{r modeling_lmdiag}
 par(mfrow=c(2,2))
 plot(m)
+par(mfrow=c(1,1))
 ```
 
-See http://www.statmethods.net/stats/rdiagnostics.html for a more exhausitve list of model diagnostics.
+Note that after plotting we immediately return the 2x2 grid to a 1x1 grid, so that for the next plot we use the default settings.
+
+If these diagnostic plots are new to you, a good explanation can be found on: https://data.library.virginia.edu/diagnostic-plots/
+Also, see http://www.statmethods.net/stats/rdiagnostics.html for a more exhausitve list of model diagnostics.
+
 
 
 Jamovi
@@ -204,7 +244,8 @@ Jamovi
 
 R features several packages with alternative implementations of basic statistics. One of these is the `jmv` package, which allows you to use the stats functions from [Jamovi](https://www.jamovi.org). 
 Jamovi is an open-source statistical spreadsheet program that runs on R.
-It can be a nice stepping stone from SPSS to R.  
+You can also run it as a GUI (think separate program) that is rather similar to SPSS (i.e. you just click stuff).
+It can be a useful stepping stone from SPSS to R.
 
 Note that installing jmv might take a while.
 

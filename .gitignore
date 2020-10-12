@@ -9,4 +9,4 @@ tutorials/udpipe_models/*
 *.rda
 tutorials/*.rda
 .httr-oauth
-
+model.html

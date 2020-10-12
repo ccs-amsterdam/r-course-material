@@ -16,7 +16,7 @@ library(printr)
 
 
 ### What is a dirichlet distribution?
-A good way to think about a dirichlet distribution is as a distribution of multinomial distributions. For illustration, imagine a bag of dices. Each die has 6 sides, and the probability for each side to be trown can be described as a (single) multinomial distribution. The probability mass function (PMF) for each die is then a vector of length 6, that gives the probability for each side, and sums to 1. Now, given a bag of dices, you basically have a bag of PMF's. The dirichlet distribution can be used to describe the distribution of these PMF's. For example, if you were to take one die from the bag, how likely is it that you get a fair die, or a die that is more likely to trow a six?
+A good way to think about a dirichlet distribution is as a distribution of multinomial distributions. For illustration, imagine a bag of dices. Each die has 6 sides, and the probability for each side to be trown can be described as a (single) multinomial distribution. The probability mass function (PMF) for each die is then a vector of length 6, that gives the probability for each side (which sums to 1). Now, given a bag of dices, you basically have a bag of PMF's. The dirichlet distribution can be used to describe the distribution of these PMF's. If you were to take one die from the bag, the Dirichlet distribution tells you how likely it is that this die has a specific multinomial distribution. For example, what is the probability of drawing a fair die?
 
 ### The alpha parameter
 The dirichlet distribution has a single parameter, often referred to as the alpha parameter. This parameter determines both the distribution and concentration of the dirichlet. 
