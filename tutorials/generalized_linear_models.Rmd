@@ -12,7 +12,6 @@ editor_options:
 
 ```{r, echo=F, message=F, warning=F}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
-library(printr)
 ```
 
 # Generalized linear models (GLM)
@@ -227,7 +226,7 @@ exp(0.3987761)
 
 For interpretation you'll generally want to use the `odds ratios`, and this is often also what journals want you to report. 
 
-So how to intepret the `odds ratio`? These are, quite straighforwardly, the ratios of the odds (note that odds are not probabilities[^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
+So how to intepret the `odds ratio`? These are, quite straightforwardly, the ratios of the odds (note that odds are not probabilities[^3]). The most important difference in the interpretation of `odds ratios`, compared to ordinary regression coefficients, is that we do not add these values to the odds (of passing the test), but multiply the odds by them. The `odds ratios` range between 0 and infinity. If `odds ratios` are between 0 and 1, multiplying means that the odds decrease (i.e. a negative effects). If ``odds ratios` are higher than 1, multiplying means that the odds increase (i.e. a positive effect)
 
 For example, the ratio of the `odds of passing the test` for students that (1) `did complete the selftest`, versus the odds of students that (2) `did not complete the selftest`. In our model, that $odds ratio$ is $3.43$, meaning that the odds of passing the test increase by **a factor** of $3.43$ for students that completed the selftest. In other words, the odds of passing the test are 3.43 times greater. 
 

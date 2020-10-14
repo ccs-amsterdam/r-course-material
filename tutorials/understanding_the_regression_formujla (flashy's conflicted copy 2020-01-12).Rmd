@@ -8,13 +8,12 @@ output:
   github_document:
     toc: yes
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 
 ```{r, echo=F}
 knitr::opts_chunk$set(warning=FALSE, results = FALSE, message=FALSE, fig.path = "img/")
-library(printr)
 ```
 
 # This tutorial
@@ -91,16 +90,18 @@ $$3.05 + 0.29x_i$$
 The random part is the residual, which is represented by the distance between the line and the dot. You can think of the residual (i.e. that which remains) as the value by which the model fails to correctly predict y. This is why its also sometimes called the *noise* of the model, or the *error*. 
 
 Let's look at an example. Here we highlight the y value for the 15th observation in our data in blue. The residual is represented as a red line.
-
 ```{r}
 i = 15
+
+plot(x,y, col='grey')
+abline(m, col='green')
 points(x[i], y[i], col='blue', pch=10)
 segments(x[i], y[i], y1 = m$fitted.values[i], col='red')
 ```
 
 For this observation, the regression formula is:
 
-$$\color{blue}{y_i} = \color{green}{\beta_0 + \beta_1{x}_i} + \color{red}{\epsilon_i}$$
+$$\color{blue}{y_i} = \color{green}{\eta\beta_0 + \beta_1{x}_i} + \color{red}{\epsilon_i}$$
 $$\color{blue}{5.90} = \color{green}{3.05 + 0.29*7.37 + \color{red}{0.68}$$
 
 Understanding the random component of the regression equation also paves the way to undestanding the $R2$ measure. This is a value between 0 and 1 that represent the proportion of variance in $y$ that is explained by the model. 

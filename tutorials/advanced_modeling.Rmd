@@ -1,7 +1,7 @@
 ---
 title: "Advanced Statistical Modeling in R"
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "November 2018"
+date: "October 2020"
 output: 
   github_document:
     toc: yes
@@ -12,20 +12,20 @@ editor_options:
 
 ```{r, echo=F}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.path = "img/")
-library(printr)
 ```
 
 # Advanced Modeling
 
-In this tutorial we show how to perform several advanced statistical models in R. For the sake of parsimony, we will not discuss each model in detail, but only point out the main usage and provide a general example.
+In this tutorial we show how to use Generalized Linear Models and Multilevel models in R. The focus is primarily on the code, but we do provide some general information about when to use these models and how to interpret them, so you can follow this tutorial even if these methods are new to you. 
+Still, note that to properly apply these methods in your own research it is recommended to also look into material that focuses on the statistical models. 
 
-For this tutorial we use the tidyverse and texreg package to manage the data and present the models.
+For this tutorial we use the tidyverse and sjPlot package to manage the data and present the models.
 For the statistical models we use the stats packages (loaded by default) and the amazing [lme4](https://cran.r-project.org/web//packages/lme4/vignettes/lmer.pdf) package 
 
 ```{r}
 library(tidyverse)
-library(texreg)
-library(lme4)    ## remember to install first
+library(sjPlot)
+library(lme4)    
 ```
 
 # Generalized linear models
@@ -37,29 +37,65 @@ Probably the most common use of generalized linear models is the logistic regres
 Generalized linear models can be performed with the regular stats package, in a way that is very similar to the regular linear models. 
 Where regular linear models have the `lm` function, generalized linear models have the `glm` function. Other than this, the main difference is that the family function, or link function, of the glm needs to be given.
 
+In this tutorial we will mainly focus on how to use the `glm` function, using logistic regression as an example. If you are not familiar with GLM's, beware that the interpretation of coefficients and model fit can be quite different from ordinary linear regression. For a more detailed tutorial that includes pointers on interpretation, see the Generalized Linear Models tutorial on the R course material GitHub page. 
+
 ## Logistic regression
 
+We'll use the `iris` demo data, which contains measurements of sepal and petal length and width for three species of iris. 
 First, we create a copy of the iris data, but with a dichotomous variable for whether a case (row) is of the species "versicolor".
+As an example case, we'll then use logistic linear regression to predict whether the species is `versicolor` based on the Sepal size (length and width).
 
 ```{r}
 d = mutate(iris, versicolor = as.numeric(Species == 'versicolor'))
 head(d)
 ```
 
-The `glm` function uses the same type of formula as the `lm` function: `dependent ~ independent1 + independent2 + ...`. 
-Here we try to predict whether the species is `versicolor` based on the Sepal size (length and width).
-We specify that we use the `binomial` family, for modeling a binomial dependent variable. 
-To view the model we again use the texreg package (but summary(m) would also work).
+The `glm` function works mostly the same as the `lm` function, and uses the same type of formula: `dependent ~ independent1 + independent2 + ...`. 
+The main difference is that we'll need to specify the error distribution family and link function with the `family` argument.
+For logistic regression, we need to use the `binomial` family (which by default uses the canonical `logit` link function). 
+To interpret the model we use the tab_model function from the sjPlot package.
 
 ```{r}
 m = glm(versicolor ~ Sepal.Length + Sepal.Width, family = binomial, data = d)
-screenreg(m)
+tab_model(m)
 ```
 
-Here we see that only Sepal.Width has a significant effect. 
-The smaller the Sepal.Width, the more likely that the species is Versicolor.
+The output in the regression table looks very similar to that of ordinary linear regression, but there are some notable differences. Most importantly, note that the coefficients represent Odds Ratios[^1].
+In ordinary linear regression coefficients are additive, meaning that for every unit increase of an independent variable the 'predicted' value of the dependent variable goes up by the coefficient value. 
+The odds ratios, however, are multiplicative. 
+For every unit increase, the odds that y=1 (versus y=0) are multiplied by the coefficient value.
+For example, in the current model the Odds Ratios for Sepal.Width (0.04) indicate that for every unit increase of Sepal.Width, the odds are multiplied by 0.04.
 
-Note that there is no R2 value, because the glm model is fit with a maximum likelihood estimator instead of the least squares approach used in regular lm. 
+[^1]: The actual coefficients in the logistic regression model are `log odds ratios`. To interpret these coefficients it's easier to transform them to `odds ratios` (i.e. using the exponential function to undo the log). In the `tab_model` function this transformation is performed by default. Always check which values are reported to avoid misinterpretation. 
+
+It's important to realize that this means that the effect of Sepal Width is negative!
+For every unit increase of sepal width, the odds that the iris species is versicolor (y=1) decreases.
+More generally speaking, be careful that when odds ratios are reported, a positive value does not indicate a positive effect. 
+If the value is between 0 and 1, the effect is negative, because the odds decrease.
+If the value is higher than 1, the effect is positive. 
+
+Note that odds can be transformed to probabilities. 
+Thus, we can compute the probability that the species is versicolor.
+Here we'll be brief (see the dedicated tutorial on GLM for details).
+We'll calculate the probability for the case that Sepal Length is 1 and Sepal Width is 2.
+
+```{r}
+odds = 3270.76         ## intercept
+odds = odds * 1.14     ## sepal length is 1, so multiply by 1.14 once
+odds = odds * 0.04^2   ## sepal width is 2, so multiply by 0.04 twice
+odds / (odds + 1)      ## transform odds to probability
+```
+
+Alternatively, we can use the predict function to predict the response for a given combination of values for independent variables.
+
+```{r}
+predict(m, type='response',
+        newdata = data.frame(Sepal.Length = 1, Sepal.Width = 2))
+```
+
+Just as in ordinary linear regression, p-values are reported to interpret whether an effect is significant.
+In this case, we see that only the effect of Sepal.Width is significant. 
+
 To evaluate model fit, you can compare models using the anova function. 
 For example, here we first make a base model that does not contain any independent variables (other than the intercept), and also make a second model with the Petal information included.
 We then compare how the model fit changes.
@@ -76,37 +112,28 @@ The chi2 test shows whether the change in the model fit is statistically signifi
 If we look at the model, we also see that Petal.Width is a significant predictor.
 
 ```{r}
-screenreg(list(m1,m2))
+tab_model(m1,m2)
 ```
 
-For reference, it is possible to get some sort of R2 value, often called the pseudo R2. 
-See for instance [this page](https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/) for a discussion and overview. 
-If you want to use it though, do not waste time figuring out how to calculate it, but rather look for a package that can do it for you (there are certain to be plenty).
-
+Note that the `tab_model` function also reports ths R2 Tjur, which is a so-called pseudo-R2 measure. Pseudo R2 measures are designed to be interpretable in the same way as regular R2 (i.e. a value between 0 and 1, where 0 means no fit and 1 means perfect fit).
+These are not computed by the glm function, but the sjPlot package has implementations for various popular pseudo R2 measures, and by default reports the R2 Tjur for logistic regression.
+Long story short, if you report these measures, beware that they are not real R2 values, that there are several alternatives, and that there is some debate on whether and which pseudo R2 measures are appropriate. 
 Finally, to illustrate how fitting a `glm` is different from using a regular `lm`, we can plot the regression line for the Sepal.Width.
-To keep it simple, we'll fit a model with only the Sepal.Width as predictor.
+For this we can use the amazing and extremely versatile `plot_model` function from the sjPlot package.
+Here we plot the prediction of the model for different values of Sepal.Width.
 
-```{r fitting_glm}
-## create model
-m = glm(versicolor ~ Sepal.Width, family = binomial, data = d)
-
-## create a sequence of values within the observed boundaries of Sepal.Width
-x = seq(min(d$Sepal.Width), max(d$Sepal.Width), 0.01)     
-
-## predict response (probability of species being 'versicolor') for the values in x
-y = predict(m, list(Sepal.Width = x), type = 'response')  
-
-## plot the actual values for versicolor
-plot(d$Sepal.Width, d$versicolor)
-
-## add the predicted values
-lines(x,y, col='blue')
+```{r fitting_glm_plot, fig.align='center', fig.height=3, fig.width=5}
+plot_model(m2, type = 'pred', terms = 'Sepal.Width')
 ```
 
-here we see that the versicolor cases (the dots at the top and bottom) are mostly on the left side (small Sepal Width).
-The curved prediction line shows that the probability approaches (but never exceeds) 1 the smaller the Sepal.Width gets, and approaches 0 the larger the Sepal.Width gets. 
-In a regular `lm`, this line would be straight, which is less suited for fitting the probability, and would arbitrarily have values higher than 1 and lower than 0. 
+The curved prediction line shows that the probability approaches 100\% the smaller the Sepal.Width gets, and approaches 0 the larger the Sepal.Width gets.
 
+You can also produce this plot for all independent variables in a grid.
+
+```{r fitting_glm_grid, fig.align='center', fig.height=7, fig.width=7}
+p = plot_model(m2, type = 'pred')     ## creates a list of plots
+plot_grid(p)
+```
 
 # Multilevel models, or Mixed-Effects models
 
@@ -149,7 +176,7 @@ plot(d$Days, d$Reaction, col=cols[d$Subject], pch=16)
 
 If we just look at the dots without the colors, we hardly see any patterns. 
 Taking the colors into account, we see that the average reaction time (in our toy data) is vastly different for each Subject.
-Also, we see that overall the reaction time within Subjects decrease for most Subjects, but with different slopes, and one even increases.
+Also, we see that overall the reaction time decreases for most Subjects, but with some differences in how fast it decreases, and for one subject it even increases.
 
 To show how we can model this with random intercepts and random slopes, we'll fit this data with three models: regular linear model, multilevel model with random intercepts, multilevel model with random slopes. 
 
@@ -159,7 +186,7 @@ Let's see what happens if we fit a regular linear regression, and plot the regre
 
 ```{r}
 m = lm(Reaction ~ Days, data=d)
-screenreg(m)
+tab_model(m)
 ```
 
 The model states that there is no relation between Days and Reaction.
@@ -189,10 +216,10 @@ The part between the parentheses has two parts:
 * The part after the | symbol gives the name of the higher level group, in this case Subject.
 * The part before the | specifies the model for this higher level. In the current example, this is only `1`, which referes to the intercept. Normally, the intercept is implicit, but here you do always need to specify it. 
 
-Here we can also use the `screenreg` function (from the `texreg` package) to print the regression table.
+Here we can also use the `tab_model` function (from the `sjPlot` package) to print the regression table.
 
-```{}
-screenreg(m_ri)
+```{r}
+tab_model(m_ri)
 ```
 
 Interestingly, we see that the intercept and the effect for Days is identical (though now the effect is Days statistically significant). 
@@ -228,7 +255,7 @@ We do this by adding the Days variable in the multilevel part (the part between 
 
 ```{r}
 m_rs = lmer(Reaction ~ Days + (1 + Days| Subject), data=d)
-screenreg(m_rs)
+tab_model(m_rs)
 ```
 
 Again, the fixed effects for the Intercept and Days are the same. 
@@ -261,7 +288,7 @@ Interestingly, the improvement from m_base to m1 is not that great.
 This is because the overall effect of Days (not taking random slopes into account) isn't that great (remember that it was not statistically significant)
 
 ```{r}
-screenreg(list(m_base,m1,m2))
+tab_model(m_base,m1,m2)
 ```
 
 It is interesting to look at the random effects to see how the variance is explained at different levels.
