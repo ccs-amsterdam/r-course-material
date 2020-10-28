@@ -1,0 +1,1450 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Generalized linear models},
+  pdfauthor={Kasper Welbers \& Wouter van Atteveldt},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Generalized linear models}
+\author{Kasper Welbers \& Wouter van Atteveldt}
+\date{January 2020}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{generalized-linear-models-glm}{%
+\section{Generalized linear models
+(GLM)}\label{generalized-linear-models-glm}}
+
+\begin{quote}
+In statistics, the generalized linear model (GLM) is a flexible
+generalization of ordinary linear regression that allows for response
+variables that have error distribution models other than a normal
+distribution. The GLM generalizes linear regression by allowing the
+linear model to be related to the response variable via a link function
+and by allowing the magnitude of the variance of each measurement to be
+a function of its predicted value.
+\href{https://en.wikipedia.org/wiki/Generalized_linear_model}{Wikipedia}
+\end{quote}
+
+In this tutorial you will learn how to use GLMs\footnote{By GLM we
+  strictly refer to General\textbf{ized} linear models, and not General
+  Linear Models. Yes, there's a difference. Don't blame us, we didn't
+  name this stuff.} in R, focusing initially on logistic and Poisson
+regression (for binary and count data). As you will see, GLMs can be
+applied more broadly, and if you understand logistic and Poisson
+regression this is relatively straightforward to do. The goal of this
+tutorial is to get you started with fitting and interpreting GLMs, so
+we'll keep the mathematics to a minimum.
+
+We will use the \texttt{glm} function in the R \texttt{stats} package
+(which is opened by default, so you don't have to run
+\texttt{library(stats)}). In addition, we'll use the \texttt{sjPlot}
+package, which is a package for creating tables (\texttt{tab\_model()})
+and visualizations (\texttt{plot\_model()}) for various statistical
+models\footnote{By GLM we strictly refer to General\textbf{ized} linear
+  models, and not General Linear Models. Yes, there's a difference.
+  Don't blame us, we didn't name this stuff.}.
+
+For the examples in this tutorial we'll generate the data ourselves.
+This way we can clearly show how you can use GLM to model data with
+different distributions. You do not need to understand the data
+generation code to follow this tutorial, but it can help you better
+understand the idea of the distribution family and link function in GLM.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{install.packages}\NormalTok{(}\StringTok{'sjPlot'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(sjPlot)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{when-to-use-a-glm}{%
+\section{When to use a GLM}\label{when-to-use-a-glm}}
+
+As the name implies, Generalized Linear Models are a generalization of
+ordinary linear regression models. While ordinary linear regression is a
+powerful tool that we all know and love, there are some cases where it
+cannot (or at least should not) be applied. For instance, if the
+dependent variable is binary (values of 0 or 1), then a logistic
+regression model (which is one form of GLM) is more appropriate.
+
+So when is it inappropriate to use ordinary linear regression? You'll
+commonly hear: ``when the dependent variable is not normally
+distributed''. This is not the whole story, but it is a good place to
+start. If your dependent variable is not normally distributed, then the
+following issues are more likely to occur:
+
+\begin{itemize}
+\tightlist
+\item
+  there is no linear relation between the dependent variable and the
+  independent variable (or in multiple analysis, the linear combination
+  of independent variables)
+\item
+  the residuals are not normally distributed
+\item
+  the variance of the residuals is not constant (heteroscedacity)
+\end{itemize}
+
+As you might have recognized, these are violations of key assumptions of
+ordinary linear regression (linear relationship, normality,
+homoscedacity). If you need a refresher on the linear regression
+assumptions,
+\href{http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/R/R5_Correlation-Regression/R5_Correlation-Regression7.html}{this
+source} offers a clear and concise overview, and specifically discusses
+the standard R \texttt{lm} diagnistic plots.
+
+\hypertarget{ordinary-linear-regression-versus-logistic-regression}{%
+\subsection{Ordinary linear regression versus logistic
+regression}\label{ordinary-linear-regression-versus-logistic-regression}}
+
+Let's take a look at what happens if we apply ordinary linear regression
+if we have a binary dependent variable. For reference, we first take a
+look at a case where linear regression works well.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{## generate data}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{x =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{200}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{)        }\CommentTok{## sample x from a normal distribution}
+\NormalTok{mu =}\StringTok{ }\DecValTok{3} \OperatorTok{+}\StringTok{ }\DecValTok{2}\OperatorTok{*}\NormalTok{x                }\CommentTok{## linear prediction}
+\NormalTok{y =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{200}\NormalTok{, mu, }\DecValTok{3}\NormalTok{)       }\CommentTok{## generate y from prediction with a normal error distribution}
+
+\CommentTok{## fit linear model and plot}
+\NormalTok{m =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x)}
+\KeywordTok{plot_model}\NormalTok{(m, }\DataTypeTok{type=}\StringTok{'pred'}\NormalTok{, }\DataTypeTok{show.data=}\NormalTok{T, }\DataTypeTok{ci.lvl =} \OtherTok{NA}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $x
+\end{verbatim}
+
+\begin{center}\includegraphics{img/glm_lm_on_normal-1} \end{center}
+
+This is perfect data for an ordinary linear regression analysis. There
+is a linear relation and the residuals are normally distributed around
+the regression line with a constant variance.
+
+\hypertarget{fitting-a-linear-model-on-binary-data}{%
+\subsubsection{Fitting a linear model on binary
+data}\label{fitting-a-linear-model-on-binary-data}}
+
+Now let's compare this to a case where the dependent variable is binary.
+First we generate the data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{## generate data}
+\NormalTok{set.seed=}\DecValTok{1}
+\NormalTok{x =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{200}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{)              }\CommentTok{## sample x from a normal distribution}
+\NormalTok{mu =}\StringTok{ }\DecValTok{-1} \OperatorTok{+}\StringTok{ }\FloatTok{0.4}\OperatorTok{*}\NormalTok{x                   }\CommentTok{## linear predictor}
+\NormalTok{prob =}\StringTok{ }\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\NormalTok{mu))         }\CommentTok{## transform linear predictor with inverse of "logit" link}
+\NormalTok{y =}\StringTok{ }\KeywordTok{rbinom}\NormalTok{(}\DecValTok{200}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DataTypeTok{prob =}\NormalTok{ prob)   }\CommentTok{## sample y from probabilities with binomial error distribution}
+\end{Highlighting}
+\end{Shaded}
+
+Then we fit the linear model, and make a scatterplot with the regression
+line.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{## fit linear model and plot}
+\NormalTok{m_lm =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x)}
+\KeywordTok{plot_model}\NormalTok{(m_lm, }\DataTypeTok{type=}\StringTok{'pred'}\NormalTok{, }\DataTypeTok{show.data=}\NormalTok{T, }\DataTypeTok{ci.lvl=}\OtherTok{NA}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $x
+\end{verbatim}
+
+\begin{center}\includegraphics{img/glm_lm_on_binary-1} \end{center}
+
+In the scatterplot we see that (as expected) there are only 2 values on
+the y-axis: 0 and 1. We see that cases where \texttt{y\ =\ 1} are more
+common for higher x values, which indicates that there is a positive
+effect of x on y. This is also reflected in the regression line.
+
+But while the model does capture the overal relation, there are some
+issues. Firstly, most predicted values of y (i.e.~the line) cannot
+actually be values of y, which only has the values 0 and 1. As a result,
+the R2 value as a measure of model fit, that looks at the squared
+distance of the dots to the line, does not really have a meaningfull
+interpreation. It is possible, to some extent, to think of the predicted
+values as probabilities, but then what does it mean when y is lower than
+0 or higher than 1? If we would check our model diagnostics, we would
+see that the residuals tend to be nonnormal with nonconstant variance.
+We will not discuss these diagnostics here, but you can run the code
+below yourself if you want to explore this yourself.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(m, }\DataTypeTok{which =} \DecValTok{1}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(m, }\DataTypeTok{which =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{influence.measures}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+In conclusion, there are some issues with using a linear regression
+model when you have a binary dependent variable. The logistic regression
+model that we discuss next is a flavour of GLM designed to address these
+issues.
+
+But before we move on, we should mention that, \emph{given some extra
+care}, it is possible to use ordinary linear regression with a binary
+dependent variable. Although the logistic regression model is generally
+preferred by many, in some disciplines it is also quite common to use a
+\href{https://en.wikipedia.org/wiki/Linear_probability_model}{linear
+probability model}. While this is essentially a linear regression model,
+some additional steps and precautions should be taken to address the
+issues mentioned above. For instance, using
+\href{https://www.r-econometrics.com/methods/hcrobusterrors/}{Heteroscedastic
+Robust Standard Errors} to calculate reliable p-values. So, if you see
+someone use a linear regression model with a binary dependent variable,
+it is not necessarily \emph{wrong}, as long as they know what they are
+doing.
+
+\hypertarget{fitting-a-logistic-regression-model-on-binary-data}{%
+\subsubsection{Fitting a logistic regression model on binary
+data}\label{fitting-a-logistic-regression-model-on-binary-data}}
+
+Logistic regression analysis is a form of GLM in which a
+\texttt{binomial} error distribution is used with a \texttt{logit} link
+function. We discuss the error distribution and link function in detail
+below, so for now just believe us that we need the binomial distribution
+and logit link for logistic regression. Logistic regression is a very
+common model for regression analysis with a binary dependent variable.
+Fitting this model in R is surprisingly simple and intuitive. The GLM
+alternative for the \texttt{lm} (linear model) function in R, is
+\texttt{glm}. The specification of the regression formula is also
+identical. To specify the error distribution and link function, we use
+the \texttt{family} argument.
+
+For logistic regression, we only need to pass the \texttt{binomial}
+function to \texttt{family}, which by default uses the \texttt{logit}
+link. Here we write it in full for sake of completeness.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_glm =}\StringTok{ }\KeywordTok{glm}\NormalTok{(y }\OperatorTok{~}\StringTok{ }\NormalTok{x, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{'logit'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+We can again use the same \texttt{plot\_model} function to inspect the
+fit. However, since the line is not linear, we'll need to compute
+predictions for all values of x to get a smooth line (see documentation
+of the \texttt{terms} argument in \texttt{plot\_model}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_model}\NormalTok{(m_glm, }\DataTypeTok{type=}\StringTok{'pred'}\NormalTok{, }\DataTypeTok{show.data=}\NormalTok{T, }\DataTypeTok{terms=}\StringTok{'x [all]'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/glm_glm_on_binary-1} \end{center}
+
+Our new line bends in order to fit the observations with low and high x.
+To the left, it approaches but never reaches 0, and to the right it
+approaches but never reaches 1.
+
+It's not just the line that's changed. The residuals are still
+non-normal, but this is no longer a problem. In fact, we need to think
+rather differently about how the model \emph{fits} the data. The
+predicted response of the logistic regression model (i.e.~the green
+line) is not the expected value of y, but the probability that y is 1.
+This has implications for how to interpret the model coefficients and
+model fit, as discussed in the next section.
+
+\hypertarget{fitting-and-interpreting-a-glm}{%
+\section{Fitting and interpreting a
+GLM}\label{fitting-and-interpreting-a-glm}}
+
+The output of a GLM looks very similar to that of ordinary linear
+regression. However, coefficients will often have to be interpreted very
+differently, and the interpretation of model fit is somewhat different.
+In this tutorial we'll focus on the interpretation of logistic
+regression and Poisson regression, which are commonly used models. This
+also introduces you to key concepts that are the same or similar in
+other GLMs.
+
+\hypertarget{logistic-regression}{%
+\subsection{Logistic regression}\label{logistic-regression}}
+
+To discuss the interpretation of logistic regression analysis we again
+simulate data, but this time we'll give our data proper names to make it
+easier to interpret. We'll also put the data into a dataframe.
+
+Let's say that you have given a test to students, but quite a lot of
+them failed. You want to understand whether this had anything to do
+with:
+
+\begin{itemize}
+\tightlist
+\item
+  how many hours they studied
+\item
+  whether they completed an online self-test that you thoughtfully
+  provided
+\item
+  how much glasses of alcohol they drink per week
+\end{itemize}
+
+You collect your data and end up with the following dataframe (oh, and
+somehow you had 1000 students).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+
+\CommentTok{## sample independent variables}
+\NormalTok{d =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{hours_studied =} \KeywordTok{rpois}\NormalTok{(}\DataTypeTok{n=}\DecValTok{1000}\NormalTok{, }\DataTypeTok{lambda=}\DecValTok{12}\NormalTok{),}
+               \DataTypeTok{selftest =} \KeywordTok{rbinom}\NormalTok{(}\DataTypeTok{n=}\DecValTok{1000}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{prob=}\FloatTok{0.25}\NormalTok{),}
+               \DataTypeTok{alcohol =} \KeywordTok{rpois}\NormalTok{(}\DataTypeTok{n=}\DecValTok{1000}\NormalTok{, }\DataTypeTok{lambda=}\DecValTok{10}\NormalTok{))}
+
+\CommentTok{## linear prediction }
+\NormalTok{mu =}\StringTok{ }\FloatTok{-1.5} \OperatorTok{+}\StringTok{ }\FloatTok{0.4}\OperatorTok{*}\NormalTok{d}\OperatorTok{$}\NormalTok{hours_studied }\OperatorTok{+}\StringTok{ }\FloatTok{1.2}\OperatorTok{*}\NormalTok{d}\OperatorTok{$}\NormalTok{selftest }\OperatorTok{+}\StringTok{ }\FloatTok{-0.2}\OperatorTok{*}\NormalTok{d}\OperatorTok{$}\NormalTok{alcohol}
+\CommentTok{## transform with inverse of "logit" link}
+\NormalTok{prob =}\StringTok{ }\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\NormalTok{mu))}
+\CommentTok{## generate x from prediction with binomial error distribution}
+\NormalTok{d}\OperatorTok{$}\NormalTok{passed_test =}\StringTok{ }\NormalTok{y =}\StringTok{ }\KeywordTok{rbinom}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DataTypeTok{prob =}\NormalTok{ prob)}
+
+\KeywordTok{head}\NormalTok{(d)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   hours_studied selftest alcohol passed_test
+## 1             9        0      10           1
+## 2            16        0       9           1
+## 3            16        0      16           1
+## 4            13        0      13           1
+## 5            16        1      11           1
+## 6            14        0      10           1
+\end{verbatim}
+
+We can fit the \texttt{glm} as before. We now only add
+\texttt{data\ =\ d} because our variables are now in a data.frame. Also,
+this time we do not specify the ``logit'' link (which is the default).
+This is the same model as above, but it's good to know that the
+following syntax also works.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m =}\StringTok{ }\KeywordTok{glm}\NormalTok{(passed_test }\OperatorTok{~}\StringTok{ }\NormalTok{hours_studied }\OperatorTok{+}\StringTok{ }\NormalTok{selftest }\OperatorTok{+}\StringTok{ }\NormalTok{alcohol, }
+        \DataTypeTok{data=}\NormalTok{d, }\DataTypeTok{family=}\NormalTok{binomial)}
+\KeywordTok{tab_model}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+~
+
+passed\_test
+
+Predictors
+
+Odds Ratios
+
+CI
+
+p
+
+(Intercept)
+
+0.19
+
+0.09~--~0.43
+
+\textless0.001
+
+hours\_studied
+
+1.49
+
+1.40~--~1.59
+
+\textless0.001
+
+selftest
+
+3.43
+
+2.19~--~5.54
+
+\textless0.001
+
+alcohol
+
+0.84
+
+0.80~--~0.89
+
+\textless0.001
+
+Observations
+
+1000
+
+R2 Tjur
+
+0.281
+
+We'll use the \texttt{tab\_model} function from the \texttt{sjPlot}
+package to make a nice table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tab_model}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+~
+
+passed\_test
+
+Predictors
+
+Odds Ratios
+
+CI
+
+p
+
+(Intercept)
+
+0.19
+
+0.09~--~0.43
+
+\textless0.001
+
+hours\_studied
+
+1.49
+
+1.40~--~1.59
+
+\textless0.001
+
+selftest
+
+3.43
+
+2.19~--~5.54
+
+\textless0.001
+
+alcohol
+
+0.84
+
+0.80~--~0.89
+
+\textless0.001
+
+Observations
+
+1000
+
+R2 Tjur
+
+0.281
+
+In many ways this is very similar to the classic table for ordinary
+linear regression. The important difference lies in the coefficients,
+that are now \texttt{Odds\ Ratios}, and the \texttt{R2\ Tjur}, which is
+a pseudo R2 measure.
+
+\hypertarget{when-to-use-logistic-regression}{%
+\subsubsection{When to use logistic
+regression}\label{when-to-use-logistic-regression}}
+
+Logistic regression is a rather exceptional case, because if the
+dependent variable is binary there is little doubt that you'll want to
+use a binomial distribution. There are some alternatives to the
+\texttt{logit} link, such as \texttt{probit}, but we won't discuss them
+here. Logit is a popular choice because it often makes sense, and is
+relatively easy to interpret.
+
+It is generally a good idea to have a look at how your model fits the
+data. A convenient tool is the \texttt{plot\_model} function from the
+\texttt{sjPlot} package, which can visualize the predicted values
+(i.e.~marginal probabilities) for different independent variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_model}\NormalTok{(m, }\DataTypeTok{type=}\StringTok{'pred'}\NormalTok{, }\DataTypeTok{grid =}\NormalTok{ T)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/gtd_example_plot -1} \end{center}
+
+\hypertarget{interpreting-coefficients-odds-ratios-and-log-odds-ratios}{%
+\subsubsection{Interpreting coefficients: odds ratios and log odds
+ratios}\label{interpreting-coefficients-odds-ratios-and-log-odds-ratios}}
+
+First of all, the interpretation of the p-values is the same as in
+ordinary linear regression. All our coefficients are significant, so in
+this case we can interpret all of the effects.
+
+We see that our column with coefficients says \texttt{Odds\ Ratios}.
+Before we discuss what that means, a VERY IMPORTANT word of caution. The
+actual coefficients in the logistic regression model are
+\texttt{log\ odds\ ratios}. To interpret these coefficients it's easier
+to transform them to \texttt{odds\ ratios}, and in some software (like
+in \texttt{sjPlot\textquotesingle{}s\ tab\_model}) this transformation
+is default. Always check which values are reported to avoid
+misinterpretation.
+
+The transformation is easy to do yourself as well. To go from
+\texttt{log\ odds\ ratios} to \texttt{odds\ ratios} you simply take the
+exponential (the inverse function of the natural log) of the
+\texttt{log\ odds\ ratios}. To go back from \texttt{odds\ ratios} to
+\texttt{log\ odds\ ratios}, simply apply the natural log function. For
+reference, note that the log of \texttt{odds\ ratios} for the
+\texttt{hours\_studied} variable is close to the coefficient that we
+used in the data generation above (0.4).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{log}\NormalTok{(}\FloatTok{1.49}\NormalTok{)}
+\KeywordTok{exp}\NormalTok{(}\FloatTok{0.3987761}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+For interpretation you'll generally want to use the
+\texttt{odds\ ratios}, and this is often also what journals want you to
+report.
+
+So how to intepret the \texttt{odds\ ratio}? These are, quite
+straightforwardly, the ratios of the odds (note that odds are not
+probabilities\footnote{We assume that you are familiar with the
+  difference between odds and probabilities. Probability indicate how
+  likely an event is to occur as a value between 0 and 1. Odds is the
+  ratio of \texttt{the\ probability\ that\ an\ event\ will\ occur}
+  divided by
+  \texttt{the\ probability\ that\ an\ event\ will\ not\ occur}. For
+  example, if the probability of throwing a six on a six sided die is
+  \(1 / 6 = 0.1666...\), then the odds are \$0.1666 / (1 - 0.1666) =
+  0.2. For the probability of not throwing six (\(5 / 6 = 0.8333...\)),
+  this is \(0.8333 / (1 - 0.8333) = 5\). So, If probability is below
+  0.5, then the odds are between 0 and 1. If probability is higher than
+  0.5, then the odds are between 1 and infinity.}). The most important
+difference in the interpretation of \texttt{odds\ ratios}, compared to
+ordinary regression coefficients, is that we do not add these values to
+the odds (of passing the test), but multiply the odds by them. The
+\texttt{odds\ ratios} range between 0 and infinity. If
+\texttt{odds\ ratios} are between 0 and 1, multiplying means that the
+odds decrease (i.e.~a negative effects). If `\texttt{odds\ ratios} are
+higher than 1, multiplying means that the odds increase (i.e.~a positive
+effect)
+
+For example, the ratio of the \texttt{odds\ of\ passing\ the\ test} for
+students that (1) \texttt{did\ complete\ the\ selftest}, versus the odds
+of students that (2) \texttt{did\ not\ complete\ the\ selftest}. In our
+model, that \(odds ratio\) is \(3.43\), meaning that the odds of passing
+the test increase by \textbf{a factor} of \(3.43\) for students that
+completed the selftest. In other words, the odds of passing the test are
+3.43 times greater.
+
+Think carefully about what \texttt{3.43\ times\ greater\ odds} means
+here in terms of probability. Consider a student who, given a certain
+amount of studying and alcohol use, has a 60\% probability of passing
+the test without taking the selftest. If he/she would take the selftest,
+we would expect the odds to be 3.43 times greater, so what would the
+change in probability be? We can calculate this by transforming this
+probability to odds, multiplying by the odds ratio, and then tranforming
+the new odds back to probabilities.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{prob_to_odds <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(p) p }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{-}\StringTok{ }\NormalTok{p)}
+\NormalTok{odds_to_prob <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(o) o }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\NormalTok{o)}
+
+\NormalTok{odds =}\StringTok{ }\KeywordTok{prob_to_odds}\NormalTok{(}\FloatTok{0.6}\NormalTok{)}
+\NormalTok{odds_with_test =}\StringTok{ }\NormalTok{odds }\OperatorTok{*}\StringTok{ }\FloatTok{3.43}
+\KeywordTok{odds_to_prob}\NormalTok{(odds_with_test)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8372661
+\end{verbatim}
+
+So in this case, \texttt{3.43\ times\ greater} odds means an increase in
+probability from 0.60 to 0.84.
+
+It is slightly more complicated for continuous variables, in our case
+these are \texttt{hours\_studied} (number of hours) and \texttt{alcohol}
+(number of glasses). Here, we talk about an increase by a certain factor
+for every unit increase in the independent variable. For an increase
+from 0 to 1 this is still simple. If all other independent variables are
+equal, then if a person studies one hour more, we multiply the odds of
+passing the test by \(1.49\). For increases of more than 1, we need to
+multiply multiple times. If a person studies 3 hours more, we need to
+multiply by \(1.49\) three times, so
+\(odds * 1.49 * 1.49 * 1.49 = odds * 1.49^3\).
+
+For the number of glasses of alcohol per week the calculation is the
+same, but note that here we have a negative effect. If all other
+independent variables are equal, then if a person drinks 5 more glasses
+of alcohol per week, the odds become less than half:
+\(odds * 0.84^5 = odds * 0.418\).
+
+A good way to remember all of this is by remembering the following
+formula for calculating the probability for a given case. For example,
+what is the probability of passing the test for a student that:
+
+\begin{itemize}
+\tightlist
+\item
+  studied 10 hours (hours\_studied = 10)
+\item
+  did the self test (selftest = 1)
+\item
+  drinks 7 glasses of alcohol per week (alcohol = 7)
+\end{itemize}
+
+The odds would be:
+
+\[odds = \beta_0 \cdot \beta_1^{hours\_studied} \cdot \beta_2^{selftest} \cdot \beta_3^{alcohol}\]
+
+\[odds = 0.19 \cdot 1.49^{10} \cdot 3.43^1 \cdot 0.84^{7}  \]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{odds =}\StringTok{ }\FloatTok{0.1939} \OperatorTok{*}\StringTok{ }\FloatTok{1.4904}\OperatorTok{^}\DecValTok{10} \OperatorTok{*}\StringTok{ }\FloatTok{3.4315}\OperatorTok{^}\DecValTok{1} \OperatorTok{*}\StringTok{ }\FloatTok{0.8445}\OperatorTok{^}\DecValTok{7}
+\end{Highlighting}
+\end{Shaded}
+
+And the probability is calculated as
+
+\[ prob = \frac{odds}{1+odds}\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{odds }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\NormalTok{odds)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.916824
+\end{verbatim}
+
+So for this person the probability of passing the test is 0.917. To
+verify that our calculation is correct, we can also use the predict
+function to get this probability. Given the model, and a dataset with
+the cases for which we want to predict the response, we compute this as
+follows.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{newdata =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{hours_studied =} \DecValTok{10}\NormalTok{, }\DataTypeTok{selftest =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alcohol =} \DecValTok{7}\NormalTok{)}
+\KeywordTok{predict}\NormalTok{(m, }\DataTypeTok{newdata=}\NormalTok{newdata, }\DataTypeTok{type =} \StringTok{'response'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         1 
+## 0.9166768
+\end{verbatim}
+
+This is identical within rounding error.
+
+\hypertarget{interpreting-model-fit}{%
+\subsubsection{Interpreting model fit}\label{interpreting-model-fit}}
+
+In ordinary linear regression it is common to report the R2 measure as
+an indicator of how wel a model fits the data. The R2 is a value between
+0 and 1 that represent the proportion of variance in the dependent
+variable that is explained by the model. This is possible because we
+assume that the residuals are normally distributed with constant
+variance. The model is can then be fit with the Ordinary Least Squares
+(OLS) method, that minimizes the squared residuals.
+
+In logistic regression this R2 measure cannot be used. The model
+parameters are determined with Maximum-likelihood estimation (MLE), that
+iteratively looks for the model parameters that maximize the likelihood
+of generating the observed data. We can use this likelihood (and
+measures based on likelihood) as an indicator of model fit, but there is
+no straightforward way to calculate a value between 0 and 1 that
+indicates whether the model explains nothing or everything.
+
+Here we discuss how we can use likelihood, and specifically the
+\emph{deviance} measure, to compare different models in order to find
+the model that best fits the data. In addition, we discuss the concept
+of \texttt{Pseudo\ R2} measures, that are sometimes reported as a
+helpfull tool for interpreting model fit.
+
+\hypertarget{comparing-models}{%
+\paragraph{Comparing models}\label{comparing-models}}
+
+The most important use of model fit measures is the possibility to
+compare \emph{nested models}. By \emph{nested models}, we mean models
+with the same dependent variable, where one model is \emph{more complex}
+compared to the other.\\
+By \emph{more complex}, we mean having more parameters, which you get by
+adding more independent variables. For instance, say we have two models
+that try to predict whether a student passes a test. If one model has
+only the independent variable \texttt{hours\_studied}, and the other
+model has both \texttt{hours\_studied} and \texttt{selftest}, then the
+second model is more complex.
+
+We want to be able to say whether the second model offers a
+\emph{statistically significant} improvement in model fit. Why
+statistically significant? Well, we can be pretty damn certain that the
+more complex model has a higher model fit. By adding more independent
+variables, it simply has more information to work with. Even if we add a
+completely random independent variable, it is still likely to give us a
+slightly better model fit because it has more parameters to tweak.
+Therefore, we want to test whether the increase in model fit is
+significant, in a way that takes into account how many variables were
+added. In other words, we want to test whether adding the independent
+variable \texttt{selftest} improves the model, and improves it more than
+we would expect based on sheer coincidence.
+
+By comparing model fit this way, we can also test whether a model
+predicts anything about the dependent variable at all. To do so, we
+compare the model to a model without any independent variables (so the
+only parameter is the intercept).
+
+Doing these comparisons in R is actually pretty straighforward. You
+simply fit multiple models, and then use the \texttt{anova} function to
+compare them. Here we show an example for logistic regression, but the
+approach is actually identical for other GLMs (and also multilevel
+models). Here we first fit an empty model, and then add the variables in
+2 steps. Note that in the empty model we need to provide the value 1 for
+the intercept (if independent variables are given, the intercept is
+automatically added).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m_}\DecValTok{0}\NormalTok{ =}\StringTok{ }\KeywordTok{glm}\NormalTok{(passed_test }\OperatorTok{~}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{data=}\NormalTok{d, }\DataTypeTok{family=}\NormalTok{ binomial)}
+\NormalTok{m_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{glm}\NormalTok{(passed_test }\OperatorTok{~}\StringTok{ }\NormalTok{hours_studied }\OperatorTok{+}\StringTok{ }\NormalTok{selftest, }\DataTypeTok{data=}\NormalTok{d, }\DataTypeTok{family=}\NormalTok{ binomial)}
+\NormalTok{m_}\DecValTok{2}\NormalTok{ =}\StringTok{ }\KeywordTok{glm}\NormalTok{(passed_test }\OperatorTok{~}\StringTok{ }\NormalTok{hours_studied }\OperatorTok{+}\StringTok{ }\NormalTok{selftest }\OperatorTok{+}\StringTok{ }\NormalTok{alcohol, }\DataTypeTok{data=}\NormalTok{d, }\DataTypeTok{family=}\NormalTok{binomial)}
+\end{Highlighting}
+\end{Shaded}
+
+A nice feature of the \texttt{tab\_model} function is that we can pass
+multiple models, and it will show them nicely side-by-side. For
+comparing models, it then makes sense to sort these models by
+complexity, with the least complex model on the left, and the most
+complex model on the right.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tab_model}\NormalTok{(m_}\DecValTok{0}\NormalTok{, m_}\DecValTok{1}\NormalTok{, m_}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Comparing models in R can be done with the \texttt{anova} function (note
+that while this is called anova, it is different from the statistical
+analysis where you compare the means of different groups). Here we also
+just pass multiple models to compare to the function. Note that the
+order of the models is important, because each model will only be
+compared to the previous model. This is sufficient, because if
+\texttt{m\_2} has better fit than \texttt{m\_1}, it also has better fit
+than \texttt{m\_0}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{anova}\NormalTok{(m_}\DecValTok{0}\NormalTok{, m_}\DecValTok{1}\NormalTok{, m_}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Each row represents a model, in the same order in which they have been
+passed to \texttt{anova()}. In the \texttt{Resid.\ Dev} column we see
+the Residual Deviance\footnote{Deviance is a measure that is obtained by
+  comparing two models based on their likelihood of generating the
+  observed data. The Residual Deviance of a model is obtained by
+  comparing the modell to the \emph{saturated model}. That is, a model
+  in which every observation has it's own parameter, so that it has the
+  best possible (and often perfect) prediction of the data. You can
+  think of the Residual Deviance as the extent to which the model
+  \emph{deviates} from a model that best fits the data.} for each model.
+This Residual Deviance has a similar interpretation as the sum of
+squares in ordinary regression: the closer the value is to zero, the
+better the model fit. Thus, if we compare multiple models, models with a
+lower Deviance have a better model fit.
+
+Let's compare the first and second row, for \texttt{m\_0} and
+\texttt{m\_1}, respectively. To see whether model fit improves from
+\texttt{m\_0} to \texttt{m\_1}, we look at how much the Residual
+Deviance decreases. This is also the value that is reported in the
+column named \texttt{Deviance} (\(1120.25 - 872.10 = 248.16\))\footnote{Deviance
+  is a measure that is obtained by comparing two models based on their
+  likelihood of generating the observed data. The Residual Deviance of a
+  model is obtained by comparing the modell to the \emph{saturated
+  model}. That is, a model in which every observation has it's own
+  parameter, so that it has the best possible (and often perfect)
+  prediction of the data. You can think of the Residual Deviance as the
+  extent to which the model \emph{deviates} from a model that best fits
+  the data.}. Since the value decreased by 248.16, we know that the
+model fit improved (Deviance got closer to zero).
+
+But how do we now if this decrease in Deviance is significant? For this
+we use a \(Chi^2\) test (which we asked for above in the \texttt{anova}
+function). In the \texttt{Pr(\textgreater{}Chi)} column we see the p
+value (in scientific notation and with the conventional stars). This
+indicates whether the model was a significant improvement compared to
+the previous model (one row higher).
+
+In case you are wondering, this \(Chi^2\) test uses the value in the
+\texttt{Deviance} and \texttt{Df} columns. Recall that we wanted to take
+into account how many variables we added in \texttt{m\_1} compared to
+\texttt{m\_0}. Adding variables decreases the degrees of freedom (Resid.
+Df) of the model, and in the \texttt{Df} column we see that we lost 2 Df
+(in \texttt{m\_2} we added the variables \texttt{hours\_studied} and
+\texttt{selftest}). Now, it turns out that with a large enough \(n\) the
+difference of the Deviance of two models is approximately chi-square
+distributed, where the difference in the degrees of freedom of the
+models is the degrees of freedom for the Chi-square test. So, comparing
+\texttt{m\_2} and \texttt{m\_3}, we can take the decrease in Deviance
+(38.253) and Df (1) and look up these values in a HUGE \(Chi^2\)
+distribution table, or use the following function to do this.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{pchisq}\NormalTok{(}\FloatTok{38.253}\NormalTok{, }\DataTypeTok{df=}\DecValTok{1}\NormalTok{, }\DataTypeTok{lower.tail=}\NormalTok{F)}
+\end{Highlighting}
+\end{Shaded}
+
+Of course, you do not need to calculate this yourself, as this is also
+the value that is reported in the anova output (if you use the
+\texttt{test\ =\ \textquotesingle{}Chisq\textquotesingle{}} argument as
+we do above).
+
+\hypertarget{pseudo-r2}{%
+\subsubsection{Pseudo R2}\label{pseudo-r2}}
+
+In addition to comparing models, we (and reviewers) often do like
+something similar to an R2 value, because it tells us something about
+how good a model is on a scale from worthless (0) to perfect (1). So
+smart people have come op with \texttt{Pseudo\ R2} measures for logistic
+regression (and other GLMs). The main idea is to have a measure of model
+fit that is bounded between 0 and 1, where zero means that it does not
+(or very poorly) fit the data, and 1 means a (near) perfect fit. The
+problem is that there are quite a lot of different pseudo r2 measures
+{[}(a nice
+overview){[}\url{https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/}{]}{]}
+and there is no consensus on when to use which. This is probably not a
+discussion you want to be part of, so a practical approach would be to
+see which measures are used in your field.
+
+The tab\_model function from \texttt{sjPlot} by default reports the
+``coefficient of discrimination'' Pseudo R2 proposed by Tjur
+(\href{https://www.tandfonline.com/doi/abs/10.1198/tast.2009.08210}{2009}).
+This actually has good appeal, as argued by
+\href{https://statisticalhorizons.com/r2logistic}{someone who's much
+more into this than us}. It's intuitive and easy to calculate. You take
+the mean of the fitted probabilities for the cases where y = 1, and
+subtract the mean of the fitted probabilities for the cases where y = 0.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{## (we create pred and y for clarity)}
+\NormalTok{pred =}\StringTok{ }\NormalTok{m_}\DecValTok{2}\OperatorTok{$}\NormalTok{fitted.values}
+\NormalTok{y =}\StringTok{ }\NormalTok{d}\OperatorTok{$}\NormalTok{passed_test}
+
+\NormalTok{pred_}\DecValTok{0}\NormalTok{ =}\StringTok{ }\KeywordTok{mean}\NormalTok{(pred[y }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{])}
+\NormalTok{pred_}\DecValTok{1}\NormalTok{ =}\StringTok{ }\KeywordTok{mean}\NormalTok{(pred[y }\OperatorTok{==}\StringTok{ }\DecValTok{1}\NormalTok{])}
+\NormalTok{pred_}\DecValTok{1} \OperatorTok{-}\StringTok{ }\NormalTok{pred_}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2805218
+\end{verbatim}
+
+Regardless of which Pseudo R2 measure you choose, be carefull not to
+attach too much meaning to it. It's usefull for comparing models and
+getting a general indication of how well you can predict a dependent
+variable, but it's only an indication.
+
+\hypertarget{poisson-regression}{%
+\subsection{Poisson regression}\label{poisson-regression}}
+
+Now we will fit and interpret a Poisson regression model. Several
+aspects of this are similar or identical to logistic regression, so rest
+assured, we'll need less words. However, this also means that if you
+skipped the logistic regression part, this section might be a bit too
+to-the-point.
+
+Again we start by generating some data. We'll pretend that
+
+\begin{itemize}
+\tightlist
+\item
+  the dependent variable is the number of times a tweet is retweeted
+  within 1 week after publication.
+\item
+  the independent variable is how funny the tweet was on a scale from 1
+  to 10.
+\end{itemize}
+
+The dependent variable \texttt{retweets} is a count variable (i.e.~it
+only has positive integers), and we think the number of retweets will be
+higher for \texttt{funny} tweets. We don't think this relation will be
+linear, because tweets that have been retweeted reach a wider audience
+and as such become more likely to be retweeted more.
+
+The typical Poisson regression is a GLM with a Poisson distribution and
+log link function. To generate the example data we transform the linear
+prediction with the inverse of the log link (the exponential) to get the
+expected values. We then draw y from a Poisson distribution with the
+expected value as the \texttt{lambda} parameter, which is both the mean
+and variance of the Poisson distribution.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{x =}\StringTok{ }\KeywordTok{runif}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{10}\NormalTok{)        }\CommentTok{## sample x from a uniform distribution}
+\NormalTok{mu =}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\DecValTok{2} \OperatorTok{+}\StringTok{ }\FloatTok{0.3}\OperatorTok{*}\NormalTok{x)          }\CommentTok{## linear prediction with inverse of the "log" link}
+\NormalTok{y =}\StringTok{ }\KeywordTok{rpois}\NormalTok{(}\DataTypeTok{n=}\DecValTok{1000}\NormalTok{, }\DataTypeTok{lambda=}\NormalTok{mu)  }\CommentTok{## generate y from prediction with Poisson error distribution}
+\NormalTok{d =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{retweets=}\NormalTok{y, }\DataTypeTok{funny=}\NormalTok{x)}
+\end{Highlighting}
+\end{Shaded}
+
+Now we can git a GLM with the \texttt{poisson} family with \texttt{log}
+link function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m =}\StringTok{ }\KeywordTok{glm}\NormalTok{(retweets }\OperatorTok{~}\StringTok{ }\NormalTok{funny, }\DataTypeTok{data=}\NormalTok{d, }\DataTypeTok{family=}\KeywordTok{poisson}\NormalTok{(}\StringTok{'log'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+And show the regression table.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tab_model}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+~
+
+retweets
+
+Predictors
+
+Incidence Rate Ratios
+
+CI
+
+p
+
+(Intercept)
+
+0.14
+
+0.11~--~0.17
+
+\textless0.001
+
+funny
+
+1.34
+
+1.30~--~1.38
+
+\textless0.001
+
+Observations
+
+1000
+
+R2 Nagelkerke
+
+0.473
+
+This is again very similar to the classic table for ordinary linear
+regression. The important difference lies in the coefficients, that are
+now \texttt{Incidence\ Rate\ Ratios}, and the \texttt{R2\ Nagelkerke},
+which is a pseudo R2 measure.
+
+\hypertarget{when-to-use-poisson-regression}{%
+\subsubsection{When to use Poisson
+regression}\label{when-to-use-poisson-regression}}
+
+Where logistic regression makes sense for a binary dependent variable,
+Poisson regression is often a good approach for (non-negative) count
+data with a low mean. In our data, this is clearly the case. There are
+many tweets with zero retweets, and for more retweets the number of
+tweets decreases exponentially.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{table}\NormalTok{(d}\OperatorTok{$}\NormalTok{retweets)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##   0   1   2   3   4   5   6   7 
+## 492 271 133  64  23  11   4   2
+\end{verbatim}
+
+If count data has a high mean, a normal distribution can be a good
+enough approximation. But with a low mean you'll have the problem that
+the distribution is highly skewed, and values cannot be lower than zero
+(so the bell curve of the normal distribution would be abruply cut off).
+
+In the current example, the Poisson model is a good fit to the data (but
+yeah, we literally used a Poisson distribution to sample it)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_model}\NormalTok{(m, }\DataTypeTok{type=}\StringTok{'pred'}\NormalTok{, }\DataTypeTok{show.data=}\NormalTok{T, }\DataTypeTok{grid=}\NormalTok{T)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/glm_poisson_fit-1} \end{center}
+
+A common alternative for this type of data is a negative binomial
+generalized linear model (in R, you can use the \texttt{glm.nb} function
+from the \texttt{MASS} package), that can be better if the Poisson model
+is overdispersed. We won't discuss this issue in this introduction to
+GLMs, but
+\href{https://www.theanalysisfactor.com/overdispersion-in-count-models-fit-the-model-to-the-data-dont-fit-the-data-to-the-model/}{this
+page} provides a nice and simple example.
+
+\hypertarget{interpreting-coefficients}{%
+\subsubsection{Interpreting
+Coefficients}\label{interpreting-coefficients}}
+
+The interpretation of the coefficients is similar to logistic
+regression, but slightly easier. Firstly, note that again we can
+interpret the p-values as in ordinary linear regression. So here we can
+say that the effect of \texttt{funny} is statistically significant.
+
+Like in logistic regression, the coefficients in the model are in logged
+form, and to interpret them it's easier to exponentiate them. The
+\texttt{tab\_model} function performs this transformation by default. As
+with logistic regression, make sure to always check whether the
+coefficients are shown in log form or as the incidence rate ratios, to
+prevent misinterpretation.
+
+The column with the coefficients is labeled the ``Incidence Rate
+Ratios''. The \emph{incidence rate} of an event is the frequency of an
+event within a given time span. In our case is the number of retweets in
+one week. The coefficients, which are \emph{incidence rate ratios}
+indicate how this incidence rate changes as an independent variable
+increases by 1 unit. So, a tweet that scores \(5\) on funny, has
+\(1.34\) times the incidence rate of a tweet that scored \(4\). A tweet
+that scores \(7\) on funny, has \(1.34^3\) times
+(\(1.34 * 1.34 * 1.34\)) the incidence rate of a tweet that scored
+\(4\).
+
+If we want to get the \emph{incidence rate} for a particular (linear
+combination of) independent variable(s), we take the intercept as the
+base rate, and calculate the expected number of retweets for a tweet
+that scores \(9\) on humor.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FloatTok{0.14} \OperatorTok{*}\StringTok{ }\FloatTok{1.34}\OperatorTok{^}\DecValTok{9}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.950164
+\end{verbatim}
+
+So even a very funny tweet on average is only retweeted about twice. If
+our imaginative data turn out to be true, there is a concernable amount
+of humor lost on twitter.
+
+\hypertarget{interpreting-model-fit-1}{%
+\subsubsection{Interpreting model fit}\label{interpreting-model-fit-1}}
+
+Like logistic regression, it is not possible to calculate the R2
+measure, and the best we can do is to use some form of Pseudo R2. For
+logistic regression we used the Tjur Pseudo R2, but this was based on
+the difference of the mean of the predicted values for y=1 and y=0. For
+Poisson regression the default Pseudo R2 reported by the sjPlot package
+is Nagelkerke.
+
+The discussion is the same here. Pseudo R2 is useful but not without
+fault, so use it wisely and don't report it as explained variance.
+
+\hypertarget{comparing-model-fit}{%
+\subsubsection{Comparing model fit}\label{comparing-model-fit}}
+
+This works the same as for logistic regression analysis, which is
+discussed above.
+
+\hypertarget{understanding-the-family-argument}{%
+\section{Understanding the family
+argument}\label{understanding-the-family-argument}}
+
+The key to really understanding what a GLM does lies in the family
+argument. We saw before that the family argument contains two parts:
+
+\begin{itemize}
+\tightlist
+\item
+  The error distribution
+\item
+  The link function
+\end{itemize}
+
+It is by changing these that the GLM generalizes linear regression.
+
+\hypertarget{a-mathematical-explanation}{%
+\subsection{A mathematical
+explanation}\label{a-mathematical-explanation}}
+
+If you're comfortable in your algebra, the use of the error distribution
+and link function is pretty straightforward. Recall that ordinary
+(univariate) linear regression can be written as:
+
+\[ y_i = \beta_0 + \beta_1{x_i} + \epsilon_i \]
+\[ \epsilon_i \sim \mathcal{N}(0, \sigma^2) \]
+
+This shows that the dependent variable \(y_i\) equals the linear
+predictor \(\beta_0 + \beta_1{x_i}\) plus the residual \(\epsilon_i\),
+and that this residual is drawn from a normal distribution. We can
+rewrite this in a different way, that makes it easier to understand the
+relation to GLMs.
+
+\[ \mu_i = \beta_0 + \beta_1{x_i} \]
+\[ y_i \sim \mathcal{N}(\mu_i, \sigma^2) \]
+
+Here \(\mu_i\) is the expected value of \(y_i\), i.e.~the point on the
+regression line. We assume that the real value of \(y_i\) is normally
+distributed around this mean. Thus, \(\mu\) is the mean parameter of the
+Gaussian distribution.
+
+The idea of GLMs is that we can use another \texttt{distribution} here
+instead of the normal distribution. The \texttt{link} function then
+serves to link the linear prediction of the model to the parameter for
+this probability distribution. We can write this as follows\footnote{For
+  different distribution, different symbols are normally used to
+  indicate the parameter, such as \(\lambda_i\) for the Poisson
+  parameter. Here we consistently use \mu\_i to emphasize that in all
+  cases the link function links the linear prediction to the parameter
+  for the distribution.}:
+
+\[ \mathcal{link}(\mu_i) = \beta_0 + \beta_1{x_i} \]
+\[ y_i \sim \mathcal{Distribution}(\mu_i, ...) \]
+
+We can now use different distributions\footnote{We write
+  \(\mathcal{Distribution}(\mu_i, ...)\) to indicate that there
+  \emph{can} be additional parameters (such as the \(\sigma^2\) in a
+  Gaussian distribution). But this is not necessarily the case. In the
+  binomial distribution there is only the probability, and in Poisson
+  there is only the lambda (which is both the mean and variance).}, as
+long as the link function ensures that \(\mu_i\) is a suitable value.
+For instance, for a \texttt{binomial} distribution the input is a
+probability bounded between 0 and 1. The \texttt{logit} link function is
+a non-linear transformation that maps the linear predictor, that can be
+a value between \(-\infty\) and \(\infty\), to a value between 0 and
+1\footnote{We have seen this transformation in the section
+  \texttt{Ordinary\ linear\ regression\ versus\ logistic\ regression}.
+  For the logistic regression the line curves to stay between 0 and 1.}.
+For logistic regression, the formula then becomes:
+
+\[  \mathcal{logit}(\mu_i) = \ln{\frac{\mu_i}{1 - \mu_i}} =\beta_0 + \beta_1{x_i} \]
+\[ y_i \sim \mathcal{Binomial}(\mu_i) \]
+
+For the Poisson distribution, the default link function is the natural
+log. So the formula becomes:
+
+\[ \ln{\mu_i} = \beta_0 + \beta_1{x_i} \]
+\[ y_i \sim \mathcal{Poisson}(\mu_i) \]
+
+You can also fit a linear regression with a Gaussian distribution. The
+result will be very similar to ordinary linear regression, but not
+identical because it will be fit with MLE instead of than OLS. As seen
+above, we do not need a link function to map \(\mu_i\) to the parameter
+of the normal distribution. However, in the GLM framework it is then
+more accurate to say the the link function is the \texttt{identity}
+function (i.e.~a function that returns the same value as its argument).
+
+\[ \mathcal{identity}(\mu_i) = \mu_i = \beta_0 + \beta_1{x_i} \]
+\[ y_i \sim \mathcal{Gaussian}(\mu_i, \sigma^2) \]
+
+\hypertarget{a-visual-explanation}{%
+\subsection{A visual explanation}\label{a-visual-explanation}}
+
+We can also see the effects of changing the distribution and link
+function in action. For this visual explanation we'll keep the R code
+hidden, to focus only on the visuals.
+
+Say that we have the following data.
+
+\begin{center}\includegraphics{img/glm_visual_exp1-1} \end{center}
+
+There is an exponential increase, and the variance in y seems to
+increase as x gets larger. This violates both the linearity and
+homoscedacity assumption of linear regression.
+
+Instead, we will fit a GLM with a \texttt{poisson} distribution and
+\texttt{log} link function. Let's add these separately to show what each
+part does. First, we'll fit a \texttt{Gaussian} (i.e.~normal)
+distribution with a \texttt{log} link.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x, }\DataTypeTok{family=}\KeywordTok{gaussian}\NormalTok{(}\StringTok{'log'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/glm_visual_exp2-1} \end{center}
+
+The green line shows the predicted values, and the blue lines show the
+prediction interval. The \texttt{log} link has caused the line to curve
+along with the data, but you hardly see the interval becoming wider to
+account for the larger variance as \texttt{x} increases.
+
+Now we'll fit the \texttt{Poisson} distribution with the \texttt{log}
+link.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x, }\DataTypeTok{family=}\KeywordTok{poisson}\NormalTok{(}\StringTok{'log'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/glm_visual_exp3-1} \end{center}
+
+Using the poisson distirbution we see that the prediction interval
+becomes wider as \texttt{x} increases.
+
+For reference, let's also look at the poisson distribution with an
+identity link (the identity link does not transform the prediction, so
+this is a linear relation)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x, }\DataTypeTok{family=}\KeywordTok{poisson}\NormalTok{(}\StringTok{'identity'}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{img/glm_visual_exp4-1} \end{center}
+
+Now there's a linear relation but the prediction interval increases as
+\texttt{x} increases due to the poisson distribution.
+
+In conclusion, we choose the \texttt{link} function to map the linear
+prediction to a different (possibly non-linear) relation that better
+fits the data. You can imagine this as the line changing (e.g, curving).
+We choose the \texttt{distribution} to better model the error of the
+prediction.
+
+Be aware that we cannot use every link function for every distribution.
+For instance, the parameter for a binomial distribution is a
+probability, so the link function needs to map the linear prediction to
+values between 0 and 1. Often you do want to stick to the default link
+function for a distribution. Here we only demonstrated what happens if
+you don't in order to show the different effects of the distribution and
+link function.
+
+\hypertarget{exercise}{%
+\section{Exercise}\label{exercise}}
+
+To play around with logistic regression, we have written a function to
+generate some data yourself.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gen_data <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(b0, b1, y_name, x_name)\{}
+  \KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{  d =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{runif}\NormalTok{(}\DecValTok{10000}\NormalTok{, }\DecValTok{0}\NormalTok{,}\DecValTok{10}\NormalTok{))}
+\NormalTok{  mu =}\StringTok{ }\KeywordTok{log}\NormalTok{(b0) }\OperatorTok{+}\StringTok{ }\KeywordTok{log}\NormalTok{(b1)}\OperatorTok{*}\NormalTok{d}\OperatorTok{$}\NormalTok{x}
+\NormalTok{  prob =}\StringTok{ }\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{+}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\NormalTok{mu))}
+\NormalTok{  d}\OperatorTok{$}\NormalTok{y =}\StringTok{ }\KeywordTok{rbinom}\NormalTok{(}\DecValTok{10000}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DataTypeTok{prob =}\NormalTok{ prob)}
+  \KeywordTok{colnames}\NormalTok{(d) =}\StringTok{ }\KeywordTok{c}\NormalTok{(x_name, y_name)}
+\NormalTok{  d}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+To use this function you need to give four arguments
+
+\begin{itemize}
+\tightlist
+\item
+  b0: the odds ratio for the intercept
+\item
+  b1: the odds ratio for the effect of x, with x being a variable on a
+  10 point scale
+\item
+  y\_name: the name of your dependent variable
+\item
+  x\_name: the name of your independent variable
+\end{itemize}
+
+For example, data that states that the more someone has
+\texttt{the\ best\ words}, the more likely he or she is to become
+\texttt{president}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d =}\StringTok{ }\KeywordTok{gen_data}\NormalTok{(}\DataTypeTok{b0 =} \FloatTok{0.0001}\NormalTok{, }\DataTypeTok{b1 =} \DecValTok{3}\NormalTok{, }\DataTypeTok{y_name =} \StringTok{'president'}\NormalTok{, }\DataTypeTok{x_name =} \StringTok{'best_words'}\NormalTok{)}
+\NormalTok{m =}\StringTok{ }\KeywordTok{glm}\NormalTok{(president }\OperatorTok{~}\StringTok{ }\NormalTok{best_words, }\DataTypeTok{data =}\NormalTok{ d, }\DataTypeTok{family=}\NormalTok{binomial)}
+\KeywordTok{tab_model}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+~
+
+president
+
+Predictors
+
+Odds Ratios
+
+CI
+
+p
+
+(Intercept)
+
+0.00
+
+0.00~--~0.00
+
+\textless0.001
+
+best\_words
+
+3.02
+
+2.87~--~3.19
+
+\textless0.001
+
+Observations
+
+10000
+
+R2 Tjur
+
+0.474
+
+The excercise is to generate different data to see how this affects the
+odds ratios and the Pseudo R2. (You can, but are not forced to, change
+the x\_name and y\_name).
+
+Try to create data in which:
+
+\begin{itemize}
+\tightlist
+\item
+  The effect is positive
+\item
+  The effect is negative
+\item
+  There is no effect
+\item
+  R2 Tjur is close to 1
+\end{itemize}
+
+\end{document}

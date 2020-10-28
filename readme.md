@@ -29,25 +29,28 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Basic string (text) handling](tutorials/R-tidy-14-strings.md) |  |14 | readr: str_detect, str_extract etc., iconv |
 
 # Statistical Analysis
-| Tutorial | Core packages / functions |
-|----|---|
-| [Basic statistics](tutorials/simple_modeling.md) | stats: lm, aov, t.test |
-| [Advanced statistics overview](tutorials/advanced_modeling.md) | stats: glm, lme4: lmer, glmer |
-| [Generalized linear models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/generalized_linear_models.html) | stats: glm, family, sjPlot: tab_model, plot_model |
-| [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
+| Tutorial | Video tutorial | Core packages / functions |
+|----|---|---|
+| [Basic statistics](tutorials/simple_modeling.md) | [Basic stats](https://www.youtube.com/watch?v=1K3SKsEj9eI) | stats: lm, aov, t.test |
+| [Advanced statistics overview](tutorials/advanced_modeling.md) | see GLM and Multilevel | stats: glm, lme4: lmer, glmer |
+| [Generalized linear models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/generalized_linear_models.html) | [GLM](https://www.youtube.com/watch?v=DDP62EUMRFs&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0) (on [family](https://www.youtube.com/watch?v=DDP62EUMRFs&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=1) argument) | stats: glm, family, sjPlot: tab_model, plot_model |
+| [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | [Multilevel](https://www.youtube.com/watch?v=1Tw1eIfSyEQ&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=4) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
 
 
 # Text analysis 
 
-| Tutorial | Core packages / functions |
-|----|---|
-| [Text analysis](tutorials/R_text_3_quanteda.md) | [quanteda](https://quanteda.io/) |
-| [Lexical sentiment analysis](tutorials/sentiment_analysis.md) | [quanteda](https://quanteda.io/), [corpustools](https://github.com/kasperwelbers/corpustools) |
-| [LDA Topic Modeling](tutorials/r_text_lda.md) | [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
-| [Structural Topic Modeling](tutorials/r_text_stm.md) | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
-| [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
-| [Supervised machine learning for text classification](tutorials/r_text_ml.md) | caret |
-| [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
+
+For a general introduction, see these videos on [preprocessing](https://www.youtube.com/watch?v=O6CGXnxPHok&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=1&t=482s) and different [analysis approaches](https://www.youtube.com/watch?v=bHa2CClBYFw&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=4)
+
+| Tutorial | Video tutorial |  Core packages / functions |
+|----|---|---|
+| [Text analysis](tutorials/R_text_3_quanteda.md) | [corpus stats](https://www.youtube.com/watch?v=7z7U7ORFWQM&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=3) |  [quanteda](https://quanteda.io/) |
+| [Lexical sentiment analysis](tutorials/sentiment_analysis.md) | | [quanteda](https://quanteda.io/), [corpustools](https://github.com/kasperwelbers/corpustools) |
+| [LDA Topic Modeling](tutorials/r_text_lda.md) | |  [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
+| [Structural Topic Modeling](tutorials/r_text_stm.md) | | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
+| [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | |  [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
+| [Supervised machine learning for text classification](tutorials/r_text_ml.md) | |  caret |
+| [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | |  [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
 
 
 

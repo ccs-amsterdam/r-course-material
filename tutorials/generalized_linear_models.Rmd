@@ -2,10 +2,14 @@
 title: "Generalized linear models"
 author: "Kasper Welbers & Wouter van Atteveldt"
 date: "January 2020"
-output: 
+output:
   html_document:
     toc: yes
-editor_options: 
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+editor_options:
   chunk_output_type: console
 ---
 
