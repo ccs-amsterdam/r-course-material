@@ -126,13 +126,26 @@ Also, we'll trow some information at you regarding how computers can analyze tex
 
 ## Installing and loading the quanteda package
 
-As mentioned above, one of the nice things about R is its excellent system for sharing **packages**. In this case, we're going to use the [quanteda](https://quanteda.io/) package, which is an elaborage package for automatic text analysis, developed by a team of experts. 
+As mentioned above, one of the nice things about R is its excellent system for sharing **packages**. In this case, we're going to use the [quanteda](https://quanteda.io/) package, which is an elaborate package for automatic text analysis, developed by a team of experts. 
 
 Many R packages are on the CRAN network, which allows us to safely and easily download and install a new package from within R. We only need to run a single line of code.
+For example, the following line of code installs the [ggplot2](https://www.r-graph-gallery.com/ggplot2-package.html) package, which provides powerfull visualization tools. 
+
+```{r, eval=F}
+install.packages('ggplot2')
+```
+
+In general, most packages can be installed without any issues. However, there are some exceptions that you need to know about. 
+For **quanteda**, your computer needs certain software that is not always installed, as mentioned on the [quanteda website](https://quanteda.io/).
+You can either install this software, or make sure to have R version 4.0.0 (or higher) installed.
+To see your current version, enter `version` in your console, and to update visit the R website ([Windows](https://cran.r-project.org/bin/windows/base/), [Mac](https://cran.r-project.org/bin/macosx/)).
+
+If you are a **macOS user**, you might get the question whether you want to install the package from source. In this case your should enter "n" or "no" in your console ("yes" only works if you have certain software installed).
 
 ```{r, eval=F}
 install.packages('quanteda')
 ```
+
 
 Once completed, **quanteda** has been installed on your computer. You do not need to repeat this command on this computer, unless you want to install quanteda anew (in case there have been updates). Think of this as installing an app on your phone.
 
