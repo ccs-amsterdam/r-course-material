@@ -537,6 +537,11 @@ summary {
 </tbody>
 </table>
 </div>
+<div id="note-on-installing-packages" class="section level1">
+<h1>Note on installing packages</h1>
+<p>In general, most R packages can be installed without any issues. However, there are some exceptions that you need to know about. For <strong>quanteda</strong> (that we use in the text analysis tutorials), your computer needs certain software that is not always installed, as mentioned on the <a href="https://quanteda.io/">quanteda website</a>. You can either install this software, but we rather recommend using R version 4.0.0 (or higher) where this is no longer required. To see your current R version, enter <code>version</code> in your R console. To update, visit the R website (<a href="https://cran.r-project.org/bin/windows/base/">Windows</a>, <a href="https://cran.r-project.org/bin/macosx/">Mac</a>).</p>
+<p>When running <code>install.packages()</code> You sometimes get the message that <strong>There is a binary version available but the source version is later</strong> (we’re mainly seen this on Mac). You then get the question whether you want to <strong>install from sources the package which needs compilation (Yes/no)</strong> . To answer this question, you have to type “yes” or “no” in your R console. Most often, <strong>you’ll want to say no</strong>. Simply put, R tells you that it has a new version of a package, but if you want to use it your computer will need to build it. The problem is that this requires some development software that you might not have installed. If you say no, you’ll install an older version that has already been build for you. In rare cases, installing from source is the only way, in which case you’ll have to install the software that R refers to.</p>
+</div>
 <div id="miscellaneous" class="section level1">
 <h1>Miscellaneous</h1>
 <ul>

@@ -52,7 +52,22 @@ For a general introduction, see these videos on [preprocessing](https://www.yout
 | [Supervised machine learning for text classification](tutorials/r_text_ml.md) | |  caret |
 | [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | |  [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
 
+# Note on installing packages
 
+In general, most R packages can be installed without any issues. However, there are some exceptions that you need to know about. 
+For **quanteda** (that we use in the text analysis tutorials), your computer needs certain software that is not always installed, as mentioned on the [quanteda website](https://quanteda.io/).
+You can either install this software, but we rather recommend using R version 4.0.0 (or higher) where this is no longer required.
+To see your current R version, enter `version` in your R console.
+To update, visit the R website ([Windows](https://cran.r-project.org/bin/windows/base/), [Mac](https://cran.r-project.org/bin/macosx/)).
+
+When running `install.packages()` You sometimes get the message that **There is a binary version available but the source version is later** (we're mainly seen this on Mac).
+You then get the question whether you want to **install from sources the package which needs compilation (Yes/no)** .
+To answer this question, you have to type "yes" or "no" in your R console.
+Most often, **you'll want to say no**.
+Simply put, R tells you that it has a new version of a package, but if you want to use it your computer will need to build it.
+The problem is that this requires some development software that you might not have installed.
+If you say no, you'll install an older version that has already been build for you.
+In rare cases, installing from source is the only way, in which case you'll have to install the software that R refers to.
 
 # Miscellaneous
 
