@@ -3,6 +3,10 @@ Fitting LDA Models in R
 Wouter van Atteveldt & Kasper Welbers
 2020-03
 
+  - [Introduction](#introduction)
+      - [Inspecting LDA results](#inspecting-lda-results)
+      - [Visualizing LDA with LDAvis](#visualizing-lda-with-ldavis)
+
 # Introduction
 
 LDA, which stands for Latent Dirichlet Allocation, is one of the most
@@ -22,8 +26,8 @@ expect these to be mostly about the same topic:
 
 ``` r
 library(quanteda)
-texts = corpus_reshape(data_corpus_inaugural, to = "paragraphs")
-dfm = dfm(texts, remove_punct=T, remove=stopwords("english"))
+corp = corpus_reshape(data_corpus_inaugural, to = "paragraphs")
+dfm = dfm(corp, remove_punct=T, remove=stopwords("english"))
 dfm = dfm_trim(dfm, min_docfreq = 5)
 ```
 
@@ -50,8 +54,7 @@ much different.
 
 ## Inspecting LDA results
 
-We can use `terms` to look at the top terms per
-topic:
+We can use `terms` to look at the top terms per topic:
 
 ``` r
 terms(m, 5)
@@ -102,24 +105,22 @@ head(topic.docs)
     ##     1909-Taft.21   1949-Truman.25 
     ##        0.8310345        0.8294118
 
-And we can find this document in the original texts by looking up the
-document id in the document variables `docvars`:
+Given the document ids of the top documents, we can look up the text in
+the `corp` corpus
 
 ``` r
-docs = docvars(dfm)
 topdoc = names(topic.docs)[1]
-docid = which(docnames(dfm) == topdoc)
-texts[docid]
+topdoc_corp = corp[docnames(corp) == topdoc]
+texts(topdoc_corp)
 ```
 
-    ## Corpus consisting of 1 document and 4 docvars.
-    ## 1813-Madison :
-    ## "As the war was just in its origin and necessary and noble in..."
+    ##                                                                                                                                                                                                                                                                                                                                                                                                       1813-Madison 
+    ## "As the war was just in its origin and necessary and noble in its objects, we can reflect with a proud satisfaction that in carrying it on no principle of justice or honor, no usage of civilized nations, no precept of courtesy or humanity, have been infringed. The war has been waged on our part with scrupulous regard to all these obligations, and in a spirit of liberality which was never surpassed."
 
-Finally, we can see which president prefered which topics:
+Finally, we can see which president preferred which topics:
 
 ``` r
-docs = docs[docnames(dfm) %in% rownames(dtm), ]
+docs = docvars(dfm)[match(rownames(dtm), docnames(dfm)),]
 tpp = aggregate(posterior(m)$topics, by=docs["President"], mean)
 rownames(tpp) = tpp$President
 heatmap(as.matrix(tpp[-1]))
@@ -142,9 +143,13 @@ date.
 `LDAvis` is a nice interactive visualization of LDA results. It needs
 the LDA and DTM information in a slightly different format than what’s
 readily available, but you can use the code below to create that format
-from the lda model `m` and the `dtm`:
+from the lda model `m` and the `dtm`. If you don’t have it yet, you’ll
+have to install the `LDAvis` package, and you might also have to install
+the `servr` package.
 
 ``` r
+library(LDAvis)   
+
 dtm = dtm[slam::row_sums(dtm) > 0, ]
 phi = as.matrix(posterior(m)$terms)
 theta <- as.matrix(posterior(m)$topics)
@@ -152,7 +157,6 @@ vocab <- colnames(phi)
 doc.length = slam::row_sums(dtm)
 term.freq = slam::col_sums(dtm)[match(vocab, colnames(dtm))]
 
-library(LDAvis)
 json = createJSON(phi = phi, theta = theta, vocab = vocab,
      doc.length = doc.length, term.frequency = term.freq)
 serVis(json)

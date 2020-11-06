@@ -23,8 +23,8 @@ A good first step towards understanding what topic models are and how they can b
 
 ```{r}
 library(quanteda)
-texts = corpus_reshape(data_corpus_inaugural, to = "paragraphs")
-dfm = dfm(texts, remove_punct=T, remove=stopwords("english"))
+corp = corpus_reshape(data_corpus_inaugural, to = "paragraphs")
+dfm = dfm(corp, remove_punct=T, remove=stopwords("english"))
 dfm = dfm_trim(dfm, min_docfreq = 5)
 ```
 
@@ -74,19 +74,18 @@ topic.docs = sort(topic.docs, decreasing=T)
 head(topic.docs)
 ```
 
-And we can find this document in the original texts by looking up the document id in the document variables `docvars`:
+Given the document ids of the top documents, we can look up the text in the `corp` corpus
 
 ```{r}
-docs = docvars(dfm)
 topdoc = names(topic.docs)[1]
-docid = which(docnames(dfm) == topdoc)
-texts[docid]
+topdoc_corp = corp[docnames(corp) == topdoc]
+texts(topdoc_corp)
 ```
 
-Finally, we can see which president prefered which topics:
+Finally, we can see which president preferred which topics:
 
 ```{r lda-heatmap}
-docs = docs[docnames(dfm) %in% rownames(dtm), ]
+docs = docvars(dfm)[match(rownames(dtm), docnames(dfm)),]
 tpp = aggregate(posterior(m)$topics, by=docs["President"], mean)
 rownames(tpp) = tpp$President
 heatmap(as.matrix(tpp[-1]))
@@ -101,9 +100,12 @@ To get a better fit of such temporal dynamics, see the session on *structural to
 
 `LDAvis` is a nice interactive visualization of LDA results.
 It needs the LDA and DTM information in a slightly different format than what's readily available, but you can use the code below to create that format from the
-lda model `m` and the `dtm`:
+lda model `m` and the `dtm`.
+If you don't have it yet, you'll have to install the `LDAvis` package, and you might also have to install the `servr` package.
 
 ```{r, eval=F}
+library(LDAvis)   
+
 dtm = dtm[slam::row_sums(dtm) > 0, ]
 phi = as.matrix(posterior(m)$terms)
 theta <- as.matrix(posterior(m)$topics)
@@ -111,7 +113,6 @@ vocab <- colnames(phi)
 doc.length = slam::row_sums(dtm)
 term.freq = slam::col_sums(dtm)[match(vocab, colnames(dtm))]
 
-library(LDAvis)
 json = createJSON(phi = phi, theta = theta, vocab = vocab,
      doc.length = doc.length, term.frequency = term.freq)
 serVis(json)
