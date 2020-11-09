@@ -40,13 +40,13 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 # Text analysis 
 
 
-For a general introduction, see these videos on [preprocessing](https://www.youtube.com/watch?v=O6CGXnxPHok&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=1&t=482s) and different [analysis approaches](https://www.youtube.com/watch?v=bHa2CClBYFw&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=4)
+For a general introduction to text analysis (in R), see these videos on [preprocessing](https://www.youtube.com/watch?v=O6CGXnxPHok&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=1&t=482s) and different [analysis approaches](https://www.youtube.com/watch?v=bHa2CClBYFw&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=4)
 
 | Tutorial | Video tutorial |  Core packages / functions |
 |----|---|---|
 | [Text analysis](tutorials/R_text_3_quanteda.md) | [corpus stats](https://www.youtube.com/watch?v=7z7U7ORFWQM&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=3) |  [quanteda](https://quanteda.io/) |
 | [Lexical sentiment analysis](tutorials/sentiment_analysis.md) | [dictionaries](https://www.youtube.com/watch?v=U0l5GB0i3uU&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=5) | [quanteda](https://quanteda.io/), [corpustools](https://github.com/kasperwelbers/corpustools) |
-| [LDA Topic Modeling](tutorials/r_text_lda.md) | |  [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
+| [LDA Topic Modeling](tutorials/r_text_lda.md) | [Video series](https://www.youtube.com/playlist?list=PLjXODJ_lGN_WtxhPsQ_t0aHtFAcsIh1-8), [Tutorial demo](https://youtu.be/4YyoMGv1nkc) |  [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
 | [Structural Topic Modeling](tutorials/r_text_stm.md) | | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
 | [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | |  [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
 | [Supervised machine learning for text classification](tutorials/r_text_ml.md) | |  caret |
