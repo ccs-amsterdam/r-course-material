@@ -120,8 +120,8 @@ I read them from an online source here, but you can also read them from
 your hard drive by specifying the path:
 
 ``` r
-texts = reattext("c:/path/to/files")
-texts = reattext("/Users/me/Documents/files")
+texts = readtext("c:/path/to/files")
+texts = readtext("/Users/me/Documents/files")
 ```
 
 You can convert the texts directly into a corpus object as above:
