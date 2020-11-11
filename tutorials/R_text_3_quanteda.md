@@ -100,7 +100,7 @@ well with the `readtext` function from the `readtext` package. You might
 have to install that package first with:
 
 ``` r
-install.packages(readtext)
+install.packages("readtext")
 ```
 
 You can then call the readtext function on a particular file, or on a
