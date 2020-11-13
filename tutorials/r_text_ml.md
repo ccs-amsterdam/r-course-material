@@ -36,27 +36,11 @@ library(caret)
 Data
 ====
 
-For machine learning, we need annotated training data. Fortunately, there are many review data files available for free. A corpus of movie reviews is included in the `quanteda.corpora` package, which you need to install from github directly:
+For machine learning, we need annotated training data. Fortunately, there are many review data files available for free. This is an example of movie:
 
 ``` r
-if (!require("devtools")) install.packages("devtools")
-devtools::install_github("quanteda/quanteda.corpora")
-```
-
-Now we can get the data:
-
-``` r
-reviews = quanteda.corpora::data_corpus_movies
-reviews
-head(docvars(reviews))
-```
-
-Note: if you have trouble with `install_github`, you can also download and load the data directly from github:
-
-``` r
-download.file("https://github.com/quanteda/quanteda.corpora/blob/master/data/data_corpus_movies.rda?raw=true", "reviews.rda")
-load("reviews.rda")
-reviews = data_corpus_movies
+download.file("http://i.amcat.nl/data_corpus_movies.rda", "data_corpus_movies.rda")
+load("data_corpus_movies.rda") 
 ```
 
 Training and test data
