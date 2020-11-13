@@ -49,7 +49,7 @@ For a general introduction to text analysis (in R), see these videos on [preproc
 | [LDA Topic Modeling](tutorials/r_text_lda.md) | [Video series](https://www.youtube.com/playlist?list=PLjXODJ_lGN_WtxhPsQ_t0aHtFAcsIh1-8), [Tutorial demo](https://youtu.be/4YyoMGv1nkc) |  [topicmodels](https://www.rdocumentation.org/packages/topicmodels/versions/0.2-8),[quanteda](https://quanteda.io/)   |
 | [Structural Topic Modeling](tutorials/r_text_stm.md) | | [stm](https://www.structuraltopicmodel.com/), [quanteda](https://quanteda.io/)  |
 | [NLP Preprocessing with Spacy(r)](tutorials/r_text_nlp.md) | |  [spacyr](https://www.rdocumentation.org/packages/spacyr/versions/0.9.91), [quanteda](https://quanteda.io/) (see also [spacy](https://spacy.io/) itself) |
-| [Supervised machine learning for text classification](tutorials/r_text_ml.md) | |  caret |
+| [Supervised machine learning for text classification](tutorials/r_text_ml.md) | [Supervised Machine Learning](https://www.youtube.com/playlist?list=PLjXODJ_lGN_XdMBgyscXHXuSB81zUoXCR) |  caret |
 | [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | |  [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
 
 # Note on installing packages
