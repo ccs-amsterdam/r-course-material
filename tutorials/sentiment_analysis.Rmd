@@ -58,11 +58,11 @@ library(corpustools)
 corp = corpus(sotu_texts, docid_field = 'id', text_field = 'text')
 ```
 
-Now, we can create a dtm as normal:
+Now, we can create a dtm as normal. We won't apply any preprocessing steps (other than the default lowercasing), because dictionaries tend to have full (i.e. not-stemmed) words, and sometimes contain punctuation such as emoticons.
 
 ```{r}
 library(quanteda)
-dtm = corp %>% dfm(remove=stopwords("english"), remove_punct=T) %>% dfm_trim(min_docfreq=5)
+dtm = corp %>% dfm()
 dtm
 ```
 
@@ -132,13 +132,6 @@ For the word lists, you can compose a dictionary e.g. of positive and negative t
 HL_dict = dictionary(list(positive=positive.words, negative=negation.words))
 ```
 
-You can also create a dictionary from a data frame based on the value of a sentiment column:
-
-```{r}
-vader_pos = vader$word[vader$sentiment > 0]
-vader_neg = vader$word[vader$sentiment < 0]
-Vader_dict = dictionary(list(positive=vader_pos, negative=vader_neg))
-```
 
 ## Applying a quanteda dictionary
 
