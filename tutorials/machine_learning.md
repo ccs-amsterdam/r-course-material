@@ -141,11 +141,11 @@ least in the training data:
 table(train.set$checking_status, train.set$class) %>% prop.table(margin=1)
 ```
 
-So it turns out that people with `good' credit risks eather have a full
-checking account, or don't use a checking account at all; but this
+So it turns out that people with ‘good’ credit risks either have a full
+checking account, or don’t use a checking account at all; but this
 implementation of decision trees only looks at one value at a time (in
 fact, all categorical variables are turned into dummies before the
-learning starts, hence the cryptic`\>=0.5\`).
+learning starts, hence the cryptic `>=0.5`).
 
 ## Validating the model
 
