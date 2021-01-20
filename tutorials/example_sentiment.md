@@ -1,6 +1,6 @@
 Reproducing ‘The validity of Sentiment Analysis’
 ================
-Kasper Welbers & Wouter van Atteveldt
+Wouter van Atteveldt & Mariken van der Velden
 January 2021
 
   - [Introduction](#introduction)

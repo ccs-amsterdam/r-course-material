@@ -1,6 +1,6 @@
 ---
 title: "Reproducing 'The validity of Sentiment Analysis'"
-author: "Kasper Welbers & Wouter van Atteveldt"
+author: "Wouter van Atteveldt & Mariken van der Velden"
 date: "January 2021"
 output: 
   github_document:
