@@ -41,6 +41,7 @@ For machine learning, we need annotated training data. Fortunately, there are ma
 ``` r
 download.file("http://i.amcat.nl/data_corpus_movies.rda", "data_corpus_movies.rda")
 load("data_corpus_movies.rda") 
+reviews = data_corpus_movies
 ```
 
 Training and test data
