@@ -19,7 +19,7 @@ library(printr)
 
 LDA, which stands for Latent Dirichlet Allocation, is one of the most popular approaches for probabilistic topic modeling. The goal of topic modeling is to automatically assign topics to documents without requiring human supervision. Although the idea of an algorithm figuring out topics might sound close to magical (mostly because people have too high expectations of what these 'topics' are), and the mathematics might be a bit challenging, it is actually really simple fit an LDA topic model in R.  
 
-A good first step towards understanding what topic models are and how they can be usefull, is to simply play around with them, so that's what we'll do here. First, let's create a document term matrix from the inaugural speeches in quanteda, at the paragraph level since we can expect these to be mostly about the same topic:
+A good first step towards understanding what topic models are and how they can be useful, is to simply play around with them, so that's what we'll do here. First, let's create a document term matrix from the inaugural speeches in quanteda, at the paragraph level since we can expect these to be mostly about the same topic:
 
 ```{r}
 library(quanteda)

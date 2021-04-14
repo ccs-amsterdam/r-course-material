@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+         http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+<!-- Created by igraph -->
+  <key id="v_name" for="node" attr.name="name" attr.type="string"/>
+  <key id="v_age" for="node" attr.name="age" attr.type="double"/>
+  <key id="v_skincolor" for="node" attr.name="skincolor" attr.type="string"/>
+  <key id="e_weight" for="edge" attr.name="weight" attr.type="double"/>
+  <key id="e_friends_since" for="edge" attr.name="friends_since" attr.type="double"/>
+  <graph id="G" edgedefault="undirected">
+    <node id="n0">
+      <data key="v_name">Anna</data>
+      <data key="v_age">22</data>
+      <data key="v_skincolor">white</data>
+    </node>
+    <node id="n1">
+      <data key="v_name">Bob</data>
+      <data key="v_age">25</data>
+      <data key="v_skincolor">white</data>
+    </node>
+    <node id="n2">
+      <data key="v_name">John</data>
+      <data key="v_age">21</data>
+      <data key="v_skincolor">white</data>
+    </node>
+    <node id="n3">
+      <data key="v_name">Sarah</data>
+      <data key="v_age">30</data>
+      <data key="v_skincolor">white</data>
+    </node>
+    <node id="n4">
+      <data key="v_name">Donald</data>
+      <data key="v_age">74</data>
+      <data key="v_skincolor">orange</data>
+    </node>
+    <edge source="n0" target="n1">
+      <data key="e_weight">10</data>
+      <data key="e_friends_since">2018</data>
+    </edge>
+    <edge source="n0" target="n3">
+      <data key="e_weight">20</data>
+      <data key="e_friends_since">2010</data>
+    </edge>
+    <edge source="n1" target="n3">
+      <data key="e_weight">5</data>
+      <data key="e_friends_since">2020</data>
+    </edge>
+    <edge source="n2" target="n3">
+      <data key="e_weight">15</data>
+      <data key="e_friends_since">2020</data>
+    </edge>
+  </graph>
+</graphml>
