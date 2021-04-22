@@ -1,6 +1,6 @@
 Network data
 ================
-Kasper Welbers & Wouter van Atteveldt
+Kasper Welbers
 2021-04
 
   - [Working with network data](#working-with-network-data)
@@ -267,9 +267,9 @@ g = graph_from_data_frame(el)
 g
 ```
 
-    ## IGRAPH 92cc14c DN-- 4 4 -- 
+    ## IGRAPH 0b1e2c2 DN-- 4 4 -- 
     ## + attr: name (v/c)
-    ## + edges from 92cc14c (vertex names):
+    ## + edges from 0b1e2c2 (vertex names):
     ## [1] Anna->Bob   Anna->Sarah Bob ->Sarah John->Sarah
 
 We have now created the network. The print information for `g` is a bit
@@ -519,9 +519,9 @@ g2 = graph_from_adjacency_matrix(a, mode = 'undirected', weighted = T)
 g2
 ```
 
-    ## IGRAPH e88f65d UNW- 5 4 -- 
+    ## IGRAPH 5d3734d UNW- 5 4 -- 
     ## + attr: name (v/c), weight (e/n)
-    ## + edges from e88f65d (vertex names):
+    ## + edges from 5d3734d (vertex names):
     ## [1] Anna--Bob   Anna--Sarah Bob --Sarah John--Sarah
 
 Creating a network from an adjacency matrix is very useful, because it
@@ -871,7 +871,7 @@ vertices with the `degree` function.
 degree(gr)
 ```
 
-    ##  [1]  4 11  1  4  1  1  1  2  1  1  1  2  1  1  1  1  1  1  1  1
+    ##  [1] 3 6 1 1 3 2 5 1 2 1 1 1 1 3 2 1 1 1 1 1
 
 This returns a vector of values, so we can directly just assign this
 vector to our vertices as an attribute.
@@ -905,7 +905,7 @@ cl = cluster_fast_greedy(gr)
 cl$membership
 ```
 
-    ##  [1] 2 1 1 3 3 3 2 5 1 1 2 4 2 1 4 5 1 1 3 1
+    ##  [1] 5 3 3 3 1 1 4 3 2 5 4 1 5 2 1 2 2 4 4 1
 
 Among the output is the `membership` vector, which is a vector with the
 cluster ids to which each vertex is assigned. You could for instance use
@@ -939,12 +939,12 @@ head(vertices_with_attr)
 
 | degree | cluster |
 | -----: | ------: |
-|      4 |       2 |
-|     11 |       1 |
-|      1 |       1 |
-|      4 |       3 |
+|      3 |       5 |
+|      6 |       3 |
 |      1 |       3 |
 |      1 |       3 |
+|      3 |       1 |
+|      2 |       1 |
 
 This brings us full circle, because you can now also use igraph as a way
 to compute relevant network statistics, that you can then use as you

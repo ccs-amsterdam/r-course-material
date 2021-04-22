@@ -54,6 +54,8 @@ For this example, we'll use the state of the union speeches (per paragraph) corp
 
 ```{r, eval=T}
 library(quanteda)
+library(quanteda.textplots)
+library(quanteda.textstats)
 library(corpustools)
 corp = corpus(sotu_texts, docid_field = 'id', text_field = 'text')
 ```
@@ -62,7 +64,7 @@ Now, we can create a dtm as normal. We won't apply any preprocessing steps (othe
 
 ```{r}
 library(quanteda)
-dtm = corp %>% dfm()
+dtm = corp %>% tokens %>% dfm()
 dtm
 ```
 
@@ -180,25 +182,25 @@ sample_ids = sample(docnames(dtm), size=50)
 ```{r, eval=F}
 ## convert quanteda corpus to data.frame
 docs = docvars(corp)
-docs$document = docnames(corp)
-docs$text = texts(corp)
+docs$doc_id = docnames(corp)
+docs$text = as.character(corp)
 
-docs %>% filter(document %in% sample_ids) %>% mutate(manual_sentiment="") %>% write_csv("to_code.csv")
+docs %>% filter(doc_id %in% sample_ids) %>% mutate(manual_sentiment="") %>% write_csv("to_code.csv")
 ```
 
 Then, you can open the result in excel, code the documents by filling in the sentiment column, and read the result back in and combine with your results above.
 Note that I rename the columns and turn the document identifier into a character column to facilitate matching it:
 
 ```{r, eval=F}
-validation = read_csv("to_code.csv") %>% mutate(document=as.character(document)) %>% inner_join(result)
+validation = read_csv("to_code.csv") %>% mutate(doc_id=as.character(doc_id)) %>% inner_join(result)
 ```
 ```{r, echo=F}
-validation = tibble(document=sample_ids, manual_sentiment = rep(c(1,1,0,-1, -1), 10))%>% inner_join(result)
+validation = tibble(doc_id=sample_ids, manual_sentiment = rep(c(1,1,0,-1, -1), 10)) %>% inner_join(result)
 ```
 
 Now let's see if my (admittedly completely random) manual coding matches the sentiment score. We can do a correlation:
 
-```{r}
+```{r, eval=F}
 cor.test(validation$manual_sentiment, validation$sentiment1)
 ```
 
@@ -237,7 +239,7 @@ but it is equally possible that they are used neutrally, especially the word "li
 To find out, the easiest method is to get a keyword-in-context list for the term:
 
 ```{r}
-head(kwic(corp, "like"))
+head(kwic(tokens(corp), "like"))
 ```
 
 From this, it seems that the word `like` here is not used as a positive verb, but rather as a neutral preposition.

@@ -260,12 +260,21 @@ not need to repeat this command on this computer, unless you want to
 install quanteda anew (in case there have been updates). Think of this
 as installing an app on your phone.
 
-However, to use quanteda in an R script, you do need to explicitly tell
-R that you want to load the package. Think of this as opening an app on
+Next to the quanteda package, you’ll also need two add-ons.
+
+``` r
+install.packages('quanteda.textstats')
+install.packages('quanteda.textplots')
+```
+
+To use quanteda in your current session, you need to explicitly tell R
+that you want to load the package. Think of this as opening an app on
 your phone. For this you need to following command.
 
 ``` r
 library(quanteda)
+library(quanteda.textplots)
+library(quanteda.textstats)
 ```
 
 ## The inaugral speeches Corpus
@@ -282,7 +291,7 @@ corp = data_corpus_inaugural
 corp
 ```
 
-    ## Corpus consisting of 58 documents and 4 docvars.
+    ## Corpus consisting of 59 documents and 4 docvars.
     ## 1789-Washington :
     ## "Fellow-Citizens of the Senate and of the House of Representa..."
     ## 
@@ -301,7 +310,7 @@ corp
     ## 1809-Madison :
     ## "Unwilling to depart from examples of the most revered author..."
     ## 
-    ## [ reached max_ndoc ... 52 more documents ]
+    ## [ reached max_ndoc ... 53 more documents ]
 
 Here **quanteda** lets us know that the corpus contains 58 documents,
 and 3 docvars. The docvars are **variables** about the documents, in
@@ -349,35 +358,20 @@ languages flawed) way to achieve this is by **stemming** words. This
 technique cuts of certain parts of words to reduce them to their stem
 (e.g., walk, walk-ing, walk-ed).
 
-For this example, we’ll use make terms lowercase, remove english
-stopwords and remove punctuation. We will use the `dfm` function from
-the quanteda package. DFM stands for document-feature matrix, which is a
+For this example, we’ll make terms lowercase, remove english stopwords
+and remove punctuation. We do this in three steps. First, we tokenize
+the text using the tokens function, which breaks it into individual
+words. Next, we create the DTM, using the `dfm` function from the
+quanteda package. DFM stands for document-feature matrix, which is a
 more general form of a document-term matrix (a feature can be a term,
-but also other things). In our case, the DFM is a DTM.
+but also other things). In our case, the DFM is a DTM. Finally, we use
+dfm\_remove to remove the stopwords.
 
 ``` r
-m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE)
-m
+tok = tokens(corp, remove_punct=TRUE)
+m = dfm(tok, tolower = TRUE)
+m = dfm_remove(m, stopwords('en'))
 ```
-
-    ## Document-feature matrix of: 58 documents, 9,210 features (92.6% sparse) and 4 docvars.
-    ##                  features
-    ## docs              fellow-citizens senate house representatives among
-    ##   1789-Washington               1      1     2               2     1
-    ##   1793-Washington               0      0     0               0     0
-    ##   1797-Adams                    3      1     0               2     4
-    ##   1801-Jefferson                2      0     0               0     1
-    ##   1805-Jefferson                0      0     0               0     7
-    ##   1809-Madison                  1      0     0               0     0
-    ##                  features
-    ## docs              vicissitudes incident life event filled
-    ##   1789-Washington            1        1    1     2      1
-    ##   1793-Washington            0        0    0     0      0
-    ##   1797-Adams                 0        0    2     0      0
-    ##   1801-Jefferson             0        0    1     0      0
-    ##   1805-Jefferson             0        0    2     0      0
-    ##   1809-Madison               0        0    1     0      1
-    ## [ reached max_ndoc ... 52 more documents, reached max_nfeat ... 9,200 more features ]
 
 We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2%
 sparse, which means that 89.2% of the cells in the DTM have the value
@@ -392,7 +386,7 @@ we print a subset of only the first 10 documents and first 10 terms.
 m[1:10,1:10]
 ```
 
-    ## Document-feature matrix of: 10 documents, 10 features (60.0% sparse) and 4 docvars.
+    ## Document-feature matrix of: 10 documents, 10 features (60.00% sparse) and 4 docvars.
     ##                  features
     ## docs              fellow-citizens senate house representatives among
     ##   1789-Washington               1      1     2               2     1
@@ -477,42 +471,44 @@ word with a given number of words before and after the word (this might
 not fit on the line, so widen your console window for a better view)
 
 ``` r
-kwic(corp, 'terror*') 
+kwic(tok, 'terror*') 
 ```
 
-    ##                                                                             
-    ##     [1797-Adams, 1324]                   fraud or violence, by |  terror   |
-    ##  [1933-Roosevelt, 111]      nameless, unreasoning, unjustified |  terror   |
-    ##  [1941-Roosevelt, 285]           seemed frozen by a fatalistic |  terror   |
-    ##    [1961-Kennedy, 850]         alter that uncertain balance of |  terror   |
-    ##    [1961-Kennedy, 972]               of science instead of its |  terrors  |
-    ##     [1981-Reagan, 811]          freeing all Americans from the |  terror   |
-    ##    [1981-Reagan, 2186]        understood by those who practice | terrorism |
-    ##   [1997-Clinton, 1047]             They fuel the fanaticism of |  terror   |
-    ##   [1997-Clinton, 1647]       maintain a strong defense against |  terror   |
-    ##     [2009-Obama, 1619]          advance their aims by inducing |  terror   |
-    ##     [2017-Trump, 1117] civilized world against radical Islamic | terrorism |
-    ##                                   
-    ##  , intrigue, or venality          
-    ##  which paralyzes needed efforts to
-    ##  , we proved that this            
-    ##  that stays the hand of           
-    ##  . Together let us explore        
-    ##  of runaway living costs.         
-    ##  and prey upon their neighbors    
-    ##  . And they torment the           
-    ##  and destruction. Our children    
-    ##  and slaughtering innocents, we   
-    ##  , which we will eradicate
+    ## Keyword-in-context with 12 matches.                                                                               
+    ##     [1797-Adams, 1190]                      by fraud or violence by |  terror  
+    ##   [1933-Roosevelt, 99] fear itself nameless unreasoning unjustified |  terror  
+    ##  [1941-Roosevelt, 258]                seemed frozen by a fatalistic |  terror  
+    ##    [1961-Kennedy, 761]              alter that uncertain balance of |  terror  
+    ##    [1961-Kennedy, 872]                    of science instead of its |  terrors 
+    ##     [1981-Reagan, 700]               freeing all Americans from the |  terror  
+    ##    [1981-Reagan, 1910]             understood by those who practice | terrorism
+    ##    [1997-Clinton, 921]                  They fuel the fanaticism of |  terror  
+    ##   [1997-Clinton, 1454]            maintain a strong defense against |  terror  
+    ##     [2009-Obama, 1442]               advance their aims by inducing |  terror  
+    ##      [2017-Trump, 977]      civilized world against radical Islamic | terrorism
+    ##  [2021-Biden.txt, 472] political extremism white supremacy domestic | terrorism
+    ##                                       
+    ##  | intrigue or venality the Government
+    ##  | which paralyzes needed efforts to  
+    ##  | we proved that this is             
+    ##  | that stays the hand of             
+    ##  | Together let us explore the        
+    ##  | of runaway living costs All        
+    ##  | and prey upon their neighbors      
+    ##  | And they torment the lives         
+    ##  | and destruction Our children will  
+    ##  | and slaughtering innocents we say  
+    ##  | which we will eradicate from       
+    ##  | that we must confront and
 
-Note that KWIC uses the corpus (`corp`) rather than the DTM, as the DTM
+Note that KWIC uses the tokens (`tok`) rather than the DTM, as the DTM
 no longer has word order information (so it can’t display context).
 Thus, to get a KWIC list for a subset of documents, e.g. only Obama’s
-speeches, you need to use `corpus_subset` rather than `dfm_subset`:
+speeches, you need to use `tok_subset` rather than `dfm_subset`:
 
 ``` r
-corp_obama = corpus_subset(corp, President == "Obama")
-kwic(corp_obama, '*econom*')   ## output not printed in this document
+tok_obama = tokens_subset(tok, President == "Obama")
+kwic(tok_obama, '*econom*')   ## output not printed in this document
 ```
 
 ## Corpus comparison

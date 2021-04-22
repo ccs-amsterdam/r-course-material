@@ -48,6 +48,8 @@ R](http://vanatteveldt.com/p/welbers-text-r.pdf) (Welbers, van Atteveldt
 
 ``` r
 library(quanteda)
+library(quanteda.textplots)
+library(quanteda.textstats)
 ```
 
 # Step 1: Importing text and creating a quanteda corpus
@@ -100,7 +102,7 @@ well with the `readtext` function from the `readtext` package. You might
 have to install that package first with:
 
 ``` r
-install.packages("readtext")
+install.packages(readtext)
 ```
 
 You can then call the readtext function on a particular file, or on a
@@ -120,8 +122,8 @@ I read them from an online source here, but you can also read them from
 your hard drive by specifying the path:
 
 ``` r
-texts = readtext("c:/path/to/files")
-texts = readtext("/Users/me/Documents/files")
+texts = reattext("c:/path/to/files")
+texts = reattext("/Users/me/Documents/files")
 ```
 
 You can convert the texts directly into a corpus object as above:

@@ -1,6 +1,6 @@
 ---
 title: "Network data"
-author: "Kasper Welbers & Wouter van Atteveldt"
+author: "Kasper Welbers"
 date: "2021-04"
 output: 
   github_document:

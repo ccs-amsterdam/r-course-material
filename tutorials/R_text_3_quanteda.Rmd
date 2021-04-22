@@ -34,6 +34,8 @@ For a more detailed explanation of the steps discussed here, you can read the pa
 
 ```{r}
 library(quanteda)
+library(quanteda.textplots)
+library(quanteda.textstats)
 ```
 
 # Step 1: Importing text and creating a quanteda corpus

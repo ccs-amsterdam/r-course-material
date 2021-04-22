@@ -149,10 +149,19 @@ install.packages('quanteda')
 
 Once completed, **quanteda** has been installed on your computer. You do not need to repeat this command on this computer, unless you want to install quanteda anew (in case there have been updates). Think of this as installing an app on your phone.
 
-However, to use quanteda in an R script, you do need to explicitly tell R that you want to load the package. Think of this as opening an app on your phone. For this you need to following command. 
+Next to the quanteda package, you'll also need two add-ons.
+
+```{r, eval=F}
+install.packages('quanteda.textstats')
+install.packages('quanteda.textplots')
+```
+
+To use quanteda in your current session, you need to explicitly tell R that you want to load the package. Think of this as opening an app on your phone. For this you need to following command. 
 
 ```{r}
 library(quanteda)
+library(quanteda.textplots)
+library(quanteda.textstats)
 ```
 
 ## The inaugral speeches Corpus
@@ -181,11 +190,16 @@ This is also called a bag-of-words representation of texts, because documents ha
 
 When we create a DTM there are some standard techniques for **preprocessing** the data. Specifically, we often want to filter out words that are not interesting, such as stopwords (e.g., the, it, is). Also, we need to normalize the terms in certain ways to help the computer understand that they mean the same thing. Most importantly, we often make all text lowercase, because a computer would see "oil" and "Oil" as two separate words, even if "Oil" was just "oil" at the start of a sentence. We might also want to count different forms of a verb (e.g., walk, walking, walked) as the same term. A simple (but for some languages flawed) way to achieve this is by **stemming** words. This technique cuts of certain parts of words to reduce them to their stem (e.g., walk, walk-ing, walk-ed). 
 
-For this example, we'll use make terms lowercase, remove english stopwords and remove punctuation. We will use the `dfm` function from the quanteda package. DFM stands for document-feature matrix, which is a more general form of a document-term matrix (a feature can be a term, but also other things). In our case, the DFM is a DTM.
+For this example, we'll make terms lowercase, remove english stopwords and remove punctuation. 
+We do this in three steps.
+First, we tokenize the text using the tokens function, which breaks it into individual words.
+Next, we create the DTM, using the `dfm` function from the quanteda package. DFM stands for document-feature matrix, which is a more general form of a document-term matrix (a feature can be a term, but also other things). In our case, the DFM is a DTM.
+Finally, we use dfm\_remove to remove the stopwords.
 
 ```{r}
-m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE)
-m
+tok = tokens(corp, remove_punct=TRUE)
+m = dfm(tok, tolower = TRUE)
+m = dfm_remove(m, stopwords('en'))
 ```
 
 We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2\% sparse, which means that 89.2\% of the cells in the DTM have the value zero. In general, DTM's are very sparse, because individual documents (rows) contain only a small portion of all the words in the vocabulary (columns). 
@@ -234,15 +248,15 @@ The wordcloud shows you the words that occur most frequently, but lack context. 
 Let's use this to see how the word "terror" has been used. We'll use "terror\*", where the \* is a wild-card that indicates that any word starting with "terror" is matched. The output shows an occurence of the word with a given number of words before and after the word (this might not fit on the line, so widen your console window for a better view)
 
 ```{r}
-kwic(corp, 'terror*') 
+kwic(tok, 'terror*') 
 ```
 
-Note that KWIC uses the corpus (`corp`) rather than the DTM, as the DTM no longer has word order information (so it can't display context).
-Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `corpus_subset` rather than `dfm_subset`:
+Note that KWIC uses the tokens (`tok`) rather than the DTM, as the DTM no longer has word order information (so it can't display context).
+Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `tok_subset` rather than `dfm_subset`:
 
 ```{r, eval=F}
-corp_obama = corpus_subset(corp, President == "Obama")
-kwic(corp_obama, '*econom*')   ## output not printed in this document
+tok_obama = tokens_subset(tok, President == "Obama")
+kwic(tok_obama, '*econom*')   ## output not printed in this document
 ```
 
 ## Corpus comparison
