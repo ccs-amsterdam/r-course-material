@@ -37,13 +37,13 @@ Before we start, let's download the three data files:
 
 ``` r
 library(tidyverse)
-csv_folder_url = "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv"
-results = read_csv(paste(csv_folder_url, "primary_results.csv", sep = "/"))
-facts = read_csv(paste(csv_folder_url, "county_facts.csv", sep = "/"))
-schedule  = read_csv(paste(csv_folder_url, "primary_schedule.csv", sep="/"))
+csv_folder_url = "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv/"
+results = read_csv(str_c(csv_folder_url, "primary_results.csv"))
+facts = read_csv(str_c(csv_folder_url, "county_facts.csv"))
+schedule  = read_csv(str_c(csv_folder_url, "primary_schedule.csv"))
 ```
 
-Note: I use `paste` to join the base url with the filenames, using a `/` as a `sep`arator.
+(Note: I use `str_c` to join the base url with the filenames, you can also paste the full url directly)
 
 Have a look at all three data sets. Before we proceed, there are some things we want to do. First, the `facts` data frame is really large, with 54 columns. Let's select a couple interesting ones to work with:
 
