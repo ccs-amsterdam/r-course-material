@@ -1,6 +1,7 @@
 R basics: Getting started
 ================
-Kasper Welbers & Wouter van Atteveldt
+Kasper Welbers, Wouter van Atteveldt & Philipp Masur
+2021-10
 
 -   [Introduction](#introduction)
     -   [What is R and why should you learn
@@ -429,8 +430,8 @@ OK, that’s decent, but we can do better. One thing we can do is take a
 speeches by Obama:
 
 ``` r
-m_obama = dfm_subset(m, President=="Obama")
-m_postwar = dfm_subset(m, Year > 1945)
+m_obama <- dfm_subset(m, President=="Obama")
+m_postwar <- dfm_subset(m, Year > 1945)
 ```
 
 Note that this has not deleted other years or presidents from our

@@ -1,6 +1,7 @@
 ---
 title: 'R basics: Getting started'
-author: "Kasper Welbers & Wouter van Atteveldt"
+author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
+date: "2021-10"
 output:
   github_document:
     toc: yes
@@ -224,8 +225,8 @@ textplot_wordcloud(m, min_count = 50)
 OK, that's decent, but we can do better. One thing we can do is take a /subset/ of the speeches, for example only speeches after 1945 or only speeches by Obama:
 
 ```{r}
-m_obama = dfm_subset(m, President=="Obama")
-m_postwar = dfm_subset(m, Year > 1945)
+m_obama <- dfm_subset(m, President=="Obama")
+m_postwar <- dfm_subset(m, Year > 1945)
 ```
 
 Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. 

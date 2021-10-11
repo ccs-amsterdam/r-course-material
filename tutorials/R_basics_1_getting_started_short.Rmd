@@ -1,7 +1,7 @@
 ---
 title: 'R basics: Getting started'
-author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09"
+author: "Kasper Welbers, Wouter van Atteveldt & & Philipp Masur"
+date: "2021-10"
 output:
   github_document:
     toc: yes
@@ -133,6 +133,7 @@ Many R packages are on the CRAN network, which allows us to safely and easily do
 
 ```{r, eval=F}
 install.packages('quanteda')
+install.packages('quanteda.textplots')
 ```
 
 Once completed, **quanteda** has been installed on your computer. You do not need to repeat this command on this computer, unless you want to install quanteda anew (in case there have been updates). Think of this as installing an app on your phone.
@@ -141,6 +142,7 @@ However, to use quanteda in an R script, you do need to explicitly tell R that y
 
 ```{r}
 library(quanteda)
+library(quanteda.textplots)
 ```
 
 ## The inaugral speeches Corpus
@@ -148,7 +150,7 @@ library(quanteda)
 In text analysis, the term **corpus** is often used to refer to a collection of texts. For this tutorial, we'll use a demo corpus that is included in the **quanteda**. The corpus is called **data_corpus_inaugural**, and contains the inaugural speeches of US presidents. For convenience, we'll assign the corpus to the name **corp**  
 
 ```{r}
-corp = data_corpus_inaugural
+corp <- data_corpus_inaugural
 corp
 ```
 
@@ -157,6 +159,7 @@ Here **quanteda** lets us know that the corpus contains 58 documents, and 3 docv
 ```{r, eval=F}
 docvars(corp)  # (only the first lines of output are shown here)
 ```
+
 ```{r, echo=F}
 head(docvars(corp))
 ```
@@ -169,8 +172,9 @@ So where do we go from here? A computer cannot actually understand texts. To ana
 
 For this example, we'll create a DTM with all terms lowercase, remove english stopwords and punctuation. We will use the `dfm` function from the quanteda package. 
 ```{r}
-m = dfm(corp, tolower = TRUE, remove = stopwords('english'), remove_punct = TRUE)
-m
+tok <- tokens(corp, remove_punct=TRUE) # remove punctuation
+m <- dfm(tok, tolower = TRUE)          # transform to lowercase letters
+m <- dfm_remove(m, stopwords('en'))    # remove english stopwords
 ```
 
 We now have a DTM with 58 documents and 5,405 terms. The entire DTM is pretty big, so we cannot visualize it entirely. 
@@ -193,15 +197,17 @@ textplot_wordcloud(m, min_count = 50)
 OK, that's decent, but we can do better. One thing we can do is take a /subset/ of the speeches, for example only speeches after 1945 or only speeches by Obama:
 
 ```{r}
-m_obama = dfm_subset(m, President=="Obama")
-m_postwar = dfm_subset(m, Year > 1945)
+m_obama <- dfm_subset(m, President=="Obama")
+m_postwar <- dfm_subset(m, Year > 1945)
 ```
 
 Note that this has not deleted other years or presidents from our existing DTM `m`, but created two new DTMs `m_obama` and `m_postwar` to contain the subsets. 
 Let's plot one of these, and let's also use some colors in addition to wordsize to complement the differences in wordfrequency. You can pass multiple colors to the function to achieve this.
 
 ```{r basics_wordcloud2}
-textplot_wordcloud(m_postwar, max_words = 100, color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
+textplot_wordcloud(m_postwar, 
+                   max_words = 100, 
+                   color = c('lightblue', 'skyblue2','purple3', 'purple4','darkred'))
 ```
 
 Alright, that'll do for now. Try to play around a bit. If you want to use a better color combination (which shouldn't be too hard), you can get a list of the available colors, or see [this page](https://www.r-graph-gallery.com/42-colors-names/) for an overview of colors. 
