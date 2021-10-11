@@ -28,7 +28,7 @@ The tradeoff is that R has a relatively steep learning curve. Still, learning  R
 
 ## Purpose of this tutorial
 
-The focus of this tutorial is to get you started with R, and to see how easy it is to start doing some cool stuff. We will not yet dive into how R and the R syntax really work, so do not be allarmed if you do not understand the code that you'll be using. For now, just focus on getting R running, getting familiar with how to run code, and playing around with it.
+The focus of this tutorial is to get you started with R, and to see how easy it is to start doing some cool stuff. We will not yet dive into how R and the R syntax really work, so do not be alarmed if you do not understand the code that you'll be using. For now, just focus on getting R running, getting familiar with how to run code, and playing around with it.
 
 # Getting started with R
 
@@ -45,7 +45,7 @@ To install R, you can download it from the [CRAN (comprehensive R Archive Networ
 
 ## Installing RStudio
 
-The [RStudio website](https://www.rstudio.com/) contains download links and installing instructions. You will need to install the free *RStudio Desktop Open Source License*. Note that the expensive licences do not offer better features or anything, but just offer additional support and a commercial licence. You can also use the free version when doing commercial research, but with an AGPL licence.
+The [RStudio website](https://www.rstudio.com/) contains download links and installing instructions. You will need to install the free *RStudio Desktop Open Source License*. Note that the expensive licences do not offer better features or anything, but just offer additional support and a commercial license. You can also use the free version when doing commercial research, but with an AGPL license.
 
 
 ## Using RStudio
@@ -111,7 +111,7 @@ Note that you shouldn't type the line `## [1] 10`: in this tutorial, lines start
 
 ## Using RStudio projects
 
-It is best to put all your code in an RStudio *project*. This is essentially a folder on your computer in which you can store the R files and data for a project that you are working on. While you do not necesarily need a project to work with R, they are very convenient, and we strongly recommend using them.
+It is best to put all your code in an RStudio *project*. This is essentially a folder on your computer in which you can store the R files and data for a project that you are working on. While you do not necessarily need a project to work with R, they are very convenient, and we strongly recommend using them.
 
 To create a new project, go to the top-right corner of your RStudio window. Look for the button labeled **Project: (None)**. Click on this button, and select New Project. Follow the instructions to create a new directory with a new project. Name the project "R introduction". 
 
@@ -129,7 +129,7 @@ Also, we'll trow some information at you regarding how computers can analyze tex
 As mentioned above, one of the nice things about R is its excellent system for sharing **packages**. In this case, we're going to use the [quanteda](https://quanteda.io/) package, which is an elaborate package for automatic text analysis, developed by a team of experts. 
 
 Many R packages are on the CRAN network, which allows us to safely and easily download and install a new package from within R. We only need to run a single line of code.
-For example, the following line of code installs the [ggplot2](https://www.r-graph-gallery.com/ggplot2-package.html) package, which provides powerfull visualization tools. 
+For example, the following line of code installs the [ggplot2](https://www.r-graph-gallery.com/ggplot2-package.html) package, which provides powerful visualization tools. 
 
 ```{r, eval=F}
 install.packages('ggplot2')
@@ -169,7 +169,7 @@ library(quanteda.textstats)
 In text analysis, the term **corpus** is often used to refer to a collection of texts. For this tutorial, we'll use a demo corpus that is included in the **quanteda**. The corpus is called **data_corpus_inaugural**, and contains the inaugural speeches of US presidents. For convenience, we'll assign the corpus to the name **corp**  
 
 ```{r}
-corp = data_corpus_inaugural
+corp <- data_corpus_inaugural
 corp
 ```
 
@@ -178,6 +178,7 @@ Here **quanteda** lets us know that the corpus contains 58 documents, and 3 docv
 ```{r, eval=F}
 docvars(corp)  ## (only the first lines of output are shown here)
 ```
+
 ```{r, echo=F}
 head(docvars(corp))
 ```
@@ -197,9 +198,9 @@ Next, we create the DTM, using the `dfm` function from the quanteda package. DFM
 Finally, we use dfm\_remove to remove the stopwords.
 
 ```{r}
-tok = tokens(corp, remove_punct=TRUE)
-m = dfm(tok, tolower = TRUE)
-m = dfm_remove(m, stopwords('en'))
+tok <- tokens(corp, remove_punct=TRUE)
+m <- dfm(tok, tolower = TRUE)
+m <- dfm_remove(m, stopwords('en'))
 ```
 
 We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2\% sparse, which means that 89.2\% of the cells in the DTM have the value zero. In general, DTM's are very sparse, because individual documents (rows) contain only a small portion of all the words in the vocabulary (columns). 
@@ -255,7 +256,7 @@ Note that KWIC uses the tokens (`tok`) rather than the DTM, as the DTM no longer
 Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `tok_subset` rather than `dfm_subset`:
 
 ```{r, eval=F}
-tok_obama = tokens_subset(tok, President == "Obama")
+tok_obama <- tokens_subset(tok, President == "Obama")
 kwic(tok_obama, '*econom*')   ## output not printed in this document
 ```
 
@@ -264,7 +265,7 @@ kwic(tok_obama, '*econom*')   ## output not printed in this document
 If you are interested in how two corpora of documents differ, a nice technique for getting a quick indication is comparing the word frequencies. For the inaugural speeches, we can for instance use this technique to see what words are overrepresented in Obama's inaugural speeches.
 
 ```{r basics_keynessplot}
-tk = textstat_keyness(m, docvars(m, 'President') == "Obama")
+tk <- textstat_keyness(m, docvars(m, 'President') == "Obama")
 textplot_keyness(tk, show_legend = F)
 ```
 

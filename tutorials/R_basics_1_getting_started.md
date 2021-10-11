@@ -2,26 +2,26 @@ R basics: Getting started
 ================
 Kasper Welbers & Wouter van Atteveldt
 
-  - [Introduction](#introduction)
-      - [What is R and why should you learn
+-   [Introduction](#introduction)
+    -   [What is R and why should you learn
         it?](#what-is-r-and-why-should-you-learn-it)
-      - [Purpose of this tutorial](#purpose-of-this-tutorial)
-  - [Getting started with R](#getting-started-with-r)
-      - [Installing R](#installing-r)
-      - [Installing RStudio](#installing-rstudio)
-      - [Using RStudio](#using-rstudio)
-      - [Running code from the R
+    -   [Purpose of this tutorial](#purpose-of-this-tutorial)
+-   [Getting started with R](#getting-started-with-r)
+    -   [Installing R](#installing-r)
+    -   [Installing RStudio](#installing-rstudio)
+    -   [Using RStudio](#using-rstudio)
+    -   [Running code from the R
         script](#running-code-from-the-r-script)
-      - [Assigning values to names](#assigning-values-to-names)
-      - [Using RStudio projects](#using-rstudio-projects)
-  - [Text Analysis in R](#text-analysis-in-r)
-      - [Installing and loading the quanteda
+    -   [Assigning values to names](#assigning-values-to-names)
+    -   [Using RStudio projects](#using-rstudio-projects)
+-   [Text Analysis in R](#text-analysis-in-r)
+    -   [Installing and loading the quanteda
         package](#installing-and-loading-the-quanteda-package)
-      - [The inaugral speeches Corpus](#the-inaugral-speeches-corpus)
-      - [The Document-term Matrix](#the-document-term-matrix)
-      - [Word clouds](#word-clouds)
-      - [Keyword in context](#keyword-in-context)
-      - [Corpus comparison](#corpus-comparison)
+    -   [The inaugral speeches Corpus](#the-inaugral-speeches-corpus)
+    -   [The Document-term Matrix](#the-document-term-matrix)
+    -   [Word clouds](#word-clouds)
+    -   [Keyword in context](#keyword-in-context)
+    -   [Corpus comparison](#corpus-comparison)
 
 # Introduction
 
@@ -32,19 +32,19 @@ among the most popular languages for data science. In comparison to
 other popular software packages in social scientific research, such as
 SPSS and Stata, R has several notable advantages:
 
-  - R is a programming language, which makes it much more versatile.
+-   R is a programming language, which makes it much more versatile.
     While R focuses on statistical analysis at heart, it facilitates a
     wide-range of features, and virtually any tool for data science can
     be implemented.
-  - The range of things you can do with R is constantly being updated. R
+-   The range of things you can do with R is constantly being updated. R
     is open-source, meaning that anyone can contribute to its
     development. In particular, people can develop new *packages*, that
     can easily and safely be installed from within R with a single
     command. Since many scholars and industry professionals use R, it is
     likely that any cutting-edge and bleeding-edge techniques that you
     are interested in are already available. You can think of it as an
-    app-store for all your data-science needs\!
-  - R is free. While for students this is not yet a big deal due to free
+    app-store for all your data-science needs!
+-   R is free. While for students this is not yet a big deal due to free
     or cheap student and university licences, this can be a big plus in
     the commercial sector. Especially for small businesses and
     free-lancers.
@@ -60,7 +60,7 @@ using cutting-edge techniques.
 
 The focus of this tutorial is to get you started with R, and to see how
 easy it is to start doing some cool stuff. We will not yet dive into how
-R and the R syntax really work, so do not be allarmed if you do not
+R and the R syntax really work, so do not be alarmed if you do not
 understand the code that you’ll be using. For now, just focus on getting
 R running, getting familiar with how to run code, and playing around
 with it.
@@ -70,8 +70,8 @@ with it.
 For the current course material, you will need to install two pieces of
 software.
 
-  - *R* is the actual R software, that is used to run R code.
-  - *RStudio* is a graphical user interface (GUI) that makes working
+-   *R* is the actual R software, that is used to run R code.
+-   *RStudio* is a graphical user interface (GUI) that makes working
     with R much easier. While it is not required to use R, and there are
     other GUI’s available, using RStudio is highly recommended.
 
@@ -91,8 +91,8 @@ The [RStudio website](https://www.rstudio.com/) contains download links
 and installing instructions. You will need to install the free *RStudio
 Desktop Open Source License*. Note that the expensive licences do not
 offer better features or anything, but just offer additional support and
-a commercial licence. You can also use the free version when doing
-commercial research, but with an AGPL licence.
+a commercial license. You can also use the free version when doing
+commercial research, but with an AGPL license.
 
 ## Using RStudio
 
@@ -102,20 +102,21 @@ automatically launch R as well.
 
 The first time you open RStudio, you will likely see three separate
 windows. The first thing you want to do is open an R Script to work in.
-To do so, go to the toolbar and select File -\> New File -\> R Script.
+To do so, go to the toolbar and select File -&gt; New File -&gt; R
+Script.
 
 You will now see four windows split evenly over the four corners of your
 screen:
 
-  - In the **top-left** you have the text editor for the file that you
+-   In the **top-left** you have the text editor for the file that you
     are working in. This will most of the time be an R script or
     RMarkdown file.
-  - In the **top-right** you can see the data and values that you are
+-   In the **top-right** you can see the data and values that you are
     currently working with (environment) or view your history of input.
-  - In the **bottom-left** you have the console, which is where you can
+-   In the **bottom-left** you have the console, which is where you can
     enter and run code, and view the output. If you run code from your R
     script, it will also be executed in this console.
-  - In the **bottom-right** you can browse through files on your
+-   In the **bottom-right** you can browse through files on your
     computer, view help for functions, or view visualizations.
 
 While you can directly enter code into your console (bottom-left), you
@@ -139,11 +140,11 @@ sum(1,2,3,4,5)
 You can **run** parts of the code in an R script by pressing Ctrl +
 Enter (on mac this is command + Enter). This can be done in two ways:
 
-  - If you select a piece of text (so that it is highlighted) you can
+-   If you select a piece of text (so that it is highlighted) you can
     press Ctrl + Enter to run the selection. For example, select the
-    first three lines (the three mathematical operations) and press Ctrl
-    + Enter.
-  - If you haven’t made a selection, but your text cursor is in the
+    first three lines (the three mathematical operations) and press
+    Ctrl + Enter.
+-   If you haven’t made a selection, but your text cursor is in the
     editor, you can press Ctrl + Enter to run the line where the cursor
     is at. This will also move the cursor to the next line, so you can
     *walk* through the code from top to bottom, running each line. Try
@@ -163,7 +164,7 @@ more thing that you need to know about the R syntax is how values can be
 In plain terms, **assignment** is how you make R remember things by
 assigning them to a name. This works the same way for all sorts of
 values, from single numbers to entire datasets. You can choose whether
-you prefer the equal sign (=) or the arrow (\<-) for assignment.
+you prefer the equal sign (=) or the arrow (&lt;-) for assignment.
 
 ``` r
 x = 2
@@ -192,7 +193,7 @@ lines starting with `##` show the *output* of commands (2 \* 5 = 10).
 It is best to put all your code in an RStudio *project*. This is
 essentially a folder on your computer in which you can store the R files
 and data for a project that you are working on. While you do not
-necesarily need a project to work with R, they are very convenient, and
+necessarily need a project to work with R, they are very convenient, and
 we strongly recommend using them.
 
 To create a new project, go to the top-right corner of your RStudio
@@ -200,7 +201,7 @@ window. Look for the button labeled **Project: (None)**. Click on this
 button, and select New Project. Follow the instructions to create a new
 directory with a new project. Name the project “R introduction”.
 
-Now, open a new R script and immediately save it (select File -\> Save
+Now, open a new R script and immediately save it (select File -&gt; Save
 in the toolbar, or press ctrl-s). Name the file
 **my\_first\_r\_script.r**. In the bottom-right corner, under the
 **Files** tab, you’ll now see the file added to the project. The
@@ -230,7 +231,7 @@ easily download and install a new package from within R. We only need to
 run a single line of code. For example, the following line of code
 installs the
 [ggplot2](https://www.r-graph-gallery.com/ggplot2-package.html) package,
-which provides powerfull visualization tools.
+which provides powerful visualization tools.
 
 ``` r
 install.packages('ggplot2')
@@ -287,7 +288,7 @@ presidents. For convenience, we’ll assign the corpus to the name
 **corp**
 
 ``` r
-corp = data_corpus_inaugural
+corp <- data_corpus_inaugural
 corp
 ```
 
@@ -368,9 +369,9 @@ but also other things). In our case, the DFM is a DTM. Finally, we use
 dfm\_remove to remove the stopwords.
 
 ``` r
-tok = tokens(corp, remove_punct=TRUE)
-m = dfm(tok, tolower = TRUE)
-m = dfm_remove(m, stopwords('en'))
+tok <- tokens(corp, remove_punct=TRUE)
+m <- dfm(tok, tolower = TRUE)
+m <- dfm_remove(m, stopwords('en'))
 ```
 
 We now have a DTM with 58 documents and 5,405 terms. The DTM is 89.2%
@@ -486,7 +487,7 @@ kwic(tok, 'terror*')
     ##   [1997-Clinton, 1454]            maintain a strong defense against |  terror  
     ##     [2009-Obama, 1442]               advance their aims by inducing |  terror  
     ##      [2017-Trump, 977]      civilized world against radical Islamic | terrorism
-    ##  [2021-Biden.txt, 472] political extremism white supremacy domestic | terrorism
+    ##      [2021-Biden, 472] political extremism white supremacy domestic | terrorism
     ##                                       
     ##  | intrigue or venality the Government
     ##  | which paralyzes needed efforts to  
@@ -507,7 +508,7 @@ Thus, to get a KWIC list for a subset of documents, e.g. only Obama’s
 speeches, you need to use `tok_subset` rather than `dfm_subset`:
 
 ``` r
-tok_obama = tokens_subset(tok, President == "Obama")
+tok_obama <- tokens_subset(tok, President == "Obama")
 kwic(tok_obama, '*econom*')   ## output not printed in this document
 ```
 
@@ -520,7 +521,7 @@ technique to see what words are overrepresented in Obama’s inaugural
 speeches.
 
 ``` r
-tk = textstat_keyness(m, docvars(m, 'President') == "Obama")
+tk <- textstat_keyness(m, docvars(m, 'President') == "Obama")
 textplot_keyness(tk, show_legend = F)
 ```
 
@@ -529,7 +530,7 @@ textplot_keyness(tk, show_legend = F)
 In the plot we see 20 terms that are overrepresented in Obama’s
 speeches. These are the top 20 terms with the blue bars. Most strongly
 overrepresented are the terms “journey”, “generat(ion)”, “job” and
-“creed”. The 20 terms with the grey bars are the underrepresented
-terms, meaning that Obama used them relatively less often than the
-average president. Again, we could plug these words into a
-keyword-in-context listing to get some context.
+“creed”. The 20 terms with the grey bars are the underrepresented terms,
+meaning that Obama used them relatively less often than the average
+president. Again, we could plug these words into a keyword-in-context
+listing to get some context.
