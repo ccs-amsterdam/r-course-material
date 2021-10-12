@@ -1,7 +1,7 @@
 ---
 title: "13a_joining_data"
-author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09"
+author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
+date: "2021-10"
 output: 
   github_document:
     toc: yes
@@ -47,10 +47,10 @@ Before we start, let's download the three data files:
 
 ```{r}
 library(tidyverse)
-csv_folder_url = "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv"
-results = read_csv(paste(csv_folder_url, "primary_results.csv", sep = "/"))
-facts = read_csv(paste(csv_folder_url, "county_facts.csv", sep = "/"))
-schedule  = read_csv(paste(csv_folder_url, "primary_schedule.csv", sep="/"))
+csv_folder_url <- "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv"
+results <- read_csv(paste(csv_folder_url, "primary_results.csv", sep = "/"))
+facts <- read_csv(paste(csv_folder_url, "county_facts.csv", sep = "/"))
+schedule  <- read_csv(paste(csv_folder_url, "primary_schedule.csv", sep = "/"))
 ```
 
 Note: I use `paste` to join the base url with the filenames, using a `/` as a `sep`arator.
@@ -59,20 +59,31 @@ Have a look at all three data sets. Before we proceed, there are some things we 
 First, the `facts` data frame is really large, with 54 columns. Let's select a couple interesting ones to work with:
 
 ```{r}
-facts_subset = facts %>% select(area_name, population=Pop_2014_count, pop_change=Pop_change_pct, over65=Age_over_65_pct, female=Sex_female_pct, white=Race_white_pct, college=Pop_college_grad_pct, income=Income_per_capita)
+facts_subset <- facts %>% 
+  select(area_name, 
+         population = Pop_2014_count, 
+         pop_change = Pop_change_pct, 
+         over65 = Age_over_65_pct, 
+         female = Sex_female_pct, 
+         white = Race_white_pct, 
+         college = Pop_college_grad_pct, 
+         income = Income_per_capita)
 ```
 
 Next, the schedule dates are now a character (textual) field rather than date, so let's fix that
 using the `as.Date` function, specifying the dates to be formatted as month/day/year:
 
 ```{r}
-schedule = schedule %>% mutate(date = as.Date(date, format="%m/%d/%y"))
+schedule <- schedule %>% 
+  mutate(date = as.Date(date, format="%m/%d/%y"))
 ```
 
 Last, let's create a data set with per-state (rather than per-country) election results using `group_by` and `summarize`:
 
 ```{r}
-results_state = results %>% group_by(state, party, candidate) %>% summarize(votes=sum(votes))
+results_state <- results %>% 
+  group_by(state, party, candidate) %>% 
+  summarize(votes = sum(votes))
 results_state
 ```
 
@@ -95,7 +106,7 @@ If this is not correct, you can specify the joining key with the `by=` option.
 A common use case is if the variable names are not the same, for example the state in the `facts` data is coded as `area_name`:
 
 ```{r}
-inner_join(results_state, facts_subset, by=c("state" = "area_name"))
+inner_join(results_state, facts_subset, by = c("state" = "area_name"))
 ```
 
 # Left and right joins
@@ -106,7 +117,8 @@ the county-level facts are (silently) dropped because their names don't occur in
 Sometimes this is undesirable. For example, suppose we have data on candidate age, but not on all candidates:
 
 ```{r}
-age = tibble(candidate=c("Hillary Clinton", "Bernie Sanders", "Donald Trump"), age=c(70, 77, 72))
+age <- tibble(candidate = c("Hillary Clinton", "Bernie Sanders", "Donald Trump"), 
+              age = c(70, 77, 72))
 age
 ```
 
@@ -126,3 +138,5 @@ As you can see, Ben Carson and others are still in the data, with missing values
 Left join keeps all rows in the first data sets, but drops rows in the second data set that don't occur in the first. 
 Right join does the opposite, keeping all rows in the second data set but potentially dropping rows in the first.
 Finally, `full_join` keeps all rows that occur in either data set. 
+
+
