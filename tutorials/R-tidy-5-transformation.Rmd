@@ -1,7 +1,7 @@
 ---
 title: 'R Tidyverse: Data transformation'
-author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09"
+author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
+date: "2021-10"
 output: 
   github_document:
     toc: yes
@@ -25,7 +25,7 @@ In this part of the tutorial, we'll focus on working with data using the `tidyve
 This package includes the `dplyr` (data-pliers) packages, which contains most of the tools we're using below,
 but it also contains functions for reading, analysing and visualising data that will be explained later. 
 
-## Instaling tidyverse
+## Installing tidyverse
 
 As before, `install.packages()` is used to download and install the package (you only need to do this once on your computer) and `library()` is used to make the functions from this package available for use (required each session that you use the package).
 
@@ -58,7 +58,9 @@ which is functionally (almost) equivalent to a data frame but is more efficient 
 As a very simply example, the following code creates a tibble containing respondents, their gender, and their height:
 
 ```{r}
-tibble(resp=c(1,2,3), gender=c("M","M","F"), height=c(176, 165, 172))
+tibble(resp = c(1,2,3), 
+       gender = c("M","M","F"), 
+       height = c(176, 165, 172))
 ```
 
 ## Reading data: read_csv
@@ -73,8 +75,8 @@ The example below downloads an overview of gun polls from the [data analytics si
 and reads it into a tibble using the read_csv function:
 
 ```{r}
-url = "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
-d = read_csv(url)
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+d <- read_csv(url)
 d
 ```
 
@@ -91,7 +93,7 @@ In the guns data, the `Question` column specifies which question was asked.
 We can select only those rows (polls) that asked whether the minimum purchage age for guns should be raised to 21:
 
 ```{r}
-age21 = filter(d, Question == 'age-21')
+age21 <- filter(d, Question == 'age-21')
 age21
 ```
 
@@ -121,7 +123,7 @@ If you look at the help page, you will first see the general *description*. This
 
 The remainder give extra information on what exactly the function does (Details), the output it produces (Value), and links to other useful packages, functions, and finally a number examples. 
 
-Altohugh it may seem intimidating at first, it is important to get used to style of the R documentation as it is the primary source of information on most functions and packages you will be using!
+Although it may seem intimidating at first, it is important to get used to style of the R documentation as it is the primary source of information on most functions and packages you will be using!
 
 ## Selecting certain columns
 
@@ -143,7 +145,7 @@ Note the use of 'backticks' (reverse quotes) to specify the column name, as R do
 Select can also be used to rename columns when selecting them, for example to get rid of the spaces:
 
 ```{r}
-select(age21, Pollster, rep=`Republican Support`, dem=`Democratic Support`)
+select(age21, Pollster, rep = `Republican Support`, dem = `Democratic Support`)
 ```
 
 Note that `select` drops all columns not selected. If you only want to rename columns, you can use the `rename` function:
@@ -165,7 +167,7 @@ To sort in descending order, put a minus in front of a variable.
 For example, the following orders by population and then by support (descending):
 
 ```{r}
-age21 = arrange(age21, Population, -Support)
+age21 <- arrange(age21, Population, -Support)
 age21
 ```
 
@@ -187,9 +189,9 @@ If you look at the documentation page, you see that mutate works similarly to `f
 Here we'll first create some variables and then look at the variables (using the `select` function to focus on the changes). Specifically, we'll make a column for the absolute difference between the support scores for republicans and democrats, as a measure of how much they disagree.
 
 ```{r}
-age21 = mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
+age21 <- mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
 select(age21, Question, Pollster, party_diff)
-age21 = arrange(age21, Population, -Support)
+age21 <- arrange(age21, Population, -Support)
 
 ```
 
@@ -212,10 +214,10 @@ Put simply, pipes take the output of a function, and directly use that output as
 This seems a bit abstract, but consider the code below, which is a collection of statements from above:
 
 ```{r}
-d = read_csv(url)
-age21 = filter(d, Question == 'age-21')
-age21 = mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
-age21 = select(age21, Question, Pollster, party_diff)
+d <- read_csv(url)
+age21 <- filter(d, Question == 'age-21')
+age21 <- mutate(age21, party_diff = abs(`Republican Support` - `Democratic Support`))
+age21 <- select(age21, Question, Pollster, party_diff)
 arrange(age21, -party_diff)
 ```
 
@@ -223,13 +225,14 @@ To recap, this reads the csv, filters by question, computes the difference, drop
 Since the output of each function is the input of the next, we can also write this as a single pipeline:
 
 ```{r}
-read_csv(url) %>% filter(Question == 'age-21') %>% 
+read_csv(url) %>% 
+  filter(Question == 'age-21') %>% 
   mutate(party_diff = abs(`Republican Support` - `Democratic Support`)) %>%
   select(Question, Pollster, party_diff) %>% 
   arrange(-party_diff)
 ```
 
-The nice thing about pipes is that it makes it really clear what you are doing. Also, it doesn't require making many intermediate objects (such as `ds`). If applied right, piping allows you to make nicely contained pieces of code to perform specific parts of your analysis from raw input straight to results, including statistical modeling or visualization.
+The nice thing about pipes is that it makes it really clear what you are doing. Also, it doesn't require making many intermediate objects (such as `ds`). If applied right, piping allows you to make nicely contained pieces of code to perform specific parts of your analysis from raw input straight to results, including statistical modeling or visualization. It usually makes sense to have each "step" in the pipeline in its own line. This way, we can easily read the code line by line
 
 Of course, you probably don't want to replace your whole script with a single pipe, and often it is nice to store intermediate values.
 For example, you might want to download, clean, and subset a data set before doing multiple analyses with it.
