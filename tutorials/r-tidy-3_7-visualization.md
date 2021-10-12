@@ -1,7 +1,7 @@
 Basics of data visualization
 ================
-Kasper Welbers & Wouter van Atteveldt
-2018-09
+Kasper Welbers, Wouter van Atteveldt & Philipp Masur
+2021-10
 
 -   [A Basic ggplot plot](#a-basic-ggplot-plot)
     -   [Important note on ggplot command
