@@ -120,7 +120,12 @@ ggplot(data = facts_state,
 For the plot to work, R needs to execute the whole ggplot call and all
 layers as a single statement. Practically, that means that if you
 combine a plot over multiple lines, the plus sign needs to be at the end
-of the line, so R knows more is coming.
+of the line, so R knows more is coming. The general syntax is always:
+
+``` r
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+```
 
 So, the following is good:
 
