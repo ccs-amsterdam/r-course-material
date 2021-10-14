@@ -10,3 +10,4 @@ tutorials/udpipe_models/*
 tutorials/*.rda
 .httr-oauth
 model.html
+*/RMarkdown_parameters_cache/*
