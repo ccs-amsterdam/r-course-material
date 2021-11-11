@@ -1,7 +1,7 @@
 ---
 title: 'R text analysis: quanteda'
-author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2019-1"
+author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
+date: "2021-10"
 output: 
   github_document:
     toc: yes
@@ -47,7 +47,7 @@ The first step is getting text into R in a proper format. stored in a variety of
 For this tutorial, we will be importing text from a csv. For convenience, we're using a csv that's available online, but the process is the same for a csv file on your own computer. The data consists of the State of the Union speeches of US presidents, with each document (i.e. row in the csv) being a paragraph. The data will be imported as a data.frame.
 
 ```{r}
-library(readr)
+library(tidyverse)
 url <- 'https://bit.ly/2QoqUQS'
 d <- read_csv(url)
 head(d)   ## view first 6 rows
@@ -117,11 +117,11 @@ text2 <- tokens(text)
 text2
 
 # Construct the document-feature matrix based on the tokenised text
-dtm <- dfm(text2, tolower = F)
+dtm <- dfm(text2)
 dtm
 ```
 
-Here you see, for instance, that the word `soliloquy` only occurs in the third document. In this matrix format, we can perform calculations with texts, like analyzing different sentiments of frames regarding cats, or the computing the similarity between the third sentence and the first two sentences. 
+Here you see, for instance, that the word `are` only occurs in the first document. In this matrix format, we can perform calculations with texts, like analyzing different sentiments of frames regarding cats, or the computing the similarity between the third sentence and the first two sentences. 
 
 ## Preprocessing/cleaning DTMs
 
@@ -131,10 +131,14 @@ In this DTM, "Cats" and "awesome" are as different as "Cats" and "cats", but for
 This can be achieved by using additional `preprocessing` steps. In the next example, we'll again create the DTM, but this time we make all text lowercase, ignore stopwords and punctuation, and perform `stemming`. Simply put, stemming removes some parts at the ends of words to ignore different forms of the same word, such as singular versus plural ("gun" or "gun-s") and different verb forms ("walk","walk-ing","walk-s")
 
 ```{r}
-dtm %>%
-  dfm_remove()
+text2 <- text %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   ## tokenize, removing unnecessary noise
+  tokens_tolower %>%                                                     ## normalize
+  tokens_remove(stopwords('en')) %>%                                     ## remove stopwords (English)
+  tokens_wordstem                                                        ## stemming
+text2
 
-dtm <- dfm(text2, tolower = T, remove = stopwords('en'), stem = T, remove_punct = T)
+dtm <- dfm(text2)
 dtm
 ```
 
@@ -154,7 +158,12 @@ There are various alternative preprocessing techniques, including more advanced 
 For this tutorial, we'll use the State of the Union speeches. We already created the corpus above. We can now pass this corpus to the `dfm()` function and set the preprocessing parameters.
 
 ```{r}
-dtm <- dfm(corp, tolower = T, stem = T, remove=stopwords('en'), remove_punct = T)
+dtm <- corp %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
+  tokens_tolower %>%                                                    
+  tokens_remove(stopwords('en')) %>%                                     
+  tokens_wordstem %>%
+  dfm
 dtm
 ```
 
@@ -216,19 +225,24 @@ textplot_keyness(ts)
 
 As seen in the first tutorial, a keyword-in-context listing shows a given keyword in the context of its use. This is a good help for interpreting words from a wordcloud or keyness plot.
 
-Since a DTM only knows word frequencies, the `kwic()` function requires the corpus object as input.
+Since a DTM only knows word frequencies, the `kwic()` function requires a tokenized corpus object as input.
 
 ```{r}
-k <- kwic(corp, 'freedom', window = 7)
+k <- kwic(tokens(corp), 'freedom', window = 7)
 head(k, 10)    ## only view first 10 results
 ```
 
 The `kwic()` function can also be used to focus an analysis on a specific search term. You can use the output of the kwic function to create a new DTM, in which only the words within the shown window are included in the DTM. With the following code, a DTM is created that only contains words that occur within 10 words from `terror*` (terrorism, terrorist, terror, etc.). 
 
 ```{r}
-terror <- kwic(corp, 'terror*')
+terror <- kwic(tokens(corp), 'terror*')
 terror_corp <- corpus(terror)
-terror_dtm <- dfm(terror_corp, tolower=T, remove=stopwords('en'), stem=T, remove_punct=T)
+terror_dtm <- terror_corp %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
+  tokens_tolower %>%                                                    
+  tokens_remove(stopwords('en')) %>%                                     
+  tokens_wordstem %>%
+  dfm
 ```
 
 Now you can focus an analysis on whether and how Presidents talk about `terror*`.
@@ -244,11 +258,11 @@ You can perform a basic dictionary search. In terms of query options this is les
 An convenient way of using dictionaries is to make a DTM with the columns representing dictionary terms.
 
 ```{r}
-dict = dictionary(list(terrorism = 'terror*',
+dict <- dictionary(list(terrorism = 'terror*',
                        economy = c('econom*', 'tax*', 'job*'),
                        military = c('army','navy','military','airforce','soldier'),
                        freedom = c('freedom','liberty')))
-dict_dtm = dfm_lookup(dtm, dict, exclusive=TRUE)
+dict_dtm <- dfm_lookup(dtm, dict, exclusive=TRUE)
 dict_dtm 
 ```
 
@@ -259,15 +273,16 @@ The "4 features" are the four entries in our dictionary. Now you can perform all
 textplot_wordcloud(dict_dtm)
 ```
 
+
 ```{r quanteda_keyness2}
-tk = textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
+tk <- textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
 textplot_keyness(tk)
 ```
 
 You can also convert the dtm to a data frame to get counts of each concept per document (which you can then match with e.g. survey data)
 
 ```{r}
-df = convert(dict_dtm, to="data.frame")
+df <- convert(dict_dtm, to="data.frame")
 head(df)
 ```
 

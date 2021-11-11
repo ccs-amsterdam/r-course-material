@@ -1,24 +1,24 @@
 R text analysis: quanteda
 ================
-Kasper Welbers & Wouter van Atteveldt
-2019-1
+Kasper Welbers, Wouter van Atteveldt & Philipp Masur
+2021-10
 
-  - [Introduction](#introduction)
-      - [The quanteda package](#the-quanteda-package)
-  - [Step 1: Importing text and creating a quanteda
+-   [Introduction](#introduction)
+    -   [The quanteda package](#the-quanteda-package)
+-   [Step 1: Importing text and creating a quanteda
     corpus](#step-1-importing-text-and-creating-a-quanteda-corpus)
-      - [From CSV files](#from-csv-files)
-      - [From text (or word/pdf) files](#from-text-or-wordpdf-files)
-  - [Step 2: Creating the DTM (or DFM)](#step-2-creating-the-dtm-or-dfm)
-      - [Preprocessing/cleaning DTMs](#preprocessingcleaning-dtms)
-      - [Filtering the DTM](#filtering-the-dtm)
-  - [Step 3: Analysis](#step-3-analysis)
-      - [Word frequencies and
+    -   [From CSV files](#from-csv-files)
+    -   [From text (or word/pdf) files](#from-text-or-wordpdf-files)
+-   [Step 2: Creating the DTM (or DFM)](#step-2-creating-the-dtm-or-dfm)
+    -   [Preprocessing/cleaning DTMs](#preprocessingcleaning-dtms)
+    -   [Filtering the DTM](#filtering-the-dtm)
+-   [Step 3: Analysis](#step-3-analysis)
+    -   [Word frequencies and
         wordclouds](#word-frequencies-and-wordclouds)
-      - [Compare corpora](#compare-corpora)
-      - [Keyword-in-context](#keyword-in-context)
-      - [Dictionary search](#dictionary-search)
-      - [Creating good dictionaries](#creating-good-dictionaries)
+    -   [Compare corpora](#compare-corpora)
+    -   [Keyword-in-context](#keyword-in-context)
+    -   [Dictionary search](#dictionary-search)
+    -   [Creating good dictionaries](#creating-good-dictionaries)
 
 # Introduction
 
@@ -71,9 +71,9 @@ the State of the Union speeches of US presidents, with each document
 data.frame.
 
 ``` r
-library(readr)
-url = 'https://bit.ly/2QoqUQS'
-d = read_csv(url)
+library(tidyverse)
+url <- 'https://bit.ly/2QoqUQS'
+d <- read_csv(url)
 head(d)   ## view first 6 rows
 ```
 
@@ -90,7 +90,7 @@ contains the text field. Also, the text column must be a character
 vector.
 
 ``` r
-corp = corpus(d, text_field = 'text')  ## create the corpus
+corp <- corpus(d, text_field = 'text')  ## create the corpus
 corp
 ```
 
@@ -102,7 +102,7 @@ well with the `readtext` function from the `readtext` package. You might
 have to install that package first with:
 
 ``` r
-install.packages(readtext)
+install.packages("readtext")
 ```
 
 You can then call the readtext function on a particular file, or on a
@@ -110,8 +110,8 @@ folder or zip archive of files directly.
 
 ``` r
 library(readtext)
-url = "https://github.com/ccs-amsterdam/r-course-material/blob/master/data/files.zip?raw=true"
-texts = readtext(url)
+url <- "https://github.com/ccs-amsterdam/r-course-material/blob/master/data/files.zip?raw=true"
+texts <- readtext(url)
 texts
 ```
 
@@ -122,14 +122,14 @@ I read them from an online source here, but you can also read them from
 your hard drive by specifying the path:
 
 ``` r
-texts = reattext("c:/path/to/files")
-texts = reattext("/Users/me/Documents/files")
+texts <- reattext("c:/path/to/files")
+texts <- reattext("/Users/me/Documents/files")
 ```
 
 You can convert the texts directly into a corpus object as above:
 
 ``` r
-corp2 = corpus(texts)
+corp2 <- corpus(texts)
 corp2
 ```
 
@@ -150,18 +150,24 @@ for `document-feature matrix` (DFM), which is a more general form of a
 DTM.
 
 ``` r
+# An example data set
 text <-  c(d1 = "Cats are awesome!",
            d2 = "We need more cats!",
            d3 = "This is a soliloquy about a cat.")
 
-dtm <- dfm(text, tolower=F)
+# Tokenise text
+text2 <- tokens(text)
+text2
+
+# Construct the document-feature matrix based on the tokenised text
+dtm <- dfm(text2)
 dtm
 ```
 
-Here you see, for instance, that the word `soliloquy` only occurs in the
-third document. In this matrix format, we can perform calculations with
-texts, like analyzing different sentiments of frames regarding cats, or
-the computing the similarity betwee the third sentence and the first two
+Here you see, for instance, that the word `are` only occurs in the first
+document. In this matrix format, we can perform calculations with texts,
+like analyzing different sentiments of frames regarding cats, or the
+computing the similarity between the third sentence and the first two
 sentences.
 
 ## Preprocessing/cleaning DTMs
@@ -183,7 +189,14 @@ different forms of the same word, such as singular versus plural (“gun”
 or “gun-s”) and different verb forms (“walk”,“walk-ing”,“walk-s”)
 
 ``` r
-dtm = dfm(text, tolower=T, remove = stopwords('en'), stem = T, remove_punct=T)
+text2 <- text %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   ## tokenize, removing unnecessary noise
+  tokens_tolower %>%                                                     ## normalize
+  tokens_remove(stopwords('en')) %>%                                     ## remove stopwords (English)
+  tokens_wordstem                                                        ## stemming
+text2
+
+dtm <- dfm(text2)
 dtm
 ```
 
@@ -220,7 +233,12 @@ created the corpus above. We can now pass this corpus to the `dfm()`
 function and set the preprocessing parameters.
 
 ``` r
-dtm = dfm(corp, tolower=T, stem=T, remove=stopwords('en'), remove_punct=T)
+dtm <- corp %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
+  tokens_tolower %>%                                                    
+  tokens_remove(stopwords('en')) %>%                                     
+  tokens_wordstem %>%
+  dfm
 dtm
 ```
 
@@ -241,7 +259,7 @@ for which the frequency (i.e. the sum value of the column in the DTM) is
 below 10.
 
 ``` r
-dtm  = dfm_trim(dtm, min_termfreq = 10)
+dtm <- dfm_trim(dtm, min_termfreq = 10)
 dtm
 ```
 
@@ -278,8 +296,8 @@ are ‘TRUE’, as is\_obama. We then use this to select these rows from the
 DTM.
 
 ``` r
-is_obama = docvars(dtm)$President == 'Barack Obama' 
-obama_dtm = dtm[is_obama,]
+is_obama <- docvars(dtm)$President == 'Barack Obama' 
+obama_dtm <- dtm[is_obama,]
 textplot_wordcloud(obama_dtm, max_words = 25)
 ```
 
@@ -292,8 +310,8 @@ Obama documents (where is\_obama is TRUE) to all other documents (where
 is\_obama is FALSE).
 
 ``` r
-is_obama = docvars(dtm)$President == 'Barack Obama' 
-ts = textstat_keyness(dtm, is_obama)
+is_obama <- docvars(dtm)$President == 'Barack Obama' 
+ts <- textstat_keyness(dtm, is_obama)
 head(ts, 20)    ## view first 20 results
 ```
 
@@ -311,10 +329,10 @@ given keyword in the context of its use. This is a good help for
 interpreting words from a wordcloud or keyness plot.
 
 Since a DTM only knows word frequencies, the `kwic()` function requires
-the corpus object as input.
+a tokenized corpus object as input.
 
 ``` r
-k = kwic(corp, 'freedom', window = 7)
+k <- kwic(tokens(corp), 'freedom', window = 7)
 head(k, 10)    ## only view first 10 results
 ```
 
@@ -326,9 +344,14 @@ contains words that occur within 10 words from `terror*` (terrorism,
 terrorist, terror, etc.).
 
 ``` r
-terror = kwic(corp, 'terror*')
-terror_corp = corpus(terror)
-terror_dtm = dfm(terror_corp, tolower=T, remove=stopwords('en'), stem=T, remove_punct=T)
+terror <- kwic(tokens(corp), 'terror*')
+terror_corp <- corpus(terror)
+terror_dtm <- terror_corp %>%
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
+  tokens_tolower %>%                                                    
+  tokens_remove(stopwords('en')) %>%                                     
+  tokens_wordstem %>%
+  dfm
 ```
 
 Now you can focus an analysis on whether and how Presidents talk about
@@ -350,11 +373,11 @@ An convenient way of using dictionaries is to make a DTM with the
 columns representing dictionary terms.
 
 ``` r
-dict = dictionary(list(terrorism = 'terror*',
+dict <- dictionary(list(terrorism = 'terror*',
                        economy = c('econom*', 'tax*', 'job*'),
                        military = c('army','navy','military','airforce','soldier'),
                        freedom = c('freedom','liberty')))
-dict_dtm = dfm_lookup(dtm, dict, exclusive=TRUE)
+dict_dtm <- dfm_lookup(dtm, dict, exclusive=TRUE)
 dict_dtm 
 ```
 
@@ -366,7 +389,7 @@ textplot_wordcloud(dict_dtm)
 ```
 
 ``` r
-tk = textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
+tk <- textstat_keyness(dict_dtm, docvars(dict_dtm)$President == 'Barack Obama')
 textplot_keyness(tk)
 ```
 
@@ -374,7 +397,7 @@ You can also convert the dtm to a data frame to get counts of each
 concept per document (which you can then match with e.g. survey data)
 
 ``` r
-df = convert(dict_dtm, to="data.frame")
+df <- convert(dict_dtm, to="data.frame")
 head(df)
 ```
 
