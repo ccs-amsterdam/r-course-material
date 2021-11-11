@@ -3,20 +3,20 @@ Supervised Sentiment Analysis in R
 Wouter van Atteveldt & Kasper Welbers
 2020-03
 
-  - [Introduction](#introduction)
-  - [Getting a DTM](#getting-a-dtm)
-  - [Dictionary-based Sentiment
+-   [Introduction](#introduction)
+-   [Getting a DTM](#getting-a-dtm)
+-   [Dictionary-based Sentiment
     analysis](#dictionary-based-sentiment-analysis)
-      - [Obtaining a dictionary](#obtaining-a-dictionary)
-      - [Creating a quanteda dictionary from a word
+    -   [Obtaining a dictionary](#obtaining-a-dictionary)
+    -   [Creating a quanteda dictionary from a word
         list](#creating-a-quanteda-dictionary-from-a-word-list)
-      - [Applying a quanteda
+    -   [Applying a quanteda
         dictionary](#applying-a-quanteda-dictionary)
-      - [Validating a dictionary](#validating-a-dictionary)
-      - [Improving a dictionary](#improving-a-dictionary)
-  - [Corpustools](#corpustools)
-      - [Highlighting dictionary hits](#highlighting-dictionary-hits)
-      - [Limiting the dtm to search
+    -   [Validating a dictionary](#validating-a-dictionary)
+    -   [Improving a dictionary](#improving-a-dictionary)
+-   [Corpustools](#corpustools)
+    -   [Highlighting dictionary hits](#highlighting-dictionary-hits)
+    -   [Limiting the dtm to search
         context](#limiting-the-dtm-to-search-context)
 
 # Introduction
@@ -39,15 +39,15 @@ For more information and critical perspectives on dictionary based
 sentiment analysis in political communication, see e.g. the references
 below:
 
-  - Soroka, S., Young, L., & Balmas, M. (2015). Bad news or mad news?
+-   Soroka, S., Young, L., & Balmas, M. (2015). Bad news or mad news?
     sentiment scoring of negativity, fear, and anger in news content.
     The ANNALS of the American Academy of Political and Social Science,
     659 (1), 108–121.
-  - González-Bailón, S., & Paltoglou, G. (2015). Signals of public
+-   González-Bailón, S., & Paltoglou, G. (2015). Signals of public
     opinion in online communication: A comparison of methods and data
     sources. The ANNALS of the American Academy of Political and Social
     Science, 659(1), 95-107.
-  - Barberá, P., Boydstun, A., Linn, S., McMahon, R., & Nagler, J.
+-   Barberá, P., Boydstun, A., Linn, S., McMahon, R., & Nagler, J.
     (2016, August). Methodological challenges in estimating tone:
     Application to news coverage of the US economy. In Meeting of the
     Midwest Political Science Association, Chicago, IL.
@@ -82,17 +82,20 @@ library(quanteda)
 library(quanteda.textplots)
 library(quanteda.textstats)
 library(corpustools)
-corp = corpus(sotu_texts, docid_field = 'id', text_field = 'text')
+corp <- corpus(sotu_texts, docid_field = 'id', text_field = 'text')
 ```
 
 Now, we can create a dtm as normal. We won’t apply any preprocessing
-steps (other than the default lowercasing), because dictionaries tend to
-have full (i.e. not-stemmed) words, and sometimes contain punctuation
-such as emoticons.
+steps (other than lowercasing), because dictionaries tend to have full
+(i.e. not-stemmed) words, and sometimes contain punctuation such as
+emoticons.
 
 ``` r
 library(quanteda)
-dtm = corp %>% tokens %>% dfm()
+dtm <- corp %>% 
+  tokens %>% 
+  tokens_tolower %>%
+  dfm
 dtm
 ```
 
@@ -128,11 +131,11 @@ it and getting the help:
 library(SentimentAnalysis)
 ?DictionaryGI
 names(DictionaryGI)
-head(DictionaryGI$negative)
+head(DictionaryGI$negative, 27)
 
 library(qdapDictionaries)
 ?weak.words
-head(weak.words)
+head(weak.words, 27)
 ```
 
 You can also download many dictionaries as CSV. For example, the VADER
@@ -142,9 +145,9 @@ standard dictionaries:
 
 ``` r
 library(tidyverse)
-url = "https://raw.githubusercontent.com/cjhutto/vaderSentiment/master/vaderSentiment/vader_lexicon.txt"
+url <- "https://raw.githubusercontent.com/cjhutto/vaderSentiment/master/vaderSentiment/vader_lexicon.txt"
 # note: the command below gives warning messages due to the details column, these can be safely ignored
-vader = read_delim(url, col_names=c("word","sentiment", "details"),  col_types="cdc",  delim="\t")
+vader <- read_delim(url, col_names=c("word","sentiment", "details"),  col_types="cdc",  delim="\t")
 head(vader)
 ```
 
@@ -167,7 +170,7 @@ dictionaries from `SentimentAnalysis` can be directly turned into a
 quanteda dictionary:
 
 ``` r
-GI_dict = dictionary(DictionaryGI)
+GI_dict <- dictionary(DictionaryGI)
 ```
 
 For the word lists, you can compose a dictionary e.g. of positive and
@@ -175,7 +178,7 @@ negative terms: (and similarly e.g. for weak words and strong words, or
 any list of words you find online)
 
 ``` r
-HL_dict = dictionary(list(positive=positive.words, negative=negation.words))
+HL_dict <- dictionary(list(positive=positive.words, negative=negation.words))
 ```
 
 ## Applying a quanteda dictionary
@@ -187,7 +190,10 @@ last step is purely optional, but it makes working with it within
 tidyverse slightly easier:
 
 ``` r
-result = dtm %>% dfm_lookup(GI_dict) %>% convert(to = "data.frame") %>% as_tibble
+result <- dtm %>% 
+  dfm_lookup(GI_dict) %>% 
+  convert(to = "data.frame") %>% 
+  as_tibble
 result
 ```
 
@@ -196,7 +202,8 @@ length of documents. We use the `ntoken` function, where a `token` is a
 fancy linguistic term for a word:
 
 ``` r
-result = result %>% mutate(length=ntoken(dtm))
+result <- result %>% 
+  mutate(length = ntoken(dtm))
 ```
 
 Now, we probably want to compute some sort of overall sentiment score.
@@ -207,9 +214,10 @@ a measure of subjectivity to get an idea of how much sentiment is
 expressed in total:
 
 ``` r
-result = result %>% mutate(sentiment1=(positive - negative) / (positive + negative))
-result = result %>% mutate(sentiment2=(positive - negative) / length)
-result = result %>% mutate(subjectivity=(positive + negative) / length)
+result <- result %>% 
+  mutate(sentiment1=(positive - negative) / (positive + negative),
+         sentiment2=(positive - negative) / length,
+         subjectivity=(positive + negative) / length)
 result
 ```
 
@@ -229,12 +237,12 @@ You can create a random sample from the original data frame using the
 sample function:
 
 ``` r
-sample_ids = sample(docnames(dtm), size=50)
+sample_ids <- sample(docnames(dtm), size=50)
 ```
 
 ``` r
 ## convert quanteda corpus to data.frame
-docs = docvars(corp)
+docs <- docvars(corp)
 docs$doc_id = docnames(corp)
 docs$text = as.character(corp)
 
@@ -261,9 +269,9 @@ We can also get a ‘confusion matrix’ if we create a nominal value from
 the sentiment using the `cut` function:
 
 ``` r
-validation = validation %>% 
+validation <- validation %>% 
   mutate(sent_nom = cut(sentiment1, breaks=c(-1, -0.1, 0.1, 1), labels=c("-", "0", "+")))
-cm = table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
+cm <- table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
 cm
 ```
 
@@ -285,8 +293,10 @@ function together with the `%in%` operator to select only rows where the
 feature is in the dictionary:
 
 ``` r
-freqs = textstat_frequency(dtm)
-freqs %>% as_tibble() %>% filter(feature %in% HL_dict$positive)
+freqs <- textstat_frequency(dtm)
+freqs %>% 
+  as_tibble %>% 
+  filter(feature %in% HL_dict$positive)
 ```
 
 As you can see, the most frequent ‘positive’ words found are ‘like’ and
@@ -307,14 +317,16 @@ positive words, we can use the `setdiff` (difference between two sets)
 function:
 
 ``` r
-positive.cleaned = setdiff(positive.words, c("like", "work"))
-HL_dict2 = dictionary(list(positive=positive.cleaned, negative=negation.words))
+positive.cleaned <- setdiff(positive.words, c("like", "work"))
+HL_dict2 <- dictionary(list(positive = positive.cleaned, negative = negation.words))
 ```
 
 To check, look at the top positive words that are now found:
 
 ``` r
-freqs %>% filter(feature %in% HL_dict2$positive)
+freqs %>% 
+  filter(feature %in% HL_dict2$positive) %>%
+  as_tibble
 ```
 
 This seems like a lot of work for each word, but even just checking the
@@ -325,13 +337,15 @@ Similarly, you can check for missing words by inspecting the top words
 not matched by any of the terms (using `!` to negate the condition)
 
 ``` r
-sent.words = c(HL_dict$positive, HL_dict$negative)
-freqs %>% filter(!feature %in% sent.words) %>% View
+sent.words <- c(HL_dict$positive, HL_dict$negative)
+freqs %>% 
+  filter(!feature %in% sent.words) %>% 
+  View
 ```
 
 By piping the result to View, it is easy to scroll through the results
 in rstudio. Note that this does not work in a Rmd file since View cannot
-be used in a static document\!
+be used in a static document!
 
 Scroll through the most frequent words, and if you find a word that
 might be positive or negative check using `kwic` whether it is indeed
@@ -353,7 +367,7 @@ install.packages("corpustools")
 
 ``` r
 library(corpustools)
-t = create_tcorpus(sotu_texts, doc_column="id")
+t <- create_tcorpus(sotu_texts, doc_column="id")
 ```
 
 ## Highlighting dictionary hits
@@ -397,7 +411,7 @@ For this tutorial, we limit the tcorpus to words occurring within 10
 words of ‘war’:
 
 ``` r
-war = subset_query(t, "war", window=10)
+war <- subset_query(t, "war", window=10)
 ```
 
 The last step is to convert the tcorpus back to a regular dfm object. We
@@ -408,7 +422,7 @@ that the last step is done using a regular expression, see for example
 [regexone.com](https://regexone.com/) for a gentle introduction.
 
 ``` r
-dtm_war = get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
+dtm_war <- get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
   dfm_tolower %>% dfm_remove("[^a-z]", valuetype="regex")
 ```
 

@@ -57,14 +57,17 @@ library(quanteda)
 library(quanteda.textplots)
 library(quanteda.textstats)
 library(corpustools)
-corp = corpus(sotu_texts, docid_field = 'id', text_field = 'text')
+corp <- corpus(sotu_texts, docid_field = 'id', text_field = 'text')
 ```
 
-Now, we can create a dtm as normal. We won't apply any preprocessing steps (other than the default lowercasing), because dictionaries tend to have full (i.e. not-stemmed) words, and sometimes contain punctuation such as emoticons.
+Now, we can create a dtm as normal. We won't apply any preprocessing steps (other than lowercasing), because dictionaries tend to have full (i.e. not-stemmed) words, and sometimes contain punctuation such as emoticons.
 
 ```{r}
 library(quanteda)
-dtm = corp %>% tokens %>% dfm()
+dtm <- corp %>% 
+  tokens %>% 
+  tokens_tolower %>%
+  dfm
 dtm
 ```
 
@@ -92,11 +95,11 @@ You can inspect the lists and their origins from each package by loading it and 
 library(SentimentAnalysis)
 ?DictionaryGI
 names(DictionaryGI)
-head(DictionaryGI$negative)
+head(DictionaryGI$negative, 27)
 
 library(qdapDictionaries)
 ?weak.words
-head(weak.words)
+head(weak.words, 27)
 ```
 
 You can also download many dictionaries as CSV. For example, the VADER lexicon is specifically made for analysing social media and includes important 
@@ -104,9 +107,9 @@ words such as "lol" and "meh" that are not present in most standard dictionaries
 
 ```{r}
 library(tidyverse)
-url = "https://raw.githubusercontent.com/cjhutto/vaderSentiment/master/vaderSentiment/vader_lexicon.txt"
+url <- "https://raw.githubusercontent.com/cjhutto/vaderSentiment/master/vaderSentiment/vader_lexicon.txt"
 # note: the command below gives warning messages due to the details column, these can be safely ignored
-vader = read_delim(url, col_names=c("word","sentiment", "details"),  col_types="cdc",  delim="\t")
+vader <- read_delim(url, col_names=c("word","sentiment", "details"),  col_types="cdc",  delim="\t")
 head(vader)
 ```
 
@@ -124,14 +127,14 @@ You can apply the dictionaries listed above using dfm_lookup.
 The dictionaries from `SentimentAnalysis` can be directly turned into a quanteda dictionary:
 
 ```{r}
-GI_dict = dictionary(DictionaryGI)
+GI_dict <- dictionary(DictionaryGI)
 ```
 
 For the word lists, you can compose a dictionary e.g. of positive and negative terms:
 (and similarly e.g. for weak words and strong words, or any list of words you find online)
 
 ```{r}
-HL_dict = dictionary(list(positive=positive.words, negative=negation.words))
+HL_dict <- dictionary(list(positive=positive.words, negative=negation.words))
 ```
 
 
@@ -142,7 +145,10 @@ To use the result in further analysis, we convert to a data frame and change it 
 The last step is purely optional, but it makes working with it within tidyverse slightly easier:
 
 ```{r}
-result = dtm %>% dfm_lookup(GI_dict) %>% convert(to = "data.frame") %>% as_tibble
+result <- dtm %>% 
+  dfm_lookup(GI_dict) %>% 
+  convert(to = "data.frame") %>% 
+  as_tibble
 result
 ```
 
@@ -150,7 +156,8 @@ We can also add the total word length if we want to normalize for the length of 
 We use the `ntoken` function, where a `token` is a fancy linguistic term for a word:
 
 ```{r}
-result = result %>% mutate(length=ntoken(dtm))
+result <- result %>% 
+  mutate(length = ntoken(dtm))
 ```
 
 Now, we probably want to compute some sort of overall sentiment score. We can make various choices here, 
@@ -158,9 +165,10 @@ but a common one is to subtract the negative count from the positive count and d
 We can also compute a measure of subjectivity to get an idea of how much sentiment is expressed in total:
 
 ```{r}
-result = result %>% mutate(sentiment1=(positive - negative) / (positive + negative))
-result = result %>% mutate(sentiment2=(positive - negative) / length)
-result = result %>% mutate(subjectivity=(positive + negative) / length)
+result <- result %>% 
+  mutate(sentiment1=(positive - negative) / (positive + negative),
+         sentiment2=(positive - negative) / length,
+         subjectivity=(positive + negative) / length)
 result
 ```
 
@@ -177,11 +185,12 @@ This can (and should) be reported in the methods section of a paper using a sent
 You can create a random sample from the original data frame using the sample function:
 
 ```{r}
-sample_ids = sample(docnames(dtm), size=50)
+sample_ids <- sample(docnames(dtm), size=50)
 ```
+
 ```{r, eval=F}
 ## convert quanteda corpus to data.frame
-docs = docvars(corp)
+docs <- docvars(corp)
 docs$doc_id = docnames(corp)
 docs$text = as.character(corp)
 
@@ -194,6 +203,7 @@ Note that I rename the columns and turn the document identifier into a character
 ```{r, eval=F}
 validation = read_csv("to_code.csv") %>% mutate(doc_id=as.character(doc_id)) %>% inner_join(result)
 ```
+
 ```{r, echo=F}
 validation = tibble(doc_id=sample_ids, manual_sentiment = rep(c(1,1,0,-1, -1), 10)) %>% inner_join(result)
 ```
@@ -207,9 +217,9 @@ cor.test(validation$manual_sentiment, validation$sentiment1)
 We can also get a 'confusion matrix' if we create a nominal value from the sentiment using the `cut` function:
 
 ```{r}
-validation = validation %>% 
+validation <- validation %>% 
   mutate(sent_nom = cut(sentiment1, breaks=c(-1, -0.1, 0.1, 1), labels=c("-", "0", "+")))
-cm = table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
+cm <- table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
 cm
 ```
 
@@ -228,8 +238,10 @@ together with the `%in%` operator to select only rows where the feature is in th
 
 
 ```{r}
-freqs = textstat_frequency(dtm)
-freqs %>% as_tibble() %>% filter(feature %in% HL_dict$positive)
+freqs <- textstat_frequency(dtm)
+freqs %>% 
+  as_tibble %>% 
+  filter(feature %in% HL_dict$positive)
 ```
 
 As you can see, the most frequent 'positive' words found are 'like' and 'work'.
@@ -246,14 +258,16 @@ From this, it seems that the word `like` here is not used as a positive verb, bu
 To remove it from the list of positive words, we can use the `setdiff` (difference between two sets) function:
 
 ```{r}
-positive.cleaned = setdiff(positive.words, c("like", "work"))
-HL_dict2 = dictionary(list(positive=positive.cleaned, negative=negation.words))
+positive.cleaned <- setdiff(positive.words, c("like", "work"))
+HL_dict2 <- dictionary(list(positive = positive.cleaned, negative = negation.words))
 ```
 
 To check, look at the top positive words that are now found:
 
 ```{r, eval=F}
-freqs %>% filter(feature %in% HL_dict2$positive)
+freqs %>% 
+  filter(feature %in% HL_dict2$positive) %>%
+  as_tibble
 ```
 
 This seems like a lot of work for each word, but even just checking the top 25 words can have a very strong effect on validity since these words often drive a large part of the outcomes.
@@ -261,8 +275,10 @@ This seems like a lot of work for each word, but even just checking the top 25 w
 Similarly, you can check for missing words by inspecting the top words not matched by any of the terms (using `!` to negate the condition)
 
 ```{r, eval=F}
-sent.words = c(HL_dict$positive, HL_dict$negative)
-freqs %>% filter(!feature %in% sent.words) %>% View
+sent.words <- c(HL_dict$positive, HL_dict$negative)
+freqs %>% 
+  filter(!feature %in% sent.words) %>% 
+  View
 ```
 
 By piping the result to View, it is easy to scroll through the results in rstudio. Note that this does not work in a Rmd file since View cannot be used in a static document!
@@ -281,7 +297,7 @@ install.packages("corpustools")
 ```
 ```{r}
 library(corpustools)
-t = create_tcorpus(sotu_texts, doc_column="id")
+t <- create_tcorpus(sotu_texts, doc_column="id")
 ```
 
 ## Highlighting dictionary hits
@@ -321,7 +337,7 @@ occurring within 10 words of 'war':
 
 
 ```{r}
-war = subset_query(t, "war", window=10)
+war <- subset_query(t, "war", window=10)
 ```
 
 The last step is to convert the tcorpus back to a regular dfm object.
@@ -330,7 +346,7 @@ apart from letters (e.g. punctuation, numbers).
 Note that the last step is done using a regular expression, see for example [regexone.com](https://regexone.com/) for a gentle introduction. 
 
 ```{r}
-dtm_war = get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
+dtm_war <- get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
   dfm_tolower %>% dfm_remove("[^a-z]", valuetype="regex")
 ```
 
