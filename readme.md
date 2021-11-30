@@ -29,6 +29,9 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Basic string (text) handling](tutorials/R-tidy-14-strings.md) |  |14 | readr: str_detect, str_extract etc., iconv |
 
 # Statistical Analysis
+
+This is a set of tutorials designed to teach basic statistical modeling and analysis. The first tutorial includes examples for standard regression analysis as well as analysis of variance. Later tutorials exemplify the use of more advanced statistical modelling approaches including the generalized linear model and multilevel models. 
+
 | Tutorial | Video tutorial | Core packages / functions |
 |----|---|---|
 | [Basic statistics](tutorials/simple_modeling.md) | [Basic stats](https://www.youtube.com/watch?v=1K3SKsEj9eI) | stats: lm, aov, t.test |
@@ -36,9 +39,16 @@ The chapter numbers are relevant chapters from the excellent (and freely availab
 | [Generalized linear models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/generalized_linear_models.html) | [GLM](https://www.youtube.com/watch?v=WnmwuD8OwMw&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=3) (on [family](https://www.youtube.com/watch?v=DDP62EUMRFs&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=1) argument) | stats: glm, family, sjPlot: tab_model, plot_model |
 | [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | [Multilevel](https://www.youtube.com/watch?v=1Tw1eIfSyEQ&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=4) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
 
+# Test theory and factor analysis
+
+The following tutorials can be used to teach basics of test theory and particularly confirmatory and exploratory factor analysis approaches. 
+
+| Tutorial | Video tutorial |  Core packages / functions |
+|----|---|---|
+| [Test Theory and Confirmatory Factor Analysis](tutorials_/R_test-theory_1_cfa.md) | | [psych](http://personality-project.org/r/psych/psych-manual.pdf), [lavaan](https://lavaan.ugent.be/), [semTools](https://cran.r-project.org/web/packages/semTools/semTools.pdf) |
+
 
 # Text analysis 
-
 
 For a general introduction to text analysis (in R), see these videos on [preprocessing](https://www.youtube.com/watch?v=O6CGXnxPHok&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=1&t=482s) and different [analysis approaches](https://www.youtube.com/watch?v=bHa2CClBYFw&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=4)
 
