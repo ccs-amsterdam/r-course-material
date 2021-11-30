@@ -261,7 +261,9 @@ Overall, this tells us that the theoretical assumption that this item pools refl
 
 The additive variance decomposition that we used to estimate our latent measurement model is also the basis for one of the most important estimates in classical test theory: the reliability. It can be defined as the true score share of the measured variance: 
 
+
 $Rel(Y_i)$ = $\frac{Var(\tau_i)}{Var(Y_i)}$ = $\frac{Var(\tau_i)}{Var(\tau_i) + Var(\epsilon_i)}$
+
 
 If we have a multi-item measure, the covariance between two items of the same scale represents the true score:
 
