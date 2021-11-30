@@ -45,7 +45,7 @@ The following tutorials can be used to teach basics of test theory and particula
 
 | Tutorial | Video tutorial |  Core packages / functions |
 |----|---|---|
-| [Test Theory and Confirmatory Factor Analysis](tutorials_/R_test-theory_1_cfa.md) | | [psych](http://personality-project.org/r/psych/psych-manual.pdf), [lavaan](https://lavaan.ugent.be/), [semTools](https://cran.r-project.org/web/packages/semTools/semTools.pdf) |
+| [Test Theory and Confirmatory Factor Analysis](tutorials/R_test-theory_1_cfa.md) | | [psych](http://personality-project.org/r/psych/psych-manual.pdf), [lavaan](https://lavaan.ugent.be/), [semTools](https://cran.r-project.org/web/packages/semTools/semTools.pdf) |
 
 
 # Text analysis 
