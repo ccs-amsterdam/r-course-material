@@ -11,3 +11,4 @@ tutorials/*.rda
 .httr-oauth
 model.html
 */RMarkdown_parameters_cache/*
+*.DS_Store
