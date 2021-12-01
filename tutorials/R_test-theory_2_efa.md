@@ -18,6 +18,7 @@ Philipp Masur
     -   [Estimating the model](#estimating-the-model)
     -   [Improving the model](#improving-the-model)
 -   [Reliability](#reliability)
+-   [Where to go next?](#where-to-go-next)
 
 # Introduction
 
@@ -125,16 +126,8 @@ middling, in the .60s, medicore, in the 50s, miserable, and less than
 .5, unacceptable.
 
 ``` r
+# Kaiser-Meyer-Olkin index
 KMO(bfi_items)
-
-#'## Wahl der Extraktionsmethode
-# Multivariate Normalverteilung
-bfi_items %>%
-  mardia(plot = FALSE) # Eher PAF als ML EFA 
-
-# Normalverteilung der Einzelnen Items 
-bfi_items %>%
-  describe 
 ```
 
 As we can see, we get an KMO/MSA index for all items (overall) and each
@@ -142,6 +135,40 @@ item individually. As all items are &gt; .70 (middling) or even &gt; .80
 (mertitourious = deserving of reward or praise) and the overall score is
 also &gt; .80, we can conclude the item pool is well adequate for
 conducting a factor analysis.
+
+Another test by Bartlett compares the correlation matrix to an identity
+matrix (essentially a matrix of zeroes). The null hypothesis for
+Bartlett’s test is thus:
+
+$ H0:matrix=identity$
+
+Bartlett’s test thus lets you rule out that the variables in the data
+set are essentially uncorrelated. If you fail to reject the null for
+this test, then you may as well stop. There are simply no correlations
+between the variables and thus no possibility to find common variance
+that can be subsumed under a factor. The variables are all essentially
+different from one another.
+
+``` r
+cortest.bartlett(bfi_items)
+```
+
+As we can see, the test was significant, thus the items are indeed
+correlated.
+
+Similar to the preparative steps for a CFA, we should also test whether
+all items are normall distributed and whether the entire item pool
+follows the assumption of a multivariate normal distribution.
+
+``` r
+# Normal distribution of individual items
+bfi_items %>%
+  describe 
+
+# Mardia's test for multivariate normal distributed items
+bfi_items %>%
+  mardia(plot = FALSE) # We should choose rather PAF and not ML 
+```
 
 Another way to assess the adequacy of the item pool for factor analysis
 is simply to look at the bivariate correlations between all the
@@ -153,7 +180,6 @@ bfi_items %>%
   select(A1:A5) %>%
   cor %>%
   round(3)
-
 
 # Correlation plot using the package `corrplot`
 library(corrplot)
@@ -227,11 +253,15 @@ The function `nfactors()` computes some of the mentioned alternative
 approaches.
 
 ``` r
-# Parallel analysis
-fa.parallel(bfi_items, fa = "fa", fm = "pa")
+# Simple scree plot
+scree(bfi_items, pc = F) # 4 factors based on Kaiser Kriterium (Eigenvalues < 1)
 
-# Different approaches at the same time
-nfactors(bfi_items)
+
+# Parallel analysis
+fa.parallel(bfi_items, fa = "fa", fm = "pa") # 6 factors
+
+# Other approaches 
+nfactors(bfi_items) # Various outcomes
 ```
 
 The parallel analysis suggest 6 factors (not 5 as proposed by theory!).
@@ -261,7 +291,8 @@ There are two types of rotation:
     simple structure.
 -   Oblique rotations permit the factors to be correlated with one
     another. Often produces solutions with a simpler structure and
-    aligns with the theory.
+    aligns with the theory. I would suggest to always use oblique
+    rotations (e.g., promax)!
 
 ``` r
 # EFA
@@ -273,7 +304,7 @@ fit <- bfi_items %>%
 # Customize output
 print(fit, 
       digits = 2,   ## round to 2 digits
-      cut = .3,     ## remove loadings below .3
+      cut = .3,     ## hide loadings below .3
       sort = TRUE)  ## sort the items into the factors
 ```
 
@@ -354,7 +385,17 @@ N.items <- bfi_items %>% select(N1, N2, N3, N5)
 rel <- omega(N.items, nfactors = 1, plot = F)
 rel$alpha     ## Cronbach's Alpha
 rel$omega.tot ## McDonald's Omega
+
+# A more comprehensive output for Cronbach's alpha
+alpha(N.items)
 ```
 
 We can see that the internal consistency (*α* = .80) and composite
 reliability (*ω* = .81) is good.
+
+# Where to go next?
+
+Check out the following book:
+
+-   Maydeu-Olivares, A. & McArdle, J. J. (2005). Contemporary
+    Psychometrics. Lawrence Erlbaum Associates.
