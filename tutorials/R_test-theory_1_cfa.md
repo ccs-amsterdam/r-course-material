@@ -29,8 +29,8 @@ In the social sciences, we are often interested in somewhat ‘abstract’
 concepts or characteristics (e.g., emotions, attitudes, literacy,
 personality,…). These concept cannot be measured *directly*, but have to
 be assessed *indirectly* using observable indicators (e.g., items in a
-questionnaire). Usually, we hence build several items that are meant
-capture the underlying disposition.
+questionnaire). Usually, we therefore create several items that are
+meant provide information about the underlying latent variable.
 
 Test theory explains the relationships between latent variable (e.g., a
 personality trait such as “extraversion”) and the responses to several
@@ -55,11 +55,12 @@ In classical test theory, we differentiate the following concepts:
 
 <br>
 
-In measuring latent variables, we decompose the variance of each
-measurement: Every observable measurement *Y* is composed of variance
-(true score: *τ*<sub>*a*</sub>) explained by the latent variable,
-variance (again a type of true score: *τ*<sub>*b*</sub>) explained by
-the specific indicator (e.g., the item), and the measurement error *ϵ*:
+In estimating latent variables, we decompose the variance of each
+measurement: Every observable measurement *Y* (e.g., an item) is
+composed of variance (true score: *τ*<sub>*a*</sub>) explained by the
+latent variable, variance (again a type of true score:
+*τ*<sub>*b*</sub>) explained by the specific indicator (e.g., the item),
+and the measurement error *ϵ*:
 
 *Y*<sub>*i*</sub> = *τ*<sub>*a*, *i*</sub> + *τ*<sub>*b*, *i*</sub> + *ϵ*<sub>*i*</sub>
 
@@ -85,16 +86,17 @@ following path model (panel 1):
 We hence need to specify a latent variable (*η*) that explains people’s
 responses in several items (*x*<sub>*i*</sub>) by taking the
 items-specific error (*e**p**s**i**l**o**n*<sub>*i*</sub>; composed of
-item-specific variance and error) into account. Of course, not all items
-will be explained by the latent factor in the same way. Some will be
-worse and other will be better. This is denote by the factor loading
+item-specific variance and the actual error) into account. Of course,
+not all items will be explained by the latent factor in the exact same
+way (at least in most cases they are not). Some will have a worse true
+score than others. This is denoted by the factor loading
 (*λ*<sub>*i*</sub>).
 
-Note: There are also formative concepts in which the combination of
+**Note:** There are also formative concepts in which the combination of
 individual indicators make up the formative factor (e.g., the value of a
 car is determined by its age, condition, size, make, etc.)
 
-In this tutorial, we will run through an example of how can assess a
+In this tutorial, we will work through an example of how we can assess a
 reflective measurement model using a confirmatory factor analysis (CFA)
 in R. As we will engage in some data wrangling, we will load the package
 collection `tidyverse`. Because we will also assess items individually,
@@ -112,10 +114,10 @@ library(psych)
 
 For this tutorial, we will assess a classic reflective measurement model
 of psychology: The Big Five Personality Model as assessed in the
-International Personality Item Pool (ipip.ori.org). Conveniently, it is
-included in the `psych` package and we can load it by simply calling
-`bfi`. Let’s quickly open the respective help page to assess the item
-formulations.
+International Personality Item Pool (<https://ipip.ori.org>).
+Conveniently, it is included in the `psych` package and we can load it
+by simply calling `bfi`. Let’s quickly open the respective documentation
+to assess the item formulations.
 
 ``` r
 d <- bfi %>% as_tibble
@@ -361,8 +363,11 @@ measurement model is also the basis for one of the most important
 estimates in classical test theory: the reliability. It can be defined
 as the true score share of the measured variance:
 
-*R**e**l*(*Y*<sub>*i*</sub>) = $\\frac{Var(\\tau\_i)}{Var(Y\_i)}$ =
-$\\frac{Var(\\tau\_i)}{Var(\\tau\_i) + Var(\\epsilon\_i)}$
+*R**e**l*(*Y*<sub>*i*</sub>)=
+
+*V**a**r*(*τ*<sub>*i*</sub>)/*V**a**r*(*Y*<sub>*i*</sub>)=
+
+*V**a**r*(*τ*<sub>*i*</sub>)/(*V**a**r*(*τ*<sub>*i*</sub>) + *V**a**r*(*ϵ*<sub>*i*</sub>))
 
 If we have a multi-item measure, the covariance between two items of the
 same scale represents the true score:

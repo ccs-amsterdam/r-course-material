@@ -20,7 +20,7 @@ library(printr)
 
 ## Classical Test Theory
 
-In the social sciences, we are often interested in somewhat 'abstract' concepts or characteristics (e.g., emotions, attitudes, literacy, personality,...). These concept cannot be measured *directly*, but have to be assessed *indirectly* using observable indicators (e.g., items in a questionnaire). Usually, we hence build several items that are meant capture the underlying disposition. 
+In the social sciences, we are often interested in somewhat 'abstract' concepts or characteristics (e.g., emotions, attitudes, literacy, personality,...). These concept cannot be measured *directly*, but have to be assessed *indirectly* using observable indicators (e.g., items in a questionnaire). Usually, we therefore create several items that are meant provide information about the underlying latent variable.
 
 Test theory explains the relationships between latent variable (e.g., a personality trait such as "extraversion") and the responses to several items (e.g., "I make friends easily.", "I know how to captivate people."). It defines the statistical relations between a measurement and the actual characteristic of interest. 
 
@@ -41,7 +41,7 @@ _Table 1: Important concepts in classical test theory_
 
 <br>
 
-In measuring latent variables, we decompose the variance of each measurement: Every observable measurement $Y$ is composed of variance (true score: $\tau_a$) explained by the latent variable, variance (again a type of true score: $\tau_b$) explained by the specific indicator (e.g., the item), and the measurement error $\epsilon$:
+In estimating latent variables, we decompose the variance of each measurement: Every observable measurement $Y$ (e.g., an item) is composed of variance (true score: $\tau_a$) explained by the latent variable, variance (again a type of true score: $\tau_b$) explained by the specific indicator (e.g., the item), and the measurement error $\epsilon$:
 
 $Y_i = \tau_{a,i} + \tau_{b,i} + \epsilon_i$
 
@@ -62,12 +62,12 @@ _Image source: Diamantopoulos et al., 2008_
 
 <br>
 
-We hence need to specify a latent variable ($\eta$) that explains people's responses in several items ($x_i$) by taking the items-specific error ($epsilon_i$; composed of item-specific variance and error) into account. Of course, not all items will be explained by the latent factor in the same way. Some will be worse and other will be better. This is denote by the factor loading ($\lambda_i$).
+We hence need to specify a latent variable ($\eta$) that explains people's responses in several items ($x_i$) by taking the items-specific error ($epsilon_i$; composed of item-specific variance and the actual error) into account. Of course, not all items will be explained by the latent factor in the exact same way (at least in most cases they are not). Some will have a worse true score than others. This is denoted by the factor loading ($\lambda_i$).
 
-Note: There are also formative concepts in which the combination of individual indicators make up the formative factor (e.g., the value of a car is determined by its age, condition, size, make, etc.)
+**Note:** There are also formative concepts in which the combination of individual indicators make up the formative factor (e.g., the value of a car is determined by its age, condition, size, make, etc.)
 
 
-In this tutorial, we will run through an example of how can assess a reflective measurement model using a confirmatory factor analysis (CFA) in R. As we will engage in some data wrangling, we will load the package collection `tidyverse`. Because we will also assess items individually, we also load the package `psych`, which provides nice tools to assess psychometric properties of variables. 
+In this tutorial, we will work through an example of how we can assess a reflective measurement model using a confirmatory factor analysis (CFA) in R. As we will engage in some data wrangling, we will load the package collection `tidyverse`. Because we will also assess items individually, we also load the package `psych`, which provides nice tools to assess psychometric properties of variables. 
 
 
 ```{r}
@@ -79,7 +79,7 @@ library(psych)
 
 ## Getting some data
 
-For this tutorial, we will assess a classic reflective measurement model of psychology: The Big Five Personality Model as assessed in the International Personality Item Pool (ipip.ori.org). Conveniently, it is included in the `psych` package and we can load it by simply calling `bfi`. Let's quickly open the respective help page to assess the item formulations. 
+For this tutorial, we will assess a classic reflective measurement model of psychology: The Big Five Personality Model as assessed in the International Personality Item Pool (https://ipip.ori.org). Conveniently, it is included in the `psych` package and we can load it by simply calling `bfi`. Let's quickly open the respective documentation to assess the item formulations. 
 
 ```{r}
 d <- bfi %>% as_tibble
@@ -262,7 +262,11 @@ Overall, this tells us that the theoretical assumption that this item pools refl
 The additive variance decomposition that we used to estimate our latent measurement model is also the basis for one of the most important estimates in classical test theory: the reliability. It can be defined as the true score share of the measured variance: 
 
 
-$Rel(Y_i)$ = $\frac{Var(\tau_i)}{Var(Y_i)}$ = $\frac{Var(\tau_i)}{Var(\tau_i) + Var(\epsilon_i)}$
+$Rel(Y_i) =$
+
+$Var(\tau_i) / Var(Y_i) =$
+
+$Var(\tau_i) / (Var(\tau_i) + Var(\epsilon_i))$
 
 
 If we have a multi-item measure, the covariance between two items of the same scale represents the true score:
