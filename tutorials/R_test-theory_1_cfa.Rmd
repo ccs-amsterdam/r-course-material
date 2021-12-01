@@ -289,9 +289,11 @@ We have seen that we can use confirmatory factor analyses to assess a scales' di
 >"Generally, ignoring measurement error leads to inconsistent estimators and to inaccurate assessments of the relation between the underlying latent variables."
 >(Bollen, 1989)
 
-There is always measurement error that we should not ignore. Relationships between variables with measurement errors (e.g., mean indices) will always be biased (usually downward). As we are often interested in rather small relationships (e.g., r = .10), we should try to reduce the measurement error. 
+There is always measurement error that we should not ignore. Relationships between variables with measurement errors (e.g., mean indices) will always be biased (usually downward). As we are often interested in rather small relationships (e.g., r = .10), we should try to reduce the measurement error. For example, instead of correlating mean scores, we can correlate the estimated true scores in a structural equation model (SEM). A SEM is simply two measurement models linked by a regressions or correlation (see Figure 2):
 
-For example, instead of correlating mean scores, we can correlated the estimated true scores in a structural equation model. Below, we first compute the mean indices for all dimensions. We then investigate the relationship between Agreeableness and Extraction based on the mean scores as well as based on the structural equation model that we estimated earlier (basically the inter-factor correlation in the CFA model). As one can see, the correlation between the latent variables is higher than the correlation between the mean scores. 
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Example_Structural_equation_model.svg/1200px-Example_Structural_equation_model.svg.png)
+
+Below, we first compute the mean indices for all dimensions. We then investigate the relationship between Agreeableness and Extraction based on the mean scores as well as based on the structural equation model that we estimated earlier (basically the inter-factor correlation in the CFA model). As one can see, the correlation between the latent variables is higher than the correlation between the mean scores. 
 
 
 ```{r}
@@ -303,11 +305,18 @@ bfi_items <- bfi_items %>%
          O_i = (O1 + O2 + O3 + O5)/4,
          N_i = (N1 + N3 + N4 + N5)/4)
 
-# Correlation between sumscores and between latent variables
-tibble(sumscore = cor(bfi_items$A_i, bfi_items$E_i),
-       latentvariable = parameterEstimates(fit.cfa2, standardized = T) %>%
-         filter(lhs == "Agreeableness", rhs == "Extraversion") %>%
-         select(std.nox) %>% as.numeric)
+# Correlation between Agreeableness and Extraversion based on the mean scores
+corr1 <- cor(bfi_items$A_i, bfi_items$E_i, use = "complete.obs")
+
+# Correlation between true scores extracted from the CFA
+corr2 <- parameterEstimates(fit.cfa2, standardized = T) %>% 
+  filter(lhs == "Agreeableness", rhs == "Extraversion") %>% 
+  select(std.all) %>% 
+  as.numeric
+
+# Comparison
+bind_rows(sumscore = corr1, 
+          truescore = corr2)
 
 ```
 
@@ -317,6 +326,8 @@ tibble(sumscore = cor(bfi_items$A_i, bfi_items$E_i),
 Test theory and measurement theory is a wide field. But to get started check out the following books and articles:
 
 - Beaujean, A. A. (2014). Latent Variable Modeling Using R: A Step-by-Step Guide. Routledge.
+
+- Bollen, K. A. (1989). Structural Equations with Latent Variables. John Wiley and Sons, Inc.
 
 - Diamantopoulos, A., Riefler, P., & Roth, K. P. (2008). Advancing formative measurement models. Journal of Business Research, 61(12), 1203–1218. https://doi.org/10.1016/j.jbusres.2008.01.009
 
