@@ -332,3 +332,5 @@ Test theory and measurement theory is a wide field. But to get started check out
 - Diamantopoulos, A., Riefler, P., & Roth, K. P. (2008). Advancing formative measurement models. Journal of Business Research, 61(12), 1203–1218. https://doi.org/10.1016/j.jbusres.2008.01.009
 
 - DiStefano C, Zhu, M. & Mîndrila, D. (2009). Understanding and Using Factor Scores: Considerations for the Applied Researcher. Practical Assessment, Research & Evaluation, 14(20), 1-11.
+
+- Maydeu-Olivares, A. & McArdle, J. J. (2005). Contemporary Psychometrics. Lawrence Erlbaum Associates. 

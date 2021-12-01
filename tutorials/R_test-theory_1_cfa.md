@@ -469,3 +469,6 @@ check out the following books and articles:
 -   DiStefano C, Zhu, M. & Mîndrila, D. (2009). Understanding and Using
     Factor Scores: Considerations for the Applied Researcher. Practical
     Assessment, Research & Evaluation, 14(20), 1-11.
+
+-   Maydeu-Olivares, A. & McArdle, J. J. (2005). Contemporary
+    Psychometrics. Lawrence Erlbaum Associates.
