@@ -3,10 +3,86 @@ Web Scraping with RVest
 Wouter van Atteveldt & Kasper Welbers
 2020-10
 
-`rvest` is a package that allows you to retrieve and parse HTML pages in
-order to extract information from them. How easy it is to do so ranges
-from the almost trivial for simple and well-designed web sites, to
-almost impossible for web sites that actively try to prevent it.
+-   [Web scraping](#web-scraping)
+    -   [How does it work?](#how-does-it-work)
+    -   [Web scraping with the rvest
+        package](#web-scraping-with-the-rvest-package)
+    -   [Motivational example](#motivational-example)
+-   [Steps in web scraping](#steps-in-web-scraping)
+-   [Parsing HTML using CSS
+    selectors](#parsing-html-using-css-selectors)
+-   [Scraping with rvest](#scraping-with-rvest)
+    -   [Retrieving and parsing a web
+        page](#retrieving-and-parsing-a-web-page)
+    -   [Identifting the right node(s)](#identifting-the-right-nodes)
+    -   [Extracting information from the
+        node](#extracting-information-from-the-node)
+    -   [Following links](#following-links)
+
+# Web scraping
+
+The internet is a veritable data gold mine, and being able to mine this
+data is a valuable skill set for all sorts of research. In this tutorial
+we will be looking at a technique called **web scraping**, which can
+greatly expand your horizon in terms of what data you will be able to
+collect.
+
+To put this into perspective, let’s distinguish three general ways to
+gather online data. In the most straightforward situation, you can just
+**download** some data, for instance as a CSV or JSON file. This is
+great if it’s possible, but it’s often not an option. Another convenient
+situation is that some platforms have an **API**. For example, Twitter
+has an API where one can collect tweets for a given search term or user.
+
+But what if you encounter data that can’t be downloaded, and for which
+no API is available? In this case, you might still be able to collect it
+using **web scraping**. A simple example might be a table on a website,
+as we’ll show in a minute. A more elaborate example could be that you
+want to gather all user posts on a web forum, or all press releases from
+the website of a certain organization.
+
+## How does it work?
+
+The vast majority of the internet users **HTML** to make nice looking
+web pages. Simply put, HTML is a markup language that tells a browser
+what things are shown where. For example, on
+[https://en.wikipedia.org/wiki/World_Happiness_Report](this%20Wikipedia%20page)
+
+For example, the following HTML code would tell a browser to show a
+headline with two paragraphs. (note that you can’t run this code in R)
+
+``` r
+<h2>Headline</h2>
+<p>First paragraph</p>
+<p>Second paragraph</p>
+```
+
+The goal of HTML is to make things look nice for humans.
+
+In your browser, this looks like a regular table, where the first row
+contains the column names ()
+
+To see how this is possible, it’s important to realize that the vast
+majority of the internet uses HTML to make good looking web pages. HTML
+is a markup language that
+
+But for the vast majority of online data,
+
+As we show in the motivation example below, this data can still quite
+easily be harvested we know a little bit about *Web scraping*.
+
+But just as with an actual gold mine, you often can’t just walk in and
+grab things.
+
+But
+
+## Web scraping with the rvest package
+
+`rvest` (think “harvest”) is a package that allows you to retrieve and
+parse HTML pages in order to extract information from them. How easy it
+is to do so ranges from the almost trivial for simple and well-designed
+web sites, to almost impossible for web sites that actively try to
+prevent it.
 
 As a general rule, you should make sure not to break any laws and
 respect copyright and terms of service (although whether these terms are
@@ -21,15 +97,22 @@ generally be preferable.
 
 ## Motivational example
 
-The example below scrapes the world hapiness report from wikipedia and
-shows the relationship between generosity and wealth:
+The example below scrapes the world happiness report from Wikipedia and
+shows the relationship between wealth and life expectancy.
 
 ``` r
 library(rvest)
 library(tidyverse)
+
 url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
-t = read_html(url) %>% html_node(".wikitable") %>% html_table() 
-ggplot(t) + geom_point(aes(x=`GDP per capita`, y=Generosity))
+
+happy = url %>%
+  read_html() %>% 
+  html_node(".wikitable") %>% 
+  html_table()
+
+ggplot(happy, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
+  geom_point() + geom_smooth(method = 'lm')
 ```
 
 # Steps in web scraping
@@ -54,13 +137,11 @@ regular expressions, however, is theoretically impossible and also a bad
 idea, because the same HTML structure can be expressed in multiple ways
 and HTML is very verbose. Thus, it is a much better idea to parse the
 HTML and treat it as a tree structure. For example, consider the
-structure of a simple HTML
-fragment:
+structure of a simple HTML fragment:
 
 ``` r
 html = "<body><div id='doc1'><p class='lead'>The lead</p><p>The body</p></div></body>"
 d = xml2::read_html(html)
-html_structure(d)
 ```
 
 As you can see, both paragraphs (`p`) are nested in a `div`, which is
@@ -73,19 +154,18 @@ the selectors are used to identify which elements to apply styling to.
 In scraping, we can use the same selectors to identify which tags
 contain the information we are interested in. Below is a table with some
 of the more common css selectors, but if you google something like ‘css
-selector cheat sheet’ you will find a lot of more exhaustive
-lists.
+selector cheat sheet’ you will find a lot of more exhaustive lists.
 
 | selector    | example       | meaning                                     |
-| ----------- | ------------- | ------------------------------------------- |
+|-------------|---------------|---------------------------------------------|
 | child       | div \> p      | any `p` directly nested in a div            |
 | descendant  | div p         | any `p` below a div in the hierachy         |
 | first child | p:first-child | a `p` that is the first child of its parent |
 | class       | p.lead        | a `p` with `class='lead'`                   |
 | class       | .lead         | any tag with `class='lead'`                 |
-| id          | div\#doc1     | a `div` with `id='doc1'`                    |
+| id          | div#doc1      | a `div` with `id='doc1'`                    |
 
-These selectors can be combined, so e.g. `body > #doc1 p.lead`
+These selectors can be combined, so e.g. `body > #doc1 p.lead`
 identifies any `p` that has `class='lead'`, is a descendant of a tag
 with `id='doc1'` which is a direct child of `body`.
 
@@ -155,8 +235,8 @@ contents), while the second call returns all 11 headers.
 ## Extracting information from the node
 
 There are four functions that extract information from the selected
-nodes. First, `html_name` extracts just the tag name of the node, e.g.
-`p` or `h2`:
+nodes. First, `html_name` extracts just the tag name of the node,
+e.g. `p` or `h2`:
 
 ``` r
 html_doc %>% html_node("h2") %>% html_name()
@@ -202,8 +282,7 @@ wiki page (which is linked in the table).
 First, we need to extract the urls from the table. To make sure we only
 use the country names, I am specifying that we only want the `a` that is
 the direct child of the `td` that is the first sibling of the first
-child of the row, i.e. the second
-column:
+child of the row, i.e. the second column:
 
 ``` r
 urls = html_doc %>% html_node(".wikitable") %>% html_nodes("td:first-child + td > a") %>% html_attr("href")
@@ -217,7 +296,7 @@ Now, let’s extract the name from a single country:
 read_html(urls[1]) %>% html_node(".country-name") %>% html_text()
 ```
 
-That worked\! But how do we generalize this to all countries? First, we
+That worked! But how do we generalize this to all countries? First, we
 can use a *for loop*: (note that to speed things up, we only use the
 first five results here)
 

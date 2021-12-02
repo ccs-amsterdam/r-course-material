@@ -14,7 +14,169 @@ knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = F
 library(printr)
 ```
 
-`rvest` is a package that allows you to retrieve and parse HTML pages in order to extract information from them.
+# Web scraping 
+
+The internet is a veritable data gold mine, and being able to mine this data is a valuable skill set for all sorts of research. 
+In this tutorial we will be looking at a technique called **web scraping**, which can greatly expand your horizon in terms of what data you will be able to collect. 
+
+To put this into perspective, let's distinguish three general ways to gather online data. In the most straightforward situation, you can just **download** some data, for instance as a CSV or JSON file. 
+This is great if it's possible, but it's often not an option. Another convenient situation is that some platforms have an **API**. For example, Twitter has an API where one can collect tweets for a given search term or user. 
+
+But what if you encounter data that can't be downloaded, and for which no API is available? In this case, you might still be able to collect it using **web scraping**. A simple example might be a table on a website, as we'll show in a minute. A more elaborate example could be that you want to gather all user posts on a web forum, or all press releases from the website of a certain organization. 
+
+
+## How does it work?
+
+The vast majority of the internet users **HTML** to make nice looking web pages. 
+Simply put, HTML is a markup language that tells a browser what things are shown where.
+For example, it could say that halfway on the page there is a table, and then tell what data there is in the rows and columns. 
+
+The key realization here is that HTML has a very simple structure. 
+
+
+## A quick introduction to HTML
+
+You don't need a deep understanding of HTML to do web scraping, but it's good to understand the main ideas.
+To get a feel for HTML code, open [this link here]() in your web browser. If you have it, use Chrome or Firefox. When you view this HTML page in your browser, you see a nicely formatted document. Sure, it's not very pretty, but it does have a big bold title, and two ok-ish looking tables.
+
+The purpose of this page is to show an easy example of what the HTML code looks like. If you right-click on the page, you should see an option like *view page source*. If you select it you'll see the entire HTML source code. Somewhere in the code you'll see: 
+
+```{r, eval=F}
+<table class="myTable" id="firstTable">
+  <tr class="headerRow">
+    <th>First column</th>
+    <th>Second column</th>
+    <th>Third column</th>
+  </tr>
+  <tr>
+    <td>Some data</td>
+    <td>Some other data</td>
+    <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Daaata</td>
+    <td>Da-ta</td>
+    <td>Data?</td>
+  </tr>
+</table> 
+```
+
+This is the HTML representation of the table, and it's a good showcase of what HTML is about.
+First of all, notice the tree shape.
+At the highest level we have the *table*.
+This table starts at the opening tag `<table>`, and ends at the closing tag `</table>` (notice the `/`).
+Within this table we have 3 *table rows* `<tr>`.
+Within the first row we have 3 *table headers* `<th>`, which contain the column names.
+The second and third row each have 3 *table data* `<td>`, that contain the data points.
+
+OK, let's slow down and just focus on the simple elegance at play here.
+We see that all the data is within the `<table>...</table>` tags.
+Let's call this entire unit the `<table>` **node**. 
+To get this data, all we need to do is query (i.e.) look for this node. 
+
+This is where the `rvest` package comes in.
+With `rvest` we can read the HTML code of a web page into R, look for HTML nodes, and extract information from them.  
+In our example, we see that the table has an id `firstTable`. 
+Let's use this to look for it.
+
+```{r}
+
+```
+
+
+All the data that we see inside of the table on the web page is between the `<table>...</table>` tags. 
+To gather this data, we only need to know how to query (i.e. look for) 
+
+
+To gather this data, the only thing that we need to know is how to *query* (i.e. look for) the table in the HTML code. 
+
+
+
+It turns out that this is rather simple, because HTML nodes often have classes and/or IDs.
+With the `rvest` package, we can load the HTML code of a web page into R, and then look for these 
+
+The `rvest` package makes this really easy. 
+
+
+```{r}
+
+```
+
+
+
+
+
+The key realization here is that HTML 
+
+
+It takes only a little knowledge of HTML to understand how 
+
+
+For this website, go to the web page that shows 
+
+
+
+The thing to understand is that this 
+
+
+
+By understanding a little bit of how this works, we can 
+
+For example, 
+
+For example, on [This wikipedia page](https://en.wikipedia.org/wiki/World_Happiness_Report) there are several tables. 
+
+
+](this Wikipedia page)
+
+
+For example, the following HTML code would tell a browser to show a headline with two paragraphs.
+(note that you can't run this code in R)
+
+```{r, eval=F}
+<h2>Headline</h2>
+<p>First paragraph</p>
+<p>Second paragraph</p>
+```
+
+
+
+
+
+The goal of HTML is to make things look nice for humans. 
+
+
+
+In your browser, this looks like a regular table, where the first row contains the column names ()
+
+To see how this is possible, it's important to realize that the vast majority of the internet uses HTML to make good looking web pages. 
+HTML is a markup language that 
+
+
+
+
+
+
+
+
+
+
+But for the vast majority of online data, 
+
+As we show in the motivation example below, this data can still quite easily be harvested we know a little bit about *Web scraping*.
+
+
+
+But just as with an actual gold mine, you often can't just walk in and grab things. 
+
+
+
+
+But
+
+## Web scraping with the rvest package
+
+`rvest` (think "harvest") is a package that allows you to retrieve and parse HTML pages in order to extract information from them.
 How easy it is to do so ranges from the almost trivial for simple and well-designed web sites,
 to almost impossible for web sites that actively try to prevent it.
 
@@ -27,15 +189,24 @@ or there is another way to get the data without having to scrape it that will ge
 
 ## Motivational example
 
-The example below scrapes the world hapiness report from wikipedia and shows the relationship between generosity and wealth:
+The example below scrapes the world happiness report from Wikipedia and shows the relationship between wealth and life expectancy.
 
 ```{r}
 library(rvest)
 library(tidyverse)
+
 url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
-t = read_html(url) %>% html_node(".wikitable") %>% html_table() 
-ggplot(t) + geom_point(aes(x=`GDP per capita`, y=Generosity))
+
+happy = url %>%
+  read_html() %>% 
+  html_node(".wikitable") %>% 
+  html_table()
+
+ggplot(happy, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
+  geom_point() + geom_smooth(method = 'lm')
 ```
+
+
 
 # Steps in web scraping
 
@@ -55,7 +226,8 @@ Thus, it is a much better idea to parse the HTML and treat it as a tree structur
 ```{r}
 html = "<body><div id='doc1'><p class='lead'>The lead</p><p>The body</p></div></body>"
 d = xml2::read_html(html)
-html_structure(d)
+
+
 ```
 
 As you can see, both paragraphs (`p`) are nested in a `div`, which is nested in a `body`. 
