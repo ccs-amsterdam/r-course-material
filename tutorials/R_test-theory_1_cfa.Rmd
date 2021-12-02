@@ -162,7 +162,7 @@ Both test are significant, suggesting that this assumption is violated. Again, t
 
 Now we can estimate the assumed model (i.e., assuming the five dimensions). For this, we will use the package `lavaan` (for more information and code example, see this documention: https://lavaan.ugent.be/), which provides a convenient syntax for fitting structure equation models in general (measurement models are technically structural equation models!). 
 
-The lavaan syntax is straightforward. First, we define each latent factor in one string. In this example, the model syntax only contains three ‘latent variable definitions’. Each formula has the following format:
+The lavaan syntax is straightforward. First, we define each latent factor in one string. In this example, the model syntax will contain five ‘latent variable definitions’. Each latent variable formula has the following format:
 
 `latent variable =~ indicator1 + indicator2 + ... + indicator_n`
 

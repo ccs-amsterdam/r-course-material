@@ -233,9 +233,9 @@ fitting structure equation models in general (measurement models are
 technically structural equation models!).
 
 The lavaan syntax is straightforward. First, we define each latent
-factor in one string. In this example, the model syntax only contains
-three ‘latent variable definitions’. Each formula has the following
-format:
+factor in one string. In this example, the model syntax will contain
+five ‘latent variable definitions’. Each latent variable formula has the
+following format:
 
 `latent variable =~ indicator1 + indicator2 + ... + indicator_n`
 
