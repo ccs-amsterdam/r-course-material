@@ -353,11 +353,6 @@ fit.cfa2 <- cfa(cfa_model2,
 
 # Output
 summary(fit.cfa2, fit = T, std = T)
-
-# Extracting factor loadings
-parameterEstimates(fit.cfa, standardized=TRUE) %>% 
-  filter(op == "=~") %>% 
-  select(Item=rhs, Standardized=est, ci.lower, ci.upper, SE=se, Z=z, 'p-value'=pvalue)
 ```
 
 The model fit slightly increased (yet still does not reach satisfactory
