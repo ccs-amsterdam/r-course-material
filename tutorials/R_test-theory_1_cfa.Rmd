@@ -20,13 +20,13 @@ library(printr)
 
 ## Classical Test Theory
 
-In the social sciences, we are often interested in somewhat 'abstract' concepts or characteristics (e.g., emotions, attitudes, literacy, personality,...). These concept cannot be measured *directly*, but have to be assessed *indirectly* using observable indicators (e.g., items in a questionnaire). Usually, we therefore create several items that are meant provide information about the underlying latent variable.
+In the social sciences, we are often interested in somewhat 'abstract' concepts (e.g., emotions, attitudes, literacy, personality,...). These concept cannot be measured *directly*, but have to be assessed *indirectly* using observable indicators (e.g., items in a questionnaire). We therefore create several items that are meant to provide information about the underlying trait.
 
-Test theory explains the relationships between latent variable (e.g., a personality trait such as "extraversion") and the responses to several items (e.g., "I make friends easily.", "I know how to captivate people."). It defines the statistical relations between a measurement and the actual characteristic of interest. 
+Test theory explains the relationships between the "latent variable" (e.g., a personality trait such as "extraversion") and the responses to several items (e.g., "I make friends easily", "I know how to captivate people"...). It defines the statistical relation between a measurement and the actual characteristic of interest. 
 
 ## Assumptions
 
-In classical test theory, we differentiate the following concepts: 
+A basic assumption of classical test theory is thus that the trait explains response patterns in items. To investigate this relationship further, we need to differentiate the following concepts: 
 
 <br>
 
@@ -34,25 +34,27 @@ _Table 1: Important concepts in classical test theory_
 
 | Name  |  Definition |
 |---|--------|
-| Latent variables | Not directly observable concepts (later also called 'factors') that we are interested in measuring, such as e.g., emotions, attitudes, personality, literacy, concerns,... |
-| Manifest variables/indicators | Measurable indicators such as e.g., items in a questionnaire (but we can also think of other indicators) |
-| True score | The share of the measurement variance that is directly linked to the latent variable, hence what we want to estimate to the best of our abilities |
-| Measurement error | Share of the measurement variance that is not linked to the latent variable |
+| Latent variables | Not directly observable concepts - later also called 'factors' - that we are interested in estimating (e.g., emotions, attitudes, personality, literacy, concerns...) |
+| Manifest indicators | Measureable aspects that should be influenced by the latent variable (e.g., items in a questionnaire, but we can also think of other indicators) |
+| True score | The share of the variance in the measurement of a manifest indicator that is directly linked to the latent variable; what we want to estimate to the best of our abilities |
+| Measurement error | Share of the measurement variance that is not linked to the latent variable (includes item-specific variance, systematic errors, and random errors) |
 
 <br>
 
-In estimating latent variables, we decompose the variance of each measurement: Every observable measurement $Y$ (e.g., an item) is composed of variance (true score: $\tau_a$) explained by the latent variable, variance (again a type of true score: $\tau_b$) explained by the specific indicator (e.g., the item), and the measurement error $\epsilon$:
+In classical test theory, we decompose the variance of each measurement of an manifest indicator: Every observable measurement $Y$ (e.g., an item) is composed of variance explained by the latent variable (true score: $\tau_a$) ), variance explained by the specific manifest indicator (e.g., the item: $\tau_b$)), and the measurement error ($\epsilon$):
 
 $Y_i = \tau_{a,i} + \tau_{b,i} + \epsilon_i$
 
-The measurement error is thereby independent of the true score and vary randomly across persons and measurement occasions: 
+The measurement error is thereby independent of the true score and varies randomly across persons and measurement occasions: 
 
 $Cor(\tau_i, \epsilon_i) = 0$
 
 
+Measurement errors can be divided into two components: *random error* and *systematic error.* Random errors are errors in measurement that lead to measurable values being inconsistent when repeated measurements of a constant attribute or quantity are taken. Systematic errors are errors that are not determined by chance but are introduced by an inaccuracy (involving either the observation or measurement process). Systematic errors can be imperfect calibration of the instrument or interference of the environment. 
+
 ## Reflective measurement model
 
-Factor models, in which a latent characteristics is measured using multiple manifest indicators, can hence be represented with the following path model (panel 1):
+When we aim to measure abstract concept (e.g., neuroticism), we estimate a **reflective** measurement model. Such models, in which a latent characteristics is estimated based on multiple manifest indicators, can be represented with the following path model (panel 1):
 
 <br>
 
@@ -62,12 +64,11 @@ _Image source: Diamantopoulos et al., 2008_
 
 <br>
 
-We hence need to specify a latent variable ($\eta$) that explains people's responses in several items ($x_i$) by taking the items-specific error ($epsilon_i$; composed of item-specific variance and the actual error) into account. Of course, not all items will be explained by the latent factor in the exact same way (at least in most cases they are not). Some will have a worse true score than others. This is denoted by the factor loading ($\lambda_i$).
+We specify a latent variable ($\eta$) that explains people's responses in several items ($x_i$) by taking the items-specific error ($epsilon_i$; composed of item-specific variance and the measurement error) into account. In most cases, not all items are equally well explained by the latent factor. For some, the true score will be lower than for others. This is denoted by the factor loadings of each item ($\lambda_i$).
 
 **Note:** There are also formative concepts in which the combination of individual indicators make up the formative factor (e.g., the value of a car is determined by its age, condition, size, make, etc.)
 
-
-In this tutorial, we will work through an example of how we can assess a reflective measurement model using a confirmatory factor analysis (CFA) in R. As we will engage in some data wrangling, we will load the package collection `tidyverse`. Because we will also assess items individually, we also load the package `psych`, which provides nice tools to assess psychometric properties of variables. 
+In this tutorial, we will estimate a reflective measurement model using a confirmatory factor analysis (CFA) in R. A CFA can be best estimated using the package `lavaan`, which I will introduce later. As we will engage in some data wrangling beforehand, we will load the package collection `tidyverse`. Because we will also assess items individually, we also load the package `psych`, which provides nice tools to assess psychometric properties of variables. 
 
 
 ```{r}
@@ -150,7 +151,7 @@ For any confirmatory factor analyses, we should additionally check whether the a
 
 ```{r}
 bfi_items %>%
-  mardia(plot = FALSE) # USe MLR instead of ML
+  mardia(plot = FALSE) # We should use MLR instead of ML
 ```
 
 Both test are significant, suggesting that this assumption is violated. Again, this is not problematic per se, but we should use a robust estimator when fitting the confirmatory model. 
@@ -159,7 +160,7 @@ Both test are significant, suggesting that this assumption is violated. Again, t
 
 ## Estimating the model
 
-Now we can estimate the assumed model (i.e., assuming the five dimensions). For this, we will use the package `lavaan`, which provides a convenient syntax for fitting structure equation models in general (measurement models are technically structural equation models!). 
+Now we can estimate the assumed model (i.e., assuming the five dimensions). For this, we will use the package `lavaan` (for more information and code example, see this documention: https://lavaan.ugent.be/), which provides a convenient syntax for fitting structure equation models in general (measurement models are technically structural equation models!). 
 
 The lavaan syntax is straightforward. First, we define each latent factor in one string. In this example, the model syntax only contains three ‘latent variable definitions’. Each formula has the following format:
 
