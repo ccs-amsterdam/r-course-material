@@ -89,11 +89,7 @@ KMO(bfi_items)
 As we can see, we get an KMO/MSA index for all items (overall) and each item individually. As all items are > .70 (middling)  or even > .80 (mertitourious = deserving of reward or praise) and the overall score is also > .80, we can conclude the item pool is well adequate for conducting a factor analysis. 
 
 
-Another test by Bartlett compares the correlation matrix to an identity matrix (essentially a matrix of zeroes). The null hypothesis for Bartlett’s test is thus:
-
-$ H0:matrix=identity$
-
-Bartlett’s test thus lets you rule out that the variables in the data set are essentially uncorrelated. If you fail to reject the null for this test, then you may as well stop. There are simply no correlations between the variables and thus no possibility to find common variance that can be subsumed under a factor. The variables are all essentially different from one another.
+Another test by Bartlett compares the correlation matrix to an identity matrix (essentially a matrix of zeroes). The null hypothesis for Bartlett’s test is thus "H0: matrix = identity". Bartlett's test thus lets you rule out that the variables in the data set are essentially uncorrelated. If you fail to reject the null for this test, then you may as well stop. There are simply no correlations between the variables and thus no possibility to find common variance that can be subsumed under a factor. The variables are all essentially different from one another.
 
 ```{r}
 cortest.bartlett(bfi_items)
@@ -101,8 +97,7 @@ cortest.bartlett(bfi_items)
 
 As we can see, the test was significant, thus the items are indeed correlated. 
 
-Similar to the preparative steps for a CFA, we should also test whether all items are normall distributed and whether the entire item pool follows the assumption of a multivariate normal distribution. 
-
+Similar to testing normality of items before a CFA, we should also test whether all items are normally distributed and whether the entire item pool follows the assumption of a multivariate normal distribution. 
 
 ```{r}
 # Normal distribution of individual items
@@ -111,7 +106,7 @@ bfi_items %>%
 
 # Mardia's test for multivariate normal distributed items
 bfi_items %>%
-  mardia(plot = FALSE) # We should choose rather PAF and not ML 
+  mardia(plot = F) # We should choose rather PAF and not ML 
 ```
 
 Another way to assess the adequacy of the item pool for factor analysis is simply to look at the bivariate correlations between all the variables: 
@@ -143,9 +138,9 @@ In the literature on EFA, three alternative approaches are usually discussed:
 - Principal axis factoring (PAF)
 - Maximum likelihood factor analysis (ML)
 
-The PCA has been criticized a lot as it does not assume a reflective measurement model. It assume that all variance in a manifest indicator is explainable by a common factor. 
+The PCA has been criticized a lot as it not based on a reflective measurement model (see tutorial on CFA). It assumes that all variance in a manifest indicator is explainable by a common factor. 
 
-The most used approaches to do a true exploratory *factor* analysis are hence PAF and ML. Both rest on the same assumptions as the confirmatory factor analysis and hence align with classical test theory. This approaches thus assume that we can decompose the variance of each measurement: Every observable measurement $Y$ is composed of variance (true score: $\tau_a$) explained by the latent variable, variance (again a type of true score: $\tau_b$) explained by the specific indicator (e.g., the item), and the measurement error $\epsilon$:
+The most used approaches to do a true exploratory *factor* analysis are hence PAF and ML. Both rest on the same assumptions as the confirmatory factor analysis and hence align with classical test theory. Again, these approaches assume that we can decompose the variance of each measurement: Every observable measurement $Y$ is composed of variance (true score: $\tau_a$) explained by the latent variable, variance (again a type of true score: $\tau_b$) explained by the specific indicator (e.g., the item), and the measurement error $\epsilon$:
 
 $Y_i = \tau_{a,i} + \tau_{b,i} + \epsilon_i$
 
@@ -156,7 +151,7 @@ Before we fit an EFA, we need to identify the optimal number of factors that sho
 - Theoretical plausibility
 - Reproducibility of the factors based on the correlation matrix
 
-Approaches include:
+For the later, the following approaches are often used in the literature
 
 - Analysis of the Eigenvalues
     - Kaiser criterion
@@ -164,11 +159,11 @@ Approaches include:
 - Very simple structure criterion
 - Empirical BIC
 - Root Mean Residual
--...
+- and many more...
 
-Many scholars consider the parallel analysis as the best option to extract the number of factors. Traditionally, we determine the number of factors in a data matrix or a correlation matrix by examining the “scree" plot of the successive eigenvalues. Sharp breaks in the plot suggest the appropriate number of components or factors to extract. 
+Many scholars consider the *parallel analysis* as the best option to extract the number of factors. Traditionally, many scholars have determined the the number of factors in a data matrix or a correlation matrix by examining the “scree" plot of the successive eigenvalues. Sharp breaks in the plot suggest the appropriate number of components or factors to extract. We can use the function `scree()` to produce such a plot.  
 
-The parallel analyis is an alternative approach that compares the scree of factors of the observed data with that of a random data matrix of the same size as the original. We can run this analysis in R using the function `fa.parallel()`, in which we further specify the extraction method (`fm = "pa"` to do principal axis factoring) and which eigen values to show (`fa = "fa"`). 
+The parallel analysis is an alternative approach that compares the scree of factors of the observed data with that of a random data matrix of the same size as the original. We can run this analysis in R using the function `fa.parallel()`, in which we further specify the extraction method (`fm = "pa"` to do principal axis factoring) and which eigenvalues to show (`fa = "fa"`). 
 
 The function `nfactors()` computes some of the mentioned alternative approaches. 
 
@@ -176,7 +171,6 @@ The function `nfactors()` computes some of the mentioned alternative approaches.
 ```{r}
 # Simple scree plot
 scree(bfi_items, pc = F) # 4 factors based on Kaiser Kriterium (Eigenvalues < 1)
-
 
 # Parallel analysis
 fa.parallel(bfi_items, fa = "fa", fm = "pa") # 6 factors
