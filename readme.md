@@ -46,7 +46,8 @@ The following tutorials can be used to teach basics of test theory and particula
 | Tutorial | Video tutorial |  Core packages / functions |
 |----|---|---|
 | [Test Theory and Confirmatory Factor Analysis](tutorials/R_test-theory_1_cfa.md) | [CFA in R](https://www.youtube.com/watch?v=uKlagNgC-GY) | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia; [lavaan](https://lavaan.ugent.be/): cfa, fitMeasures, modindices; [semTools](https://cran.r-project.org/web/packages/semTools/semTools.pdf): reliability |
-| [Exploratory Factor Analysis](tutorials/R_test-theory_2_efa.md) | | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia, fa.parallel, nfactors, fa, fa.diagram, omega |
+| [Exploratory Factor Analysis](tutorials/R_test-theory_2_efa.md) | [EFA in R](
+https://youtu.be/AXaBMDA34YM) | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia, fa.parallel, nfactors, fa, fa.diagram, omega |
 
 
 # Text analysis 
