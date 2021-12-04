@@ -4,7 +4,25 @@
 body {
   font-family: Sans-serif;
 }
-.myTable {
+h2, h4 {
+  text-align: center;
+}
+div.columns {
+  display: table;
+  text-align: justify;
+  text-justify: inter-word;
+}
+div.leftColumn {
+  width: 45%;
+  padding: 2.5%;
+  display: table-cell;
+}
+div.rightColumn {
+  width: 45%;
+  padding: 2.5%;
+  display: table-cell;
+}
+table.someTable {
   border-top: 1.5px solid; 
   border-bottom: 1.5px solid;
   text-align: left;
@@ -12,10 +30,10 @@ body {
   margin-left: 25%;
   border-collapse: collapse;
 }
-.blue {
+table.blue {
   color: blue;
 }
-.headerRow {
+tr.headerRow {
   border-bottom: 1.5px solid;
 }
 th, td {
@@ -26,51 +44,73 @@ th, td {
 
 <h2>Looking behind the curtains of an HTML page</h2>
 
-<p>This is a simple HTML document. Right click on the page and select <b>view page source</b> (or something similar, depending on browser) to view the HTML source code.</p>
+<div class="columns">
+  <div class="leftColumn">
+    <h4>Left Column</h4>
 
-<p>Alternatively, right click on a specific element on the page and select <b>inspect element</b>. This also shows the HTML code, but focused on the selected element. Also, you should be able to fold and unfold HTML nodes (using the triangle-like thing before the &lt;tags&gt;), and when you hover your mouse over them, they should light up in the browser. 
+    <p>This is a simple HTML document. Right click on the page and select <b>view page source</b> 
+       (or something similar, depending on browser) to view the HTML source code.</p>
+    
+    <p>Alternatively, right click on a specific element on the page and select <b>inspect element</b>. 
+       This also shows the HTML code, but focused on the selected element. You should be able to fold 
+       and unfold HTML nodes (using the triangle-like thing before the &lt;tags&gt;), and when you hover 
+       your mouse over them, they should light up in the browser. Play around with this for a bit to get 
+       a feel for exploring HTML code.</p>
 
-Play around with this for a bit to get a feel for exploring HTML code.</p>
-<p>The nice thing is that for Web scraping you really don't need to know much about HTML. If you know how to <i>inspect</i> elements, you can easily look up their class, ID or path.</p>
+    <p>Here's a stupid table.</p>
+    
+    <table class="someTable" id="exampleTable">
+      <tr class="headerRow">
+        <th>First column</th>
+        <th>Second column</th>
+        <th>Third column</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>5</td>
+        <td>6</td>
+      </tr>
+    </table>
+  
+  </div>
+  
+  <div class="rightColumn">
+    <h4>Right Column</h4>
 
-<h3>Some tables to play around with</h3>
-
-<p>Here is a simple table to practice querying HTML nodes:</p>
-
-<table class="myTable" id="firstTable">
-  <tr class="headerRow">
-    <th>First column</th>
-    <th>Second column</th>
-    <th>Third column</th>
-  </tr>
-  <tr>
-    <td>Some data</td>
-    <td>Some other data</td>
-    <td>Yes</td>
-  </tr>
-  <tr>
-    <td>Daaata</td>
-    <td>Da-ta</td>
-    <td>Data?</td>
-  </tr>
-</table>
-
-<p>And here's another table:</p>
-
-<table class="myTable blue" id="secondTable">
-  <tr class="headerRow">
-    <th>First column</th>
-    <th>Second column</th>
-    <th>Third column</th>
-  </tr>
-  <tr>
-    <td>Some data</td>
-    <td>Some other data</td>
-    <td>Yes</td>
-  </tr>
-  <tr>
-    <td>Daaata</td>
-    <td>Da-ta</td>
-    <td>Data?</td>
-  </tr>
-</table>
+    <table class="someTable blue" id="steve">
+      <tr class="headerRow">
+        <th>numbers</th>
+        <th>letters</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>A</td>
+      </tr>
+       <tr>
+        <td>2</td>
+        <td>B</td>
+      </tr>
+       <tr>
+        <td>3</td>
+        <td>C</td>
+      </tr>
+       <tr>
+        <td>4</td>
+        <td>D</td>
+      </tr>
+       <tr>
+        <td>5</td>
+        <td>E</td>
+      </tr>
+       <tr>
+        <td>6</td>
+        <td>F</td>
+      </tr>
+    </table>
+  </div>
+</div>

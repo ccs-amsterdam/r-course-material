@@ -3,7 +3,18 @@ Web Scraping with RVest
 Wouter van Atteveldt & Kasper Welbers
 2020-10
 
--   [Web scraping](#web-scraping)
+-   [What is web scraping and why learn
+    it?](#what-is-web-scraping-and-why-learn-it)
+    -   [Learning web scraping with
+        rvest](#learning-web-scraping-with-rvest)
+-   [Scraping data by parsing HTML](#scraping-data-by-parsing-html)
+    -   [A short intro to HTML](#a-short-intro-to-html)
+-   [Selecting HTML elements](#selecting-html-elements)
+    -   [CSS selectors](#css-selectors)
+    -   [One cool xpath thing that you want to
+        know](#one-cool-xpath-thing-that-you-want-to-know)
+    -   [But wait, is this even
+        allowed?](#but-wait-is-this-even-allowed)
     -   [How does it work?](#how-does-it-work)
     -   [Web scraping with the rvest
         package](#web-scraping-with-the-rvest-package)
@@ -19,34 +30,330 @@ Wouter van Atteveldt & Kasper Welbers
         node](#extracting-information-from-the-node)
     -   [Following links](#following-links)
 
-# Web scraping
+# What is web scraping and why learn it?
 
 The internet is a veritable data gold mine, and being able to mine this
-data is a valuable skill set for all sorts of research. In this tutorial
-we will be looking at a technique called **web scraping**, which can
-greatly expand your horizon in terms of what data you will be able to
-collect.
+data is a valuable skill set. In this tutorial we will be looking at a
+technique called **web scraping**, which can greatly expand your horizon
+in terms of what data you will be able to collect.
 
 To put this into perspective, let’s distinguish three general ways to
 gather online data. In the most straightforward situation, you can just
 **download** some data, for instance as a CSV or JSON file. This is
-great if it’s possible, but it’s often not an option. Another convenient
-situation is that some platforms have an **API**. For example, Twitter
-has an API where one can collect tweets for a given search term or user.
+great if it’s possible, but alas, there often is no download button.
+Another convenient situation is that some platforms have an **API**. For
+example, Twitter has an API where one can collect tweets for a given
+search term or user. But what if you encounter data that can’t be
+downloaded, and for which no API is available? In this case, you might
+still be able to collect it using **web scraping**.
 
-But what if you encounter data that can’t be downloaded, and for which
-no API is available? In this case, you might still be able to collect it
-using **web scraping**. A simple example might be a table on a website,
-as we’ll show in a minute. A more elaborate example could be that you
-want to gather all user posts on a web forum, or all press releases from
-the website of a certain organization.
+A simple example is a table on a website. This table might practically
+be a data.frame, with nice rows and columns, but it can be hassle to
+copy this data. A more elaborate example could be that you want to
+gather all user posts on a web forum, or all press releases from the
+website of a certain organization. You could technically click your way
+through the website and copy/paste each item manually, but you (or the
+people you hire) will die a little inside. Whenever you encounter such a
+tedious, repetitive data collection task, chances are good you can
+automate it with a web scraper!
 
-## How does it work?
+In addition to being a very useful technique, I would furthermore
+emphasize that web scraping is an excellent way to learn about R and
+programming. When students ask how to approach become better in R (or
+Python, or whatever), our first recommendation is to simply to spend
+time with it on fun and/or rewarding tasks that intrinsically motivate
+you. Web scraping is rather ideal in this regard. It touches upon
+various useful programming skills, has an engaging puzzle-like element
+in trying to conquer websites, and collecting your own novel data set
+that you could use is pretty awesome. I mean, It’s literally building a
+robot to do work for you! How cool is that?
+
+## Learning web scraping with rvest
+
+In this tutorial we will be using the `rvest` package (to **ha-rvest**
+data). This is a neat little package developed by the venerable Hadley
+Wickham (aka the mastermind behind the `tidyverse`). And in true
+tidyverse fashion it makes web scraping really intuitive. Check out this
+small piece of code that scrapes the world happiness report from
+Wikipedia and shows the relationship between wealth and life expectancy.
+
+``` r
+library(rvest)
+library(tidyverse)
+
+url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
+
+## import table from the Wikipedia url
+happy_table = read_html(url) %>%
+  html_element(".wikitable") %>% 
+  html_table()
+
+## Plot relationship wealth and life expectancy
+ggplot(happy_table, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
+  geom_point() + geom_smooth(method = 'lm')
+```
+
+The scraping part is really just the short pipe there! With
+`read_html(url)`, we visit the Wikipedia page. Then
+`html_element(".wikitable")` searches this website to find any elements
+called ‘wikitable’, and `html_table()` imports this table as a data
+frame.
+
+*As an exercise, you could try the same thing for other Wikipedia pages
+with tables. Just replace the url and change the columns for the x and y
+axis in gglot*
+
+If you happen to know a bit about HTML, you might realize that
+`html_element(".wikitable")` just uses CSS to select the (first) element
+with the .wikitable class. If so, congratulations, you now basically
+know web scraping! If not, don’t worry! You really only need to know
+very little about HTML to use web scraping. We’ll cover this in the next
+section.
+
+Off course, this is just a simple example. If you need to scrape all
+press releases from a website, you will need more steps and some
+additional functions from the `rvest` package. But take a minute to
+think how this does cover the key logic. If we would want to scrape all
+press releases from a website, our first step would be to find an
+archive on the website that contains links to the press releases. We
+would read this archive with `read_html()`, and then look for all HTML
+elements that contain the links. Then for each link, we can again use
+`read_html()` to read the data, and look for all HTML elements of the
+press release that we want to collect (e.g., title, date, body).
+
+# Scraping data by parsing HTML
 
 The vast majority of the internet users **HTML** to make nice looking
 web pages. Simply put, HTML is a markup language that tells a browser
-what things are shown where. For example, on
-[https://en.wikipedia.org/wiki/World_Happiness_Report](this%20Wikipedia%20page)
+what things are shown where. For example, it could say that halfway on
+the page there is a table, and then tell what data there is in the rows
+and columns.
+
+In other words, HTML is the language that web developers use to display
+**data** as a **web page** that’s nice for human interpretation. With
+web scraping, we’re basically translating the **web page** back into
+**data**.
+
+## A short intro to HTML
+
+You really don’t need a deep understanding of HTML to do this, but it’s
+convenient to understand the main ideas. To get a feel for HTML code,
+open [this link here](https://bit.ly/31keW5P) in your web browser. Use
+Chrome or Firefox if you have it (not all browsers let you *inspect
+elements* as we’ll do below). You should see a nicely formatted
+document. Sure, it’s not very pretty, but it does have a big bold title,
+and two ok-ish looking tables.
+
+The purpose of this page is to show an easy example of what the HTML
+code looks like. If you right-click on the page, you should see an
+option like *view page source*. If you select it you’ll see the entire
+HTML source code. Somewhere in the code you’ll see:
+
+``` r
+<table class="myTable" id="firstTable">   # table
+  <tr class="headerRow">                  #    table row
+    <th>First column</th>                 #       table header
+    <th>Second column</th>                #       table header
+    <th>Third column</th>                 #       table header
+  </tr>                                   #    
+  <tr>                                    #    table row 
+    <td>Some data</td>                    #       table data 
+    <td>Some other data</td>              #       table data
+    <td>Yes</td>                          #       table data 
+  </tr>                                   #    
+  <tr>                                    #    table row                      
+    <td>Daaata</td>                       #       table data
+    <td>Da-ta</td>                        #       table data
+    <td>Data?</td>                        #       table data
+  </tr>                                   #     
+</table>                                  # 
+```
+
+This is the HTML representation of the table, and it’s a good showcase
+of what HTML is about. The parts after the `#` are not part of the HTML
+code, but comments to help you see the structure. First of all, notice
+that it has this *family tree* like shape. At the highest level we have
+the *table*, that has three *row* children, that in turn also have three
+children.
+
+This table starts at the opening tag `<table>`, and ends at the closing
+tag `</table>` (notice the `/`). Between these tags we see three *table
+rows* `<tr>`. Each of these *rows* also has an opening tag `<tr>` and
+closing tag `</tr>`. Between these tags we have children representing
+the values in the cells of each row. In the first row, these are 3
+*table headers* `<th>`, which contain the column names. The second and
+third row each have 3 *table data* `<td>`, that contain the data points.
+
+Let’s call this entire unit the `<table>` **element** (sometimes you
+also see this referred to as a **node**, but the distinction can be
+ignored for now). To collect the data from this table, we first need a
+way to look for this table element. This is where the `rvest` package
+comes in. With `rvest` we can read the HTML code of a web page into R,
+look for HTML elements, and extract information from them.  
+In our example, we see that the table has an id `exampleTable`. With the
+`html_element` function, we can use the CCS selector `#id` (in our case
+`#exampleTable`) for looking up this element.
+
+``` r
+url = 'https://bit.ly/31keW5P'
+
+read_html(url) %>%
+  html_element('#exampleTable') 
+
+read_html(url) %>%
+  html_element('#firstTable') 
+
+read_html(url) %>%
+  html_element(xpath = '//*[@id="firstTable"]') 
+```
+
+The output looks a bit messy, but what it tells us is that we have
+selected the `<table>` html element/node. It also shows that this
+element has the three table rows (tr) as children. We could now manually
+extract all data from this element, but this requires us to learn a few
+more tricks first. Note that since this is a table element, you could
+also use `html_table` like we did above (try it!).
+
+In summary, the vast majority of web pages is written in HTML, and we
+can extract information from these pages by looking for the HTML
+elements that we’re interested in. Accordingly, the main thing to learn
+about HTML in order to do web scraping is how to look for HTML
+elements/nodes.
+
+# Selecting HTML elements
+
+The `rvest` package supports two ways for selecting HTML elements. The
+first and default approach is to use **CSS selectors**. CSS is mostly
+used by web developers to *style* web pages[1], but it works just as
+well for scraping. The second approach is to use **xpath**. Xpath
+patterns are more difficult to read and write, but are in the end more
+powerful than CSS selectors, meaning there are some patterns that you
+can express in xpath but cannot express in CSS.
+
+In this tutorial we’ll mainly cover the most important basics of CCS
+selectors. But we’ll also cover a single `xpath` trick, because it
+allows you to do one nice thing that CCS can’t.
+
+## CSS selectors
+
+Here we’ll cover the main CCS selectors to get you started with web
+scraping, but a full overview is out of the scope of this tutorial. For
+some more details you can consult the [rvest
+vignette](https://rvest.tidyverse.org/articles/harvesting-the-web.html),
+or this [CSS selector
+overview](https://www.w3schools.com/cssref/css_selectors.asp).
+Alternatively, there is also this nice [game for learning
+CSS](https://flukeout.github.io/#)
+
+## One cool xpath thing that you want to know
+
+Just know that you can also use xpath in `rvest` by using the `xpath`
+argument in the search functions (for example:
+`html_element(xpath = '//*[@id="someTable"]')`.
+
+There are many ways to do this, but the most important ones to know are
+selecting by **tag**, **class** and by **id**. In our example we see
+that the table has each: `<table class="myTable" id="firstTable">`. We
+can select it with each of the following:
+
+| selector    | example           | Selects                                                |
+|-------------|-------------------|--------------------------------------------------------|
+| element/tag | `table`           | **all** elements with `<table>` tag                    |
+| class       | `.someTable`      | **all** elements with `class="someTable"`              |
+| id          | `#exampleTable`   | **unique** element with `id="exampleTable"`            |
+| class.class | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
+| id          | `#exampleTable`   | **unique** element with `id="exampleTable"`            |
+
+-   
+
+So as a simple rule of thumb:
+
+-   If an element has an `id`, use it
+-   If it doesn’t have an `id` look for `class`, but make sure to check
+    if there are other elements with the same class
+-   If an element doesn’t have an `id` or `class`,
+-   If you can’t
+
+In the pipe here we first read the HTML from the url. Then we use
+`html_element` to look for the table element, and `html_table` is a nice
+convenience function to import this table as a data frame.
+
+There are actually multiple ways to find this element. As in the
+wikipedia example, we could use `.myTable`
+
+The `#` here indicates that `firstTable` is an ID (and not, for
+instance, a class).
+
+The `html_table` function is a nice convenience function from `rvest` to
+import a simple table. For sake of learning, note that you could also
+have done this yourself. We could have taken the table element, and
+within that element look for the rows (note that we use the plural
+html_element**s**, because we want multiple rows)
+
+``` r
+read_html(url) %>%
+  html_element('#firstTable') %>%
+  html_children()
+```
+
+Then within those rows we could have looked for the cells. However, to
+do this we would need to work with for loops (or other ways of iterating
+over elements), so we’ll skip it for now. We’ll discuss a bit of for
+loop later on.
+
+But just realize that
+
+All the data that we see inside of the table on the web page is between
+the `<table>...</table>` tags. To gather this data, we only need to know
+how to query (i.e. look for)
+
+To gather this data, the only thing that we need to know is how to
+*query* (i.e. look for) the table in the HTML code.
+
+It turns out that this is rather simple, because HTML nodes often have
+classes and/or IDs. With the `rvest` package, we can load the HTML code
+of a web page into R, and then look for these
+
+The `rvest` package makes this really easy.
+
+Web scraping
+
+## But wait, is this even allowed?
+
+In principle, yes. The internet is filled with *robots* that scrape all
+sorts of content. But off course, this does not mean that anything goes.
+If you write a scraper that opens a webpage a thousand times per minute,
+you’re not being a very nice visitor, and the host might kick you out.
+If you collect data from a website, whether manually or automatically,
+you could run into copyright issues. For non-commercial research this is
+rarely an issue, but just remember to always be mindful that not all
+data is open.
+
+Aside from legal issues, note that there can be ethical concerns as
+well. If you scrape data from a web forum where people share deeply
+personal stories, you can imagine that they might not like this data
+being collected. As with any form of research involving people, do
+consider whether the end goals of your research justify the means.
+
+## How does it work?
+
+The key realization here is that HTML
+
+It takes only a little knowledge of HTML to understand how
+
+For this website, go to the web page that shows
+
+The thing to understand is that this
+
+By understanding a little bit of how this works, we can
+
+For example,
+
+For example, on [This wikipedia
+page](https://en.wikipedia.org/wiki/World_Happiness_Report) there are
+several tables.
+
+\](this Wikipedia page)
 
 For example, the following HTML code would tell a browser to show a
 headline with two paragraphs. (note that you can’t run this code in R)
@@ -159,7 +466,7 @@ selector cheat sheet’ you will find a lot of more exhaustive lists.
 | selector    | example       | meaning                                     |
 |-------------|---------------|---------------------------------------------|
 | child       | div \> p      | any `p` directly nested in a div            |
-| descendant  | div p         | any `p` below a div in the hierachy         |
+| descendant  | div p         | any `p` below a div in the hierarchy        |
 | first child | p:first-child | a `p` that is the first child of its parent |
 | class       | p.lead        | a `p` with `class='lead'`                   |
 | class       | .lead         | any tag with `class='lead'`                 |
@@ -361,3 +668,11 @@ lot easier to write and debug.
 (as a challenge, try to extract the population from the infobox rather
 than the full name. Hint: You might need to use xpath to identify the
 right cell of the table)
+
+[1] If you look at the HTML code of our [example
+page](view-source:https://bit.ly/31keW5P), you see that there is this
+`<style>...</style>` section, and in this section we also use CSS
+selectors to select elements. For example, the `.someTable` class is
+selected to style this table like an APA table, and the `.blue` class
+defines that any element with this class (in our case the second table)
+is colored blue.
