@@ -105,7 +105,7 @@ Sure, it's not very pretty, but it does have a big bold title, and two ok-ish lo
 The purpose of this page is to show an easy example of what the HTML code looks like.
 If you right-click on the page, you should see an option like *view page source*.
 If you select it you'll see the entire HTML source code.
-Somewhere in the code you'll see:
+Somewhere in the middle of the code you'll see (without the `# table` part):
 
 ```{r, eval=F}
 <table class="someTable" id="exampleTable">  # table
