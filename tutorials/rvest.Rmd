@@ -1,7 +1,7 @@
 ---
 title: 'Web Scraping with RVest'
-author: "Wouter van Atteveldt & Kasper Welbers"
-date: "2020-10"
+author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
+date: "2021-12"
 output: 
   github_document:
     toc: yes
@@ -12,7 +12,7 @@ editor_options:
 ---
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(printr)
 ```
 
@@ -62,7 +62,7 @@ This is a neat little package developed by the venerable Hadley Wickham (aka the
 And in true tidyverse fashion it makes web scraping really intuitive.
 Check out this small piece of code that scrapes the world happiness report from Wikipedia and shows the relationship between wealth and life expectancy.
 
-```{r}
+```{r example_wiki_scrape}
 library(rvest)
 library(tidyverse)
 
@@ -179,7 +179,7 @@ And each of these elements can be selected with the `html_element` function.
 Note that our table is `<table class="someTable" id="exampleTable">`. 
 We can now use the id to select this table (we'll cover how this works in the next section)
 
-```{r}
+```{r results=F}
 ## first, read the HTML code for our example HTML page
 html = read_html('https://bit.ly/3lz6ZRe')
 
@@ -222,7 +222,7 @@ When you hover your mouse over the elements they light up on the page, so you ca
 The tree structure is also made more obvious by allowing you to fold and unfold elements by clicking on the triangles on the left.
 This is a great tool for web scraping, because it allows you to quickly identify the HTML elements that you want to select.
 
-In our case, we now see that the right column is specified as `<div class="rightColumn">`. 
+In our case, we now see that the right column is specified as a `div` with `class="rightColumn"`. 
 We can now select this column by selecting the div element with this class (more on this in the next section).
 
 ```{r}
@@ -305,7 +305,7 @@ Luckily, `rvest` is quite flexible in how it handles single elements and lists o
 The functions to extract data from single elements also work on lists, and then just return a list of data.
 For example, this is what happens if we use the `html_table()` function on a list of tables.
 
-```{r}
+```{r, results=F}
 tables = html %>% html_elements('table')
 html_table(tables)
 ```
@@ -562,7 +562,7 @@ with links to their IMDB profiles.
 Inspect the **Cast** title, and you'll see that below it there's a `<table class="cast_list">`.
 In other words:
 
-```{r}
+```{r, result=F}
 html = read_html('https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm')
 html %>% html_element('.cast_list') %>% html_table()
 ```
@@ -658,7 +658,7 @@ And we have our code for scraping the biography page URLs.
 We'll put it all together here!
 (Note that for this demo we use only the top 5 URLs to save time, and not bother IMDB too much)
 
-```{r}
+```{r, eval=F}
 ## the URL for the cast page of a movie
 movie_cast_url = 'https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm'
 

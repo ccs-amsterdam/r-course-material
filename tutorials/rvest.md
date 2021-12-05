@@ -1,7 +1,7 @@
 Web Scraping with RVest
 ================
-Wouter van Atteveldt & Kasper Welbers
-2020-10
+Kasper Welbers, Wouter van Atteveldt & Philipp Masur
+2021-12
 
 -   [What is web scraping and why learn
     it?](#what-is-web-scraping-and-why-learn-it)
@@ -12,6 +12,7 @@ Wouter van Atteveldt & Kasper Welbers
 -   [Web scraping HTML pages in three
     steps](#web-scraping-html-pages-in-three-steps)
     -   [A short intro to HTML](#a-short-intro-to-html)
+    -   [{html_node}](#html_node)
     -   [Selecting HTML elements](#selecting-html-elements)
     -   [Selecting descendants (children, children’s children,
         etc.)](#selecting-descendants-children-childrens-children-etc)
@@ -109,6 +110,8 @@ happy_table = read_html(url) %>%
 ggplot(happy_table, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
   geom_point() + geom_smooth(method = 'lm')
 ```
+
+![](rvest_files/figure-gfm/example_wiki_scrape-1.png)<!-- -->
 
 The scraping part is really just the short pipe there! With
 `read_html(url)`, we visit the Wikipedia page. Then
@@ -291,25 +294,55 @@ When you hover your mouse over the elements they light up on the page, so you ca
 The tree structure is also made more obvious by allowing you to fold and unfold elements by clicking on the triangles on the left.
 This is a great tool for web scraping, because it allows you to quickly identify the HTML elements that you want to select.
 
-In our case, we now see that the right column is specified as `<div class="rightColumn">
+In our case, we now see that the right column is specified as a `div` with `class="rightColumn"`. 
+We can now select this column by selecting the div element with this class (more on this in the next section).
 
-\`. We can now select this column by selecting the div element with this
-class (more on this in the next section).
 
-``` r
-html %>% html_element('div.rightColumn') 
-```
+```r
+html %>
 
-We can extract the text with the `html_text2` function (more on this
-below).
+% html_element(‘div.rightColumn’)
 
-``` r
-text = html %>% 
-  html_element('div.rightColumn') %>%
-  html_text2()
+## {html_node}
 
-cat(text)  ## (cat just prints the text more nicely)
-```
+##
+<div class="rightColumn">
+## \[1\]
+<h4>
+Right Column
+</h4>
+## \[2\]
+<p>
+Here’s another column! The main purpose of this column is just to show …
+## \[3\]
+<table class="someTable blue" id="steve">
+<tr class="headerRow">
+<th>
+
+nu …
+
+
+    We can extract the text with the `html_text2` function (more on this below).
+
+
+    ```r
+    text = html %>% 
+      html_element('div.rightColumn') %>%
+      html_text2()
+
+    cat(text)  ## (cat just prints the text more nicely)
+
+    ## Right Column
+    ## 
+    ## Here's another column! The main purpose of this column is just to show that you can use CSS selectors to get all elements in a specific column.
+    ## 
+    ## numbers  letters 
+    ## 1    A   
+    ## 2    B   
+    ## 3    C   
+    ## 4    D   
+    ## 5    E   
+    ## 6    F   
 
 ## Selecting HTML elements
 
@@ -420,6 +453,8 @@ typically in `<a>` tags, so we’ll get all of them, and then use the
   length()
 ```
 
+    ## [1] 536
+
 Now let’s do this again, but first selecting only the body. If you
 inspect the HTML, you’d find that the body is in an element with the
 attributes `<div id="content" class="mb-body" role="main">`. So we can
@@ -434,6 +469,8 @@ that select all `<a>`.
   html_elements('#content a') %>%
   length()
 ```
+
+    ## [1] 410
 
 Indeed, we got less links this time, because it worked! The nice thing
 about this is that it works for any combination of CSS selectors. This
@@ -454,6 +491,8 @@ run `html_elements('a')` on that element.
   html_elements('a') %>%
   length()
 ```
+
+    ## [1] 410
 
 If this is your first run in with CSS and HTML, this might al seem a bit
 overwhelming. The good part though: this should cover most of what you
@@ -486,6 +525,8 @@ html = 'https://bit.ly/3lz6ZRe' %>% read_html
 html %>% html_element('.leftColumn') %>% html_text()
 ```
 
+    ## [1] "\n    Left Column\n\n    This is a simple HTML document. Right click on the page and select view page source \n       (or something similar, depending on browser) to view the HTML source code.\n    \n    Alternatively, right click on a specific element on the page and select inspect element. \n       This also shows the HTML code, but focused on the selected element. You should be able to fold \n       and unfold HTML nodes (using the triangle-like thing before the <tags>), and when you hover \n       your mouse over them, they should light up in the browser. Play around with this for a bit to get \n       a feel for exploring HTML code.\n\n    Here's a stupid table.\n    \n    First column                         \n        Second column                        \n        Third column                         \n      1                                    \n        2                                    \n        3                                    \n      4                                    \n        5                                    \n        6                                    \n      "
+
 That’s pretty ugly. See all those ‘’ and empty spaces? That’s because in
 the HTML source code the developer added some line breaks and empty
 space to make it look better in the code. But in the browser these extra
@@ -497,6 +538,8 @@ note that for huge amounts of data html_text() might be faster.
 html %>% html_element('.leftColumn') %>% html_text2()
 ```
 
+    ## [1] "Left Column\n\nThis is a simple HTML document. Right click on the page and select view page source (or something similar, depending on browser) to view the HTML source code.\n\nAlternatively, right click on a specific element on the page and select inspect element. This also shows the HTML code, but focused on the selected element. You should be able to fold and unfold HTML nodes (using the triangle-like thing before the <tags>), and when you hover your mouse over them, they should light up in the browser. Play around with this for a bit to get a feel for exploring HTML code.\n\nHere's a stupid table.\n\nFirst column\tSecond column\tThird column\t\n1\t2\t3\t\n4\t5\t6\t"
+
 Another nice function is `html_attr` or `html_attrs`, for getting
 attributes of elements. With `html_attrs` we get all attributes. For
 example, we can get the attributes of the `#exampleTable`.
@@ -504,6 +547,10 @@ example, we can get the attributes of the `#exampleTable`.
 ``` r
 html %>% html_elements('#exampleTable') %>% html_attrs()
 ```
+
+    ## [[1]]
+    ##          class             id 
+    ##    "someTable" "exampleTable"
 
 Being able to access attributes is especially useful for scraping links.
 Links are typically represented by `<a>` tags, in which the link is
@@ -551,6 +598,8 @@ name_overview = html %>%
 html_text2(name_overview)  
 ```
 
+    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 500 Up 117 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 794 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
+
 Looks pretty good! Now let’s see what we have. The first h1 header in
 this box is the name. It’s fairly safe to assume this is always the
 first header in this box, so we’ll take it! Note that in the header
@@ -567,6 +616,8 @@ name = name_overview %>%
 name
 ```
 
+    ## [1] "Bill Murray"
+
 Next, let’s get the job categories. There’s this div with
 `id="name-job-categories"` just lying there. Inside, there are again
 spans with this `itemprop` class. We’ll take them, this time using
@@ -580,6 +631,8 @@ job_categories = name_overview %>%
 job_categories
 ```
 
+    ## [1] "Actor"    "Writer"   "Producer"
+
 Now for the bio text. Inspect the element of the bio text, and you’ll as
 `<div>` with `id="name-bio-text"`. Nice.
 
@@ -590,6 +643,8 @@ bio = name_overview %>%
 
 bio
 ```
+
+    ## [1] "Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio »"
 
 Finally, let’s get the birth date and location. There’s a `<div>` with
 `id="name-born-info"`. Inside there is a `<time>`, which shows the date
@@ -604,6 +659,8 @@ born_date = name_overview %>%
 
 born_date
 ```
+
+    ## [1] "1950-9-21"
 
 Now, the location is actually a bit tricky. It’s in a `<a>` tag, but
 that’s the third `<a>` tag in the name_born node. We could assume this
@@ -631,6 +688,8 @@ born_location = name_overview %>%
 born_location
 ```
 
+    ## [1] "Wilmette, Illinois, USA"
+
 ### Putting it all together
 
 Ok, so let’s put that all together!
@@ -654,6 +713,10 @@ job categories, where each category is separated by `" | "`.
 tibble(name, born_date, born_location, bio,
        job_categories = paste(job_categories, collapse=' | '))
 ```
+
+| name        | born_date | born_location           | bio                                                                                                                                                                                                                                                                                                                                                                           | job_categories              |
+|:------------|:----------|:------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|
+| Bill Murray | 1950-9-21 | Wilmette, Illinois, USA | Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his … See full bio » | Actor \| Writer \| Producer |
 
 ## Scraping an archive: all actor profiles for a movie
 
@@ -682,6 +745,74 @@ html = read_html('https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm
 html %>% html_element('.cast_list') %>% html_table()
 ```
 
+| X1  | X2                  | X3  | X4                       |
+|:----|:--------------------|:----|:-------------------------|
+| NA  |                     |     |                          |
+| NA  | Bill Murray         | …   | Steve Zissou             |
+| NA  | Owen Wilson         | …   | Ned Plimpton             |
+| NA  | Cate Blanchett      | …   | Jane Winslett-Richardson |
+| NA  | Anjelica Huston     | …   | Eleanor Zissou           |
+| NA  | Willem Dafoe        | …   | Klaus Daimler            |
+| NA  | Jeff Goldblum       | …   | Alistair Hennessey       |
+| NA  | Michael Gambon      | …   | Oseary Drakoulias        |
+| NA  | Noah Taylor         | …   | Vladimir Wolodarsky      |
+| NA  | Bud Cort            | …   | Bill Ubell               |
+| NA  | Seu Jorge           | …   | Pelé dos Santos          |
+| NA  | Robyn Cohen         | …   | Anne-Marie Sakowitz      |
+| NA  | Waris Ahluwalia     | …   | Vikram Ray               |
+| NA  | Niels Koizumi       | …   | Bobby Ogata              |
+| NA  | Pawel Wdowczak      | …   | Renzo Pietro             |
+| NA  | Matthew Gray Gubler | …   | Intern #1                |
+| NA  | Seymour Cassel      | …   | Esteban du Plantier      |
+| NA  | Antonio Monda       | …   | Festival Director        |
+| NA  | Isabella Blow       | …   | Antonia Cook             |
+| NA  | James Hamilton      | …   | Festival Photographer    |
+| NA  | Melanie Gerren      | …   | Mandeeza                 |
+| NA  | Nazzareno Piana     | …   | Elderly Man              |
+
+(as Nazzareno ‘Neno’ Piana) \| \|NA \|Rudd Simmons \|… \|Man in Yellow
+Shirt \| \|NA \|Leonardo Giovannelli \|… \|Werner \| \|NA \|Henry S.F.
+Cooper Jr. \|… \|Talk Show Host \| \|NA \|Pietro Ragusa \|… \|Academic
+\| \|NA \|Eric Chase Anderson \|… \|Air Kentucky Pilot \| \|NA \|Robert
+Wilson \|… \|Air Kentucky Pilot \| \|NA \|Don McKinnon \|… \|Air
+Kentucky Pilot \| \|NA \|Alessio Santini \|… \|University of Alaska
+Intern \| \|NA \|Paolo Sirignani \|… \|University of Alaska Intern \|
+\|NA \|Andrew Weisell \|… \|University of Alaska Intern \| \|NA
+\|Niccolò Senni \|… \|University of Alaska Intern \| \|NA \|Andrea
+Guerra \|… \|University of Alaska Intern \| \|NA \|Christiano Irrera \|…
+\|University of Alaska Intern \| \|NA \|Vincenzo Recchia \|…
+\|University of Alaska Intern \| \|NA \|Marco Ciarlitto \|… \|University
+of Alaska Intern \| \|NA \|Tony Shafrazi \|… \|Larry Amin \| \|NA \|Noah
+Baumbach \|… \|Phillip \| \|NA \|Stefano Maria Ortolani \|… \|Italian
+Man in Audience \| \|NA \|Sylvie Genin \|… \|French Woman in Audience \|
+\|NA \|Jacques Henri Lartigue \|… \|Lord Mandrake
+
+(archive footage) (as Jacques-Henri Lartigue) \| \|NA \|Muzius Gordon
+Dietzmann \|… \|Javier \| \|NA \|Gangyuan Xu \|… \|Cedric \| \|NA
+\|Robin Scott \|… \|Hugo \| \|NA \|Guglielmo Casciaro \|… \|Carl \| \|NA
+\|Alessandro De Angelis \|… \|Hennessey Sailor \| \|NA \|Andrea Bertone
+\|… \|Hennessey Sailor \| \|NA \|Andriy Kachur \|… \|Hennessey Sailor \|
+\|NA \|Roberto Salvi \|… \|Hennessey Sailor \| \|NA \|Stefano Masciolini
+\|… \|Hennessey Sailor \| \|NA \|Robert Sommer \|… \|Party Guest \| \|NA
+\|Anna Orso \|… \|Party Guest \| \|NA \|Ettore Conti \|… \|Party Guest
+\| \|NA \|Robert Graham \|… \|Venezuelan General \| \|NA \|Hal
+Yamanouchi \|… \|Chief Pirate \| \|NA \|Conrado Mendoza Dolor \|…
+\|Pirate \| \|NA \|Eduardo Bautista Grantuza \|… \|Pirate \| \|NA
+\|Simeon Maragigak Agelion \|… \|Pirate \| \|NA \|Walter Cajapao Casapao
+\|… \|Pirate \| \|NA \|Honorato Ilao Reyes \|… \|Pirate \| \|NA
+\|Roderick Magbay \|… \|Pirate \| \|NA \|Demetreo Castillo \|… \|Pirate
+\| \|NA \|Thomas Carwgal de la Peña \|… \|Pirate \| \|NA \|Edwarren
+Bantungon \|… \|Pirate \| \|NA \|Levi Mickael de Ramon \|… \|Pirate \|
+\|NA \|Aries Corales \|… \|Pirate \| \|NA \|Aries Dolor Ilagon \|…
+\|Pirate \| \|NA \|Joseph de los Reyes \|… \|Pirate \| \|NA \|Dennis
+Rayos Martinez \|… \|Pirate \| \|NA \|Taiyo Yamanouchi \|… \|Pirate
+
+(as Tatyo Yamanouchi) \| \|NA \|Wai Tung Wong \|… \|Pirate \| \|NA
+\|Ging Fang Zhu \|… \|Pirate \| \|NA \|Francis Dokyi \|… \|Water Taxi
+Driver \| \|NA \|Begni Bok Dong \|… \|Young Ogata \| \|NA \|Daniel Acon
+\|… \|Former Team Zissou, Antarctica \| \|NA \|Alexander Hamilton \|…
+\|Former Team Zissou, Antarctica \| \|NA \|Leica \|… \|Cody \|
+
 Ok, pretty sweet. It doesn’t give us the URLs though, so let’s see where
 they are. In each row (`<tr>`) there are four data elements (`<td>`):
 the picture, the actor name, some seemingly useless ellipsis (…) and the
@@ -699,6 +830,10 @@ bio_urls = html %>% html_elements('.cast_list .primary_photo a') %>% html_attr('
 head(bio_urls, 5)  # show just first 5 
 ```
 
+    ## [1] "/name/nm0000195/?ref_=ttfc_fc_cl_i1" "/name/nm0005562/?ref_=ttfc_fc_cl_i2"
+    ## [3] "/name/nm0000949/?ref_=ttfc_fc_cl_i3" "/name/nm0001378/?ref_=ttfc_fc_cl_i4"
+    ## [5] "/name/nm0000353/?ref_=ttfc_fc_cl_i5"
+
 Voila. But hey, these aren’t URLs yet. Since these are links within the
 `imdb.com` domain, they don’t contain the whole `https://imdb.com/`
 jingle. We can just paste this onto them though.
@@ -707,6 +842,12 @@ jingle. We can just paste this onto them though.
 bio_urls = paste('https://imdb.com', bio_urls, sep='')
 head(bio_urls, 5)  # show just first 5 
 ```
+
+    ## [1] "https://imdb.com/name/nm0000195/?ref_=ttfc_fc_cl_i1"
+    ## [2] "https://imdb.com/name/nm0005562/?ref_=ttfc_fc_cl_i2"
+    ## [3] "https://imdb.com/name/nm0000949/?ref_=ttfc_fc_cl_i3"
+    ## [4] "https://imdb.com/name/nm0001378/?ref_=ttfc_fc_cl_i4"
+    ## [5] "https://imdb.com/name/nm0000353/?ref_=ttfc_fc_cl_i5"
 
 ### looping over the URLs
 
@@ -732,6 +873,13 @@ for (item in items) {
 }
 ```
 
+    ## [1] "--------"
+    ## [1] 2
+    ## [1] "--------"
+    ## [1] 5
+    ## [1] "--------"
+    ## [1] 9
+
 So you see that it printed ‘——’ three times. Below it, you see the value
 printed for `item` in each loop.
 
@@ -753,6 +901,24 @@ for (bio_url in top3_bio_urls) {
 results
 ```
 
+    ## $`https://imdb.com/name/nm0000195/?ref_=ttfc_fc_cl_i1`
+    ## # A tibble: 1 × 2
+    ##   name           born_date     
+    ##   <chr>          <chr>         
+    ## 1 name goes here date goes here
+    ## 
+    ## $`https://imdb.com/name/nm0005562/?ref_=ttfc_fc_cl_i2`
+    ## # A tibble: 1 × 2
+    ##   name           born_date     
+    ##   <chr>          <chr>         
+    ## 1 name goes here date goes here
+    ## 
+    ## $`https://imdb.com/name/nm0000949/?ref_=ttfc_fc_cl_i3`
+    ## # A tibble: 1 × 2
+    ##   name           born_date     
+    ##   <chr>          <chr>         
+    ## 1 name goes here date goes here
+
 Ok, let’s look at this slowly. We loop over the `top3_bio_urls` and each
 loop the name `bio_url` refers to one of these urls. Then we create the
 tibble with the bio data based on this url (here we just create a dummy
@@ -770,6 +936,12 @@ we then say that we want to include the name/ids of the list as the
 ``` r
 bind_rows(results, .id = 'url')
 ```
+
+| url                                                   | name           | born_date      |
+|:------------------------------------------------------|:---------------|:---------------|
+| <https://imdb.com/name/nm0000195/?ref_=ttfc_fc_cl_i1> | name goes here | date goes here |
+| <https://imdb.com/name/nm0005562/?ref_=ttfc_fc_cl_i2> | name goes here | date goes here |
+| <https://imdb.com/name/nm0000949/?ref_=ttfc_fc_cl_i3> | name goes here | date goes here |
 
 ### Putting it all together
 
