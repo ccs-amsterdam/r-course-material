@@ -5,23 +5,22 @@ Wouter van Atteveldt & Kasper Welbers
 
 -   [What is web scraping and why learn
     it?](#what-is-web-scraping-and-why-learn-it)
-    -   [Learning web scraping with
-        rvest](#learning-web-scraping-with-rvest)
--   [Scraping data by parsing HTML](#scraping-data-by-parsing-html)
-    -   [A short intro to HTML](#a-short-intro-to-html)
--   [Selecting HTML elements](#selecting-html-elements)
-    -   [CSS selectors](#css-selectors)
-    -   [One cool xpath thing that you want to
-        know](#one-cool-xpath-thing-that-you-want-to-know)
     -   [But wait, is this even
         allowed?](#but-wait-is-this-even-allowed)
-    -   [How does it work?](#how-does-it-work)
-    -   [Web scraping with the rvest
-        package](#web-scraping-with-the-rvest-package)
-    -   [Motivational example](#motivational-example)
--   [Steps in web scraping](#steps-in-web-scraping)
--   [Parsing HTML using CSS
-    selectors](#parsing-html-using-css-selectors)
+    -   [Web scraping in a nutshell](#web-scraping-in-a-nutshell)
+-   [Web scraping HTML pages in three
+    steps](#web-scraping-html-pages-in-three-steps)
+    -   [A short intro to HTML](#a-short-intro-to-html)
+    -   [Selecting HTML elements](#selecting-html-elements)
+    -   [CSS selectors](#css-selectors)
+    -   [Selecting descendants (children, children’s children,
+        etc.)](#selecting-descendants-children-childrens-children-etc)
+    -   [`rvest` convenience functions for extracting data from
+        elements](#rvest-convenience-functions-for-extracting-data-from-elements)
+-   [Three demo cases](#three-demo-cases)
+    -   [Scraping a single web page](#scraping-a-single-web-page)
+    -   [Scraping an archive](#scraping-an-archive)
+    -   [Scraping using a sitemap](#scraping-using-a-sitemap)
 -   [Scraping with rvest](#scraping-with-rvest)
     -   [Retrieving and parsing a web
         page](#retrieving-and-parsing-a-web-page)
@@ -68,7 +67,24 @@ in trying to conquer websites, and collecting your own novel data set
 that you could use is pretty awesome. I mean, It’s literally building a
 robot to do work for you! How cool is that?
 
-## Learning web scraping with rvest
+## But wait, is this even allowed?
+
+In principle, yes. The internet is filled with *robots* that scrape all
+sorts of content. But off course, this does not mean that anything goes.
+If you write a scraper that opens a webpage a thousand times per minute,
+you’re not being a very nice visitor, and the host might kick you out.
+If you collect data from a website, whether manually or automatically,
+you could run into copyright issues. For non-commercial research this is
+rarely an issue, but just remember to always be mindful that not all
+data is open.
+
+Aside from legal issues, note that there can be ethical concerns as
+well. If you scrape data from a web forum where people share deeply
+personal stories, you can imagine that they might not like this data
+being collected. As with any form of research involving people, do
+consider whether the end goals of your research justify the means.
+
+## Web scraping in a nutshell
 
 In this tutorial we will be using the `rvest` package (to **ha-rvest**
 data). This is a neat little package developed by the venerable Hadley
@@ -116,12 +132,35 @@ additional functions from the `rvest` package. But take a minute to
 think how this does cover the key logic. If we would want to scrape all
 press releases from a website, our first step would be to find an
 archive on the website that contains links to the press releases. We
-would read this archive with `read_html()`, and then look for all HTML
-elements that contain the links. Then for each link, we can again use
-`read_html()` to read the data, and look for all HTML elements of the
-press release that we want to collect (e.g., title, date, body).
+would read this archive with `read_html()`, and then use
+`html_elements()` to look for all HTML elements that contain the links.
+Then for each link, we can again use `read_html()` to read the data, and
+look for all HTML elements of the press release that we want to collect
+(e.g., title, date, body).
 
-# Scraping data by parsing HTML
+# Web scraping HTML pages in three steps
+
+In this tutorial we focus on web scraping of HTML pages, which covers
+the vast majority of websites. The general workflow then covers three
+steps:
+
+-   **Reading HTML pages into R**. This step is by far the easiest. With
+    `rvest` we simply use the `read_html()` function for a given URL. As
+    such, you now already learned this step (one down, two to go!).
+-   **Selecting HTML elements from these pages**. This step is the most
+    involved, because you need to know a bit about HTML. But even if
+    this is completely new to you, you’ll be able to learn the most
+    important steps within a good hour or so.
+-   **Extracting data from these elements**. This step is again quite
+    easy. `rvest` has some nice, intuitive functions for extracting data
+    from selected HTML elements.
+
+In this section we’ll start with a **short introduction to HTML**, using
+an example web page that we made for this tutorial. Then we’ll cover
+**selecting HTML elements** and \*\*extracting data from HTML
+elements\*.
+
+## A short intro to HTML
 
 The vast majority of the internet users **HTML** to make nice looking
 web pages. Simply put, HTML is a markup language that tells a browser
@@ -132,42 +171,44 @@ and columns.
 In other words, HTML is the language that web developers use to display
 **data** as a **web page** that’s nice for human interpretation. With
 web scraping, we’re basically translating the **web page** back into
-**data**.
+**data**. You really don’t need a deep understanding of HTML to do this,
+but it’s convenient to understand the main ideas.
 
-## A short intro to HTML
-
-You really don’t need a deep understanding of HTML to do this, but it’s
-convenient to understand the main ideas. To get a feel for HTML code,
-open [this link here](https://bit.ly/31keW5P) in your web browser. Use
-Chrome or Firefox if you have it (not all browsers let you *inspect
-elements* as we’ll do below). You should see a nicely formatted
-document. Sure, it’s not very pretty, but it does have a big bold title,
-and two ok-ish looking tables.
+To get a feel for HTML code, open [this link
+here](https://bit.ly/3lz6ZRe) in your web browser. Use Chrome or Firefox
+if you have it (not all browsers let you *inspect elements* as we’ll do
+below). You should see a nicely formatted document. Sure, it’s not very
+pretty, but it does have a big bold title, and two ok-ish looking
+tables.
 
 The purpose of this page is to show an easy example of what the HTML
 code looks like. If you right-click on the page, you should see an
 option like *view page source*. If you select it you’ll see the entire
-HTML source code. Somewhere in the code you’ll see:
+HTML source code. This can seem a bit overwhelming, but don’t worry, you
+will never actually be reading the entire thing. We only need to look
+for the elements that we’re interested in, and there are some nice
+tricks for this that we’ll over later. For now, let’s say that we’re
+interested in the table on the left of the page. Somewhere in the middle
+of the code you’ll find the code for this table (without the `# table`
+part on the right):
 
-``` r
-<table class="myTable" id="firstTable">   # table
-  <tr class="headerRow">                  #    table row
-    <th>First column</th>                 #       table header
-    <th>Second column</th>                #       table header
-    <th>Third column</th>                 #       table header
-  </tr>                                   #    
-  <tr>                                    #    table row 
-    <td>Some data</td>                    #       table data 
-    <td>Some other data</td>              #       table data
-    <td>Yes</td>                          #       table data 
-  </tr>                                   #    
-  <tr>                                    #    table row                      
-    <td>Daaata</td>                       #       table data
-    <td>Da-ta</td>                        #       table data
-    <td>Data?</td>                        #       table data
-  </tr>                                   #     
-</table>                                  # 
-```
+    <table class="someTable" id="exampleTable">           <!-- table                -->
+        <tr class="headerRow">                            <!--    table row         -->
+            <th>First column</th>                         <!--       table header   -->
+            <th>Second column</th>                        <!--       table header   -->
+            <th>Third column</th>                         <!--       table header   -->
+        </tr>
+        <tr>                                              <!--    table row         -->
+            <td>1</td>                                    <!--       table data     -->
+            <td>2</td>                                    <!--       table data     -->
+            <td>3</td>                                    <!--       table data     -->
+        </tr>
+        <tr>                                              <!--    table row         -->
+            <td>4</td>                                    <!--       table dat      -->
+            <td>5</td>                                    <!--       table dat      -->
+            <td>6</td>                                    <!--       table data     -->
+        </tr>
+    </table>
 
 This is the HTML representation of the table, and it’s a good showcase
 of what HTML is about. The parts after the `#` are not part of the HTML
@@ -184,27 +225,22 @@ the values in the cells of each row. In the first row, these are 3
 *table headers* `<th>`, which contain the column names. The second and
 third row each have 3 *table data* `<td>`, that contain the data points.
 
-Let’s call this entire unit the `<table>` **element** (sometimes you
-also see this referred to as a **node**, but the distinction can be
-ignored for now). To collect the data from this table, we first need a
-way to look for this table element. This is where the `rvest` package
-comes in. With `rvest` we can read the HTML code of a web page into R,
-look for HTML elements, and extract information from them.  
-In our example, we see that the table has an id `exampleTable`. With the
-`html_element` function, we can use the CCS selector `#id` (in our case
-`#exampleTable`) for looking up this element.
+Each of these components can be thought of as an **element** (more
+strictly a **node**, but the distinction can be ignored for now). And
+the cool thing about this hierarchical structure of the HTML code, is
+that we can look for each of these elements. This is where the `rvest`
+package comes in. With `rvest` we can read the HTML code of a web page
+into R, look for HTML elements, and extract information from them.
+
+For example, we see that our table has an id `exampleTable`. With the
+`html_element` function, we can use the CCS selector (explained in the
+next section) to look for this element.
 
 ``` r
-url = 'https://bit.ly/31keW5P'
+url = 'https://bit.ly/3lz6ZRe'
 
 read_html(url) %>%
   html_element('#exampleTable') 
-
-read_html(url) %>%
-  html_element('#firstTable') 
-
-read_html(url) %>%
-  html_element(xpath = '//*[@id="firstTable"]') 
 ```
 
 The output looks a bit messy, but what it tells us is that we have
@@ -220,7 +256,7 @@ elements that we’re interested in. Accordingly, the main thing to learn
 about HTML in order to do web scraping is how to look for HTML
 elements/nodes.
 
-# Selecting HTML elements
+## Selecting HTML elements
 
 The `rvest` package supports two ways for selecting HTML elements. The
 first and default approach is to use **CSS selectors**. CSS is mostly
@@ -228,11 +264,9 @@ used by web developers to *style* web pages[1], but it works just as
 well for scraping. The second approach is to use **xpath**. Xpath
 patterns are more difficult to read and write, but are in the end more
 powerful than CSS selectors, meaning there are some patterns that you
-can express in xpath but cannot express in CSS.
-
-In this tutorial we’ll mainly cover the most important basics of CCS
-selectors. But we’ll also cover a single `xpath` trick, because it
-allows you to do one nice thing that CCS can’t.
+can express in xpath but cannot express in CSS. In this tutorial we’ll
+only cover CCS selectors. Just be aware that you could also use `xpath`.
+In `rvest`, you would then simply use `html_element(xpath = "")`.
 
 ## CSS selectors
 
@@ -245,266 +279,180 @@ overview](https://www.w3schools.com/cssref/css_selectors.asp).
 Alternatively, there is also this nice [game for learning
 CSS](https://flukeout.github.io/#)
 
-## One cool xpath thing that you want to know
+The following CCS selectors cover
 
-Just know that you can also use xpath in `rvest` by using the `xpath`
-argument in the search functions (for example:
-`html_element(xpath = '//*[@id="someTable"]')`.
+| selector      | example           | Selects                                                |
+|---------------|-------------------|--------------------------------------------------------|
+| element/tag   | `table`           | **all** `<table>` elements                             |
+| class         | `.someTable`      | **all** elements with `class="someTable"`              |
+| id            | `#steve`          | **unique** element with `id="steve"`                   |
+| element.class | `tr.headerRow`    | **all** `<tr>` elements with the `someTable` class     |
+| class1.class2 | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
 
-There are many ways to do this, but the most important ones to know are
-selecting by **tag**, **class** and by **id**. In our example we see
-that the table has each: `<table class="myTable" id="firstTable">`. We
-can select it with each of the following:
-
-| selector    | example           | Selects                                                |
-|-------------|-------------------|--------------------------------------------------------|
-| element/tag | `table`           | **all** elements with `<table>` tag                    |
-| class       | `.someTable`      | **all** elements with `class="someTable"`              |
-| id          | `#exampleTable`   | **unique** element with `id="exampleTable"`            |
-| class.class | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
-| id          | `#exampleTable`   | **unique** element with `id="exampleTable"`            |
-
--   
-
-So as a simple rule of thumb:
-
--   If an element has an `id`, use it
--   If it doesn’t have an `id` look for `class`, but make sure to check
-    if there are other elements with the same class
--   If an element doesn’t have an `id` or `class`,
--   If you can’t
-
-In the pipe here we first read the HTML from the url. Then we use
-`html_element` to look for the table element, and `html_table` is a nice
-convenience function to import this table as a data frame.
-
-There are actually multiple ways to find this element. As in the
-wikipedia example, we could use `.myTable`
-
-The `#` here indicates that `firstTable` is an ID (and not, for
-instance, a class).
-
-The `html_table` function is a nice convenience function from `rvest` to
-import a simple table. For sake of learning, note that you could also
-have done this yourself. We could have taken the table element, and
-within that element look for the rows (note that we use the plural
-html_element**s**, because we want multiple rows)
+Let’s check them out with our example web page.
 
 ``` r
-read_html(url) %>%
-  html_element('#firstTable') %>%
-  html_children()
+html = 'https://bit.ly/3lz6ZRe' %>% read_html
+
+html %>% html_element('table')           ## left table 
+html %>% html_element('.someTable')      ## left table
+html %>% html_element('#steve')          ## right table 
+html %>% html_element('tr.headerRow')    ## left table first row
+html %>% html_element('.someTable.blue') ## right table    
 ```
 
-Then within those rows we could have looked for the cells. However, to
-do this we would need to work with for loops (or other ways of iterating
-over elements), so we’ll skip it for now. We’ll discuss a bit of for
-loop later on.
+Note that both the table on the left and on the right have the
+`someTable` class. As stated in the table above, we should find **all**
+elements with this class. So why does it select only the first one here?
+That’s because we use `html_element`, which looks for a single element,
+and selects the first it finds.
 
-But just realize that
-
-All the data that we see inside of the table on the web page is between
-the `<table>...</table>` tags. To gather this data, we only need to know
-how to query (i.e. look for)
-
-To gather this data, the only thing that we need to know is how to
-*query* (i.e. look for) the table in the HTML code.
-
-It turns out that this is rather simple, because HTML nodes often have
-classes and/or IDs. With the `rvest` package, we can load the HTML code
-of a web page into R, and then look for these
-
-The `rvest` package makes this really easy.
-
-Web scraping
-
-## But wait, is this even allowed?
-
-In principle, yes. The internet is filled with *robots* that scrape all
-sorts of content. But off course, this does not mean that anything goes.
-If you write a scraper that opens a webpage a thousand times per minute,
-you’re not being a very nice visitor, and the host might kick you out.
-If you collect data from a website, whether manually or automatically,
-you could run into copyright issues. For non-commercial research this is
-rarely an issue, but just remember to always be mindful that not all
-data is open.
-
-Aside from legal issues, note that there can be ethical concerns as
-well. If you scrape data from a web forum where people share deeply
-personal stories, you can imagine that they might not like this data
-being collected. As with any form of research involving people, do
-consider whether the end goals of your research justify the means.
-
-## How does it work?
-
-The key realization here is that HTML
-
-It takes only a little knowledge of HTML to understand how
-
-For this website, go to the web page that shows
-
-The thing to understand is that this
-
-By understanding a little bit of how this works, we can
-
-For example,
-
-For example, on [This wikipedia
-page](https://en.wikipedia.org/wiki/World_Happiness_Report) there are
-several tables.
-
-\](this Wikipedia page)
-
-For example, the following HTML code would tell a browser to show a
-headline with two paragraphs. (note that you can’t run this code in R)
+If we want to find all elements we should use the plural
+`html_elements`.
 
 ``` r
-<h2>Headline</h2>
-<p>First paragraph</p>
-<p>Second paragraph</p>
+tables = html %>% html_elements('.someTable')
+tables
 ```
 
-The goal of HTML is to make things look nice for humans.
-
-In your browser, this looks like a regular table, where the first row
-contains the column names ()
-
-To see how this is possible, it’s important to realize that the vast
-majority of the internet uses HTML to make good looking web pages. HTML
-is a markup language that
-
-But for the vast majority of online data,
-
-As we show in the motivation example below, this data can still quite
-easily be harvested we know a little bit about *Web scraping*.
-
-But just as with an actual gold mine, you often can’t just walk in and
-grab things.
-
-But
-
-## Web scraping with the rvest package
-
-`rvest` (think “harvest”) is a package that allows you to retrieve and
-parse HTML pages in order to extract information from them. How easy it
-is to do so ranges from the almost trivial for simple and well-designed
-web sites, to almost impossible for web sites that actively try to
-prevent it.
-
-As a general rule, you should make sure not to break any laws and
-respect copyright and terms of service (although whether these terms are
-binding without you explicitly agreeing probably depends on your
-jurisdiction).
-
-Finally, web scraping is finicky and your scraper will probably stop
-functioning whenever the target web site is redesigned. For this reason,
-if there is an API you can use (e.g. for the guardian) or there is
-another way to get the data without having to scrape it that will
-generally be preferable.
-
-## Motivational example
-
-The example below scrapes the world happiness report from Wikipedia and
-shows the relationship between wealth and life expectancy.
+Now the output says “xml_nodeset (2)”, meaning that the output is not a
+single element, but a set containing both of the tables. This set
+behaves like a list, so we can extract each individual table.
 
 ``` r
-library(rvest)
-library(tidyverse)
-
-url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
-
-happy = url %>%
-  read_html() %>% 
-  html_node(".wikitable") %>% 
-  html_table()
-
-ggplot(happy, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
-  geom_point() + geom_smooth(method = 'lm')
+table2 = tables[[2]]
+html_table(table2)
 ```
 
-# Steps in web scraping
+## Selecting descendants (children, children’s children, etc.)
 
-In general, the first step is to understand the structure of the web
-site you want to parse, and determine how you can find the information
-you are after. For this, the network view and inspect functions in most
-modern browsers are invaluable tools.
+Sometimes it’s necessary to select elements via their parent. For
+example, imagine you have a website with news articles, and you want to
+extract all URLs mentioned in the news article. You can’t just extract
+all URLs from the web page, because there are probably many outside of
+the article as well. Instead, what you’d do is select the article
+element first, and then within that article element you’d look for all
+URLs.
 
-After this, you can retrieve the desired web page and parse the
-resulting HTML code. From this, you extract the required information
-using the patterns identified in the first step. In many cases, this
-information will contain or consist of links to other web pages, in
-which case you will then retrieve and parse these pages as well.
-
-# Parsing HTML using CSS selectors
-
-In theory, you could perform these steps using basic R commands to
-download files over the internet and parse the resulting HTML code as a
-text, e.g. using regular expressions. Parsing HTML correctly with pure
-regular expressions, however, is theoretically impossible and also a bad
-idea, because the same HTML structure can be expressed in multiple ways
-and HTML is very verbose. Thus, it is a much better idea to parse the
-HTML and treat it as a tree structure. For example, consider the
-structure of a simple HTML fragment:
+Here’s how you’d do it. Let’s take the [Wikipedia page for
+hyperlinks](https://en.wikipedia.org/wiki/Hyperlink). And let’s say we
+want to get only links from the body of the article (so NOT the ones in
+the left column). First, let’s just get all the links. Links are
+typically in `<a>` tags, so we’ll get all of them, and then use the
+`length()` function to see how many we got.
 
 ``` r
-html = "<body><div id='doc1'><p class='lead'>The lead</p><p>The body</p></div></body>"
-d = xml2::read_html(html)
+'https://en.wikipedia.org/wiki/Hyperlink' %>%
+  read_html() %>%
+  html_elements('a') %>%
+  length()
 ```
 
-As you can see, both paragraphs (`p`) are nested in a `div`, which is
-nested in a `body`. The easiest way to identify an element in such a
-tree is using CSS selectors. CSS (cascading style sheets) are designed
-to apply styling to certain aspects of a document, for example to format
-the lead paragraph in a different font. As part of such a style sheet,
-the selectors are used to identify which elements to apply styling to.
-
-In scraping, we can use the same selectors to identify which tags
-contain the information we are interested in. Below is a table with some
-of the more common css selectors, but if you google something like ‘css
-selector cheat sheet’ you will find a lot of more exhaustive lists.
-
-| selector    | example       | meaning                                     |
-|-------------|---------------|---------------------------------------------|
-| child       | div \> p      | any `p` directly nested in a div            |
-| descendant  | div p         | any `p` below a div in the hierarchy        |
-| first child | p:first-child | a `p` that is the first child of its parent |
-| class       | p.lead        | a `p` with `class='lead'`                   |
-| class       | .lead         | any tag with `class='lead'`                 |
-| id          | div#doc1      | a `div` with `id='doc1'`                    |
-
-These selectors can be combined, so e.g. `body > #doc1 p.lead`
-identifies any `p` that has `class='lead'`, is a descendant of a tag
-with `id='doc1'` which is a direct child of `body`.
-
-Using rvest, you can easily extract information using such a selector:
+Now let’s do this again, but first selecting only the body. If you
+inspect the HTML, you’d find that the body is in an element with the
+attributes `<div id="content" class="mb-body" role="main">`. So we can
+easily get this with the id selector `#content`. There are two ways to
+do this. The most efficient way is to use `#content a` as the CSS
+selector. This basically says: first select `#content`, and then within
+that select all `<a>`.
 
 ``` r
-lead = html_node(d, "div .lead")
-lead
+'https://en.wikipedia.org/wiki/Hyperlink' %>%
+  read_html() %>%
+  html_elements('#content a') %>%
+  length()
 ```
+
+Indeed, we got less links this time, because it worked! The nice thing
+about this is that it works for any combination of CSS selectors. This
+was a combination of `id` (#content) and `element` (a), but it could
+also have been `class element`, `class class` etc.
+
+The second approach is to use the pipe! The `html_elements` function
+doesn’t just work on the entire HTML. It also works on selected
+elements. So we could first look for the `#content` element, and then
+run `html_elements('a')` on that element.
 
 ``` r
-html_text(lead)
+'https://en.wikipedia.org/wiki/Hyperlink' %>%
+  read_html() %>%
+  html_element('#content') %>%
+  html_elements('a') %>%
+  length()
 ```
 
-As an alternative to CSS selectors, you can also use xpath. Xpath
-patterns are more difficult to read and write, but are in the end more
-powerful than CSS selectors, meaning there are some patterns that you
-can express in xpath but cannot express in css. For example, in CSS you
-cannot use arbitrary attributes to select a nore (such as
-`data="report"`), which is possible in xpath. For example, the same
-selection as above can be expressed in xpath as follows:
+If this is your first run in with CSS and HTML, this might al seem a bit
+overwhelming. The good part though: this should cover most of what you
+need! With just these CSS selectors, and the option to look for elements
+within elements, you now have a super flexible tool for parsing HTML
+content. We only have one more thing to cover, which is how to extract
+data from these elements. Luckily, `rvest` has you covered with some
+really easy convenience functions.
+
+## `rvest` convenience functions for extracting data from elements
+
+`rvest` offers several nice functions for extracting data from elements.
+We’ve already used the `html_table` and `html_text2` functions, but
+let’s shed a little more light on them.
+
+The `html_table` function doesn’t really need much more explanation
+(right?). Given a table element, it can produce a data frame in R.
+
+The `html_text` and `html_text2` functions both serve to extract text
+from an element. They don’t just get the text directly from the element,
+but also the text from all its descendants (children, grandchildren,
+etc.). The difference between the two is subtle. `html_text` is faster,
+but gives you the text as it appears in the html code. For example, look
+at this text from the left column of our toy example:
 
 ``` r
-lead = html_node(d, xpath="//div//*[@class='lead']")
-html_text(lead)
+html = 'https://bit.ly/3lz6ZRe' %>% read_html
+html %>% html_element('.leftColumn') %>% html_text()
 ```
 
-A full explanation of xpath is beyond the scope of this tutorial, but
-you can easily find such an explanation on the internet. In general, I
-would recommend using CSS whenever possible due to the increased
-readability, and only use xpath if what you’re looking for cannot be
-found using CSS.
+That’s pretty ugly. See all those ‘’ and empty spaces? That’s because in
+the HTML source code the developer added some line breaks and empty
+space to make it look better in the code. But in the browser these extra
+breaks and spaces are ignored. `html_text2` let’s you get the text as
+seen in the browser. In general, you should just use html_text2(), but
+note that for huge amounts of data html_text() might be faster.
+
+``` r
+html %>% html_element('.leftColumn') %>% html_text2()
+```
+
+Another nice function is `html_attr` or `html_attrs`, for getting
+attributes of elements. With `html_attrs` we get all attributes. For
+example, we can get the attributes of the `#exampleTable`.
+
+``` r
+html %>% html_elements('#exampleTable') %>% html_attrs()
+```
+
+Being able to access attributes is especially useful for scraping links.
+Links are typically represented by `<a>` tags, in which the link is
+stored as the `href` attribute.
+
+``` r
+html %>% html_elements('a') %>% html_attr('href')
+```
+
+# Three demo cases
+
+Now that we have the tools to load HTML into R, select HTML elements and
+extract data from them, we can go over a few cases to demonstrate web
+scraping in practice.
+
+Please note that since these examples use actual websites, they might
+break if the websites change. If the code doesn’t work anymore, don’t
+judge us too harshly, and please let us know so we can update the
+examples.
+
+## Scraping a single web page
+
+## Scraping an archive
+
+## Scraping using a sitemap
 
 # Scraping with rvest
 
