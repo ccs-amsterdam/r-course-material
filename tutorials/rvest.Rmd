@@ -564,7 +564,7 @@ with links to their IMDB profiles.
 Inspect the **Cast** title, and you'll see that below it there's a `<table class="cast_list">`.
 In other words:
 
-```{r, result=F}
+```{r, results=F}
 html = read_html('https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm')
 html %>% html_element('.cast_list') %>% html_table()
 ```
