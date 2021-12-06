@@ -63,6 +63,15 @@ For a general introduction to text analysis (in R), see these videos on [preproc
 | [Supervised machine learning for text classification](tutorials/r_text_ml.md) | [Supervised Machine Learning](https://www.youtube.com/playlist?list=PLjXODJ_lGN_XdMBgyscXHXuSB81zUoXCR) |  caret |
 | [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | |  [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
 
+
+
+# Data collection
+
+| Tutorial | Video tutorial |  Core packages / functions |
+|----|---|---|
+| [Gathering Data](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/Gathering_data.md) | | tidyverse, jsonlite |
+[Webscraping with rvest](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/rvest.md) | [Web scraping in R](https://www.youtube.com/watch?v=9GR26Y4z_v4) | rvest |
+
 # Note on installing packages
 
 In general, most R packages can be installed without any issues. However, there are some exceptions that you need to know about. 
@@ -80,9 +89,9 @@ The problem is that this requires some development software that you might not h
 If you say no, you'll install an older version that has already been build for you.
 In rare cases, installing from source is the only way, in which case you'll have to install the software that R refers to.
 
+
+
 # Miscellaneous
 
 * [R Markdown codeblock parameters](miscellaneous/RMarkdown_parameters.Rmd)
-* [Gathering Data](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/Gathering_data.md)
-* [Webscraping with rvest](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/rvest.md)
-* [Scraping the Guardian](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/guardian.md)
+

@@ -42,21 +42,6 @@ It touches upon various useful programming skills, has an engaging puzzle-like e
 I mean, It's literally building a robot to do work for you!
 How cool is that?
 
-## But wait, is this even allowed?
-
-In principle, yes.
-The internet is filled with *robots* that scrape all sorts of content.
-But off course, this does not mean that anything goes.
-If you write a scraper that opens a webpage a thousand times per minute, you're not being a very nice visitor, and the host might kick you out.
-If you collect data from a website, whether manually or automatically, you could run into copyright issues.
-For non-commercial research this is rarely an issue, but just remember to always be mindful that if you use data (in certain ways) it might cause harm, either financially or ethically.
-
-Aside from legal issues, note that there can be ethical concerns as well.
-If you scrape data from a web forum where people share deeply personal stories, you can imagine that they might not like this data being collected.
-As with any form of research involving people, do consider whether the end goals of your research justify the means.
-
-If you're interested, there are various articles dealing with the issue. Among recent publications there is [Fiesler, Beard \& Keegan, 2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and [Luscombe, Dick \& Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
-
 ## Web scraping in a nutshell
 
 In this tutorial we will be using the `rvest` package (to **ha-rvest** data).
@@ -105,19 +90,17 @@ Off course, it makes most sense to just read this thing from start to finish.
 However, we'll go through quite a lot of details before we get to the actual scraping.
 If you're the type of person that rather sees something in action first, or want to see what scraping can do before you decide to learn the details, you can also skip straight to the demo cases section.
 
-
 # Web scraping HTML pages in three steps
 
 In this tutorial we focus on web scraping of HTML pages, which covers the vast majority of websites.
 The general workflow then covers three steps:
 
-* **Reading HTML pages into R**. This step is by far the easiest. With `rvest` we simply use the `read_html()` function for a given URL. As such, you now already learned this step (one down, two to go!).
-* **Selecting HTML elements from these pages**. This step is the most involved, because you need to know a bit about HTML. But even if this is completely new to you, you'll be able to learn the most important steps within a good hour or so.
-* **Extracting data from these elements**. This step is again quite easy. `rvest` has some nice, intuitive functions for extracting data from selected HTML elements. 
+-   **Reading HTML pages into R**. This step is by far the easiest. With `rvest` we simply use the `read_html()` function for a given URL. As such, you now already learned this step (one down, two to go!).
+-   **Selecting HTML elements from these pages**. This step is the most involved, because you need to know a bit about HTML. But even if this is completely new to you, you'll be able to learn the most important steps within a good hour or so.
+-   **Extracting data from these elements**. This step is again quite easy. `rvest` has some nice, intuitive functions for extracting data from selected HTML elements.
 
 In this section we'll start with a **short introduction to HTML**, using an example web page that we made for this tutorial.
-Then we'll cover **selecting HTML elements** and **extracting data from HTML elements*.
-
+Then we'll cover **selecting HTML elements** and \*\*extracting data from HTML elements\*.
 
 ## A short intro to HTML
 
@@ -142,25 +125,23 @@ We only need to look for the elements that we're interested in, and there are so
 For now, let's say that we're interested in the table on the left of the page.
 Somewhere in the middle of the code you'll find the code for this table.
 
-````
-<table class="someTable" id="exampleTable">           <!-- table                -->
-    <tr class="headerRow">                            <!--    table row         -->
-        <th>First column</th>                         <!--       table header   -->
-        <th>Second column</th>                        <!--       table header   -->
-        <th>Third column</th>                         <!--       table header   -->
-    </tr>
-    <tr>                                              <!--    table row         -->
-        <td>1</td>                                    <!--       table data     -->
-        <td>2</td>                                    <!--       table data     -->
-        <td>3</td>                                    <!--       table data     -->
-    </tr>
-    <tr>                                              <!--    table row         -->
-        <td>4</td>                                    <!--       table dat      -->
-        <td>5</td>                                    <!--       table dat      -->
-        <td>6</td>                                    <!--       table data     -->
-    </tr>
-</table>
-````
+    <table class="someTable" id="exampleTable">           <!-- table                -->
+        <tr class="headerRow">                            <!--    table row         -->
+            <th>First column</th>                         <!--       table header   -->
+            <th>Second column</th>                        <!--       table header   -->
+            <th>Third column</th>                         <!--       table header   -->
+        </tr>
+        <tr>                                              <!--    table row         -->
+            <td>1</td>                                    <!--       table data     -->
+            <td>2</td>                                    <!--       table data     -->
+            <td>3</td>                                    <!--       table data     -->
+        </tr>
+        <tr>                                              <!--    table row         -->
+            <td>4</td>                                    <!--       table dat      -->
+            <td>5</td>                                    <!--       table dat      -->
+            <td>6</td>                                    <!--       table data     -->
+        </tr>
+    </table>
 
 This is the HTML representation of the table, and it's a good showcase of what HTML is about.
 The parts after the `<!--` are not part of the HTML code, but comments to help you see the structure.
@@ -169,7 +150,7 @@ At the highest level we have the `<table>`.
 This table has three **table rows** (`<tr>`), which we can think of as it's **children**.
 Each of these rows in turn also has three **children** that contain the data in these rows.
 
-Let's see how we can tell where the table starts and ends. 
+Let's see how we can tell where the table starts and ends.
 The **table** starts at the opening tag `<table>`, and ends at the closing tag `</table>` (the `/` always indicates a closing tag).
 This means that everything in between of these tags is part of the table.
 Likewise, we see that each **table row** opens with `<tr>`, and closes with `</tr>`, and everything between these tags is part of the row.
@@ -178,7 +159,7 @@ The second and third row each have 3 *table data* `<td>`, that contain the data 
 
 Each of these components can be thought of as an **element** (more strictly a **node**, but the distinction can be ignored for now).
 And each of these elements can be selected with the `html_element` function.
-Note that our table is `<table class="someTable" id="exampleTable">`. 
+Note that our table is `<table class="someTable" id="exampleTable">`.
 We can now use the id to select this table (we'll cover how this works in the next section)
 
 ```{r results=F}
@@ -190,8 +171,7 @@ html %>% html_element('#exampleTable')
 ```
 
 The output looks a bit messy, but what it tells us is that we have selected the `<table>` html element/node.
-It also shows that this element has the three table rows (tr) as children,
-and shows the values within these rows.
+It also shows that this element has the three table rows (tr) as children, and shows the values within these rows.
 
 *Note that since this is a table element, you could also use `html_table` like we did above to extract the data.*
 
@@ -201,8 +181,8 @@ But if we view the example page we also see that our page has columns, and these
 Let's now select the column on the right, and then extract this text.
 
 To select this column, we first need to know a bit about it.
-This time, instead of looking it up in the raw code, we'll use the **inspect element** feature of your browser. 
-Note that not all browsers might have this feature (or it might be disabled). 
+This time, instead of looking it up in the raw code, we'll use the **inspect element** feature of your browser.
+Note that not all browsers might have this feature (or it might be disabled).
 If you can't find it, it can be worthwhile to install Google Chrome, because you'll really like this feature!!
 With it, you can right click on any part of a webpage, and then select **inspect** to inspect the element!
 
@@ -220,11 +200,11 @@ This will open a sidebar in which you see the HTML code, but focused on that ele
 
 </center>
 
-When you hover your mouse over the elements they light up on the page, so you can directly see the correspondence between the code and the page. 
+When you hover your mouse over the elements they light up on the page, so you can directly see the correspondence between the code and the page.
 The tree structure is also made more obvious by allowing you to fold and unfold elements by clicking on the triangles on the left.
 This is a great tool for web scraping, because it allows you to quickly identify the HTML elements that you want to select.
 
-In our case, we now see that the right column is specified as a `div` with `class="rightColumn"`. 
+In our case, we now see that the right column is specified as a `div` with `class="rightColumn"`.
 We can now select this column by selecting the div element with this class (more on this in the next section).
 
 ```{r}
@@ -241,33 +221,33 @@ text = html %>%
 cat(text)  ## (cat just prints the text more nicely)
 ```
 
-
 ## Selecting HTML elements
 
-The `rvest` package supports two ways for selecting HTML elements. 
+The `rvest` package supports two ways for selecting HTML elements.
 The first and default approach is to use **CSS selectors**.
 CSS is mostly used by web developers to *style* web pages[^1], but it works just as well for scraping.
 The second approach is to use **xpath**.
 This is a bit more flexible, but it's also harder to read and write.
 For sake of simplicity we'll only cover CSS selectors, which is often all you need.
 
-[^1]: If you look at the HTML code of our [example page](view-source:https://bit.ly/31keW5P), you see that there is this `<style>...</style>` section, and in this section we also use CSS selectors to select elements. For example, the `.someTable` class is selected to style this table like an APA table, and the `.blue` class defines that any element with this class (in our case the second table) is colored blue.
+[^1]: If you look at the HTML code of our [example page](view-source:https://bit.ly/31keW5P), you see that there is this `<style>...</style>` section, and in this section we also use CSS selectors to select elements.
+For example, the `.someTable` class is selected to style this table like an APA table, and the `.blue` class defines that any element with this class (in our case the second table) is colored blue.
 
-There are quite a lot of [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp) and we won't cover all of them. Here are the most common ones you'll need for web scraping.
+There are quite a lot of [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp) and we won't cover all of them.
+Here are the most common ones you'll need for web scraping.
 You can always look up the other ones, but these are good to know by heart.
 
-| selector    | example                         | Selects                                     |
-|-------------|----------------------------------|---------------------------------------------|
-| element/tag | `table`          | **all** `<table>` elements        |
-| class       | `.someTable`     | **all** elements with `class="someTable"`  |
-| id          | `#steve`  | **unique** element with `id="steve"` |
-| element.class | `tr.headerRow`| **all** `<tr>` elements with the `someTable` class |
-| class1.class2 | `.someTable.blue`| **all** elements with the `someTable` AND `blue` class |
+| selector      | example           | Selects                                                |
+|---------------|-------------------|--------------------------------------------------------|
+| element/tag   | `table`           | **all** `<table>` elements                             |
+| class         | `.someTable`      | **all** elements with `class="someTable"`              |
+| id            | `#steve`          | **unique** element with `id="steve"`                   |
+| element.class | `tr.headerRow`    | **all** `<tr>` elements with the `someTable` class     |
+| class1.class2 | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
 
-
-We can use these `CSS selectors` in `rvest` with the `html_element` and `html_elements` functions. 
+We can use these `CSS selectors` in `rvest` with the `html_element` and `html_elements` functions.
 Both work the same way, but `html_element` only returns **the first** element that meets the criteria, whereas `html_elements` returns a set with all elements.
-This is important, but might be a bit confusing. 
+This is important, but might be a bit confusing.
 So let's just walk through each CSS selector for both functions to see what it does.
 
 ```{r, results=F}
@@ -300,10 +280,10 @@ This can be a bit confusing given that we looked for HTML elements, and it's per
 
 Important to remember:
 
-* `html_element` always returns a single element. If there are multiple elements that meet the condition, it will return the first element.
-* `html_elements` always returns a list of elements. If there is only one element that meets the condition, you'll just get a list with that one element.
+-   `html_element` always returns a single element. If there are multiple elements that meet the condition, it will return the first element.
+-   `html_elements` always returns a list of elements. If there is only one element that meets the condition, you'll just get a list with that one element.
 
-Luckily, `rvest` is quite flexible in how it handles single elements and lists of elements. 
+Luckily, `rvest` is quite flexible in how it handles single elements and lists of elements.
 The functions to extract data from single elements also work on lists, and then just return a list of data.
 For example, this is what happens if we use the `html_table()` function on a list of tables.
 
@@ -317,16 +297,15 @@ This also works with the other functions for extracting data that we discuss bel
 ## Selecting descendants (children, children's children, etc.)
 
 Sometimes it's necessary to select elements via their parent.
-For example, imagine you have a website with news articles, and you want to extract
-all URLs mentioned in the news article. You can't just extract all URLs from the web page,
-because there are probably many outside of the article as well. 
-Instead, what you'd do is select the article element first, and then within that article element
-you'd look for all URLs.
+For example, imagine you have a website with news articles, and you want to extract all URLs mentioned in the news article.
+You can't just extract all URLs from the web page, because there are probably many outside of the article as well.
+Instead, what you'd do is select the article element first, and then within that article element you'd look for all URLs.
 
-Here's how you'd do it. Let's take the [Wikipedia page for hyperlinks](https://en.wikipedia.org/wiki/Hyperlink). And let's say we want to get only
-links from the body of the article (so NOT the ones in the left column).
-First, let's just get all the links. Links are typically in `<a>` tags, so we'll get all of 
-them, and then use the `length()` function to see how many we got.
+Here's how you'd do it.
+Let's take the [Wikipedia page for hyperlinks](https://en.wikipedia.org/wiki/Hyperlink).
+And let's say we want to get only links from the body of the article (so NOT the ones in the left column).
+First, let's just get all the links.
+Links are typically in `<a>` tags, so we'll get all of them, and then use the `length()` function to see how many we got.
 
 ```{r}
 'https://en.wikipedia.org/wiki/Hyperlink' %>%
@@ -335,11 +314,12 @@ them, and then use the `length()` function to see how many we got.
   length()
 ```
 
-Now let's do this again, but first selecting only the body. If you inspect the HTML, you'd
-find that the body is in an element with the attributes `<div id="content" class="mb-body" role="main">`. 
-So we can easily get this with the id selector `#content`. 
-There are two ways to do this. The most efficient way is to use `#content a` as the CSS selector.
-This basically says: first select `#content`, and then within that select all `<a>`. 
+Now let's do this again, but first selecting only the body.
+If you inspect the HTML, you'd find that the body is in an element with the attributes `<div id="content" class="mb-body" role="main">`.
+So we can easily get this with the id selector `#content`.
+There are two ways to do this.
+The most efficient way is to use `#content a` as the CSS selector.
+This basically says: first select `#content`, and then within that select all `<a>`.
 
 ```{r}
 'https://en.wikipedia.org/wiki/Hyperlink' %>%
@@ -348,10 +328,16 @@ This basically says: first select `#content`, and then within that select all `<
   length()
 ```
 
-Indeed, we got less links this time, because it worked! The nice thing about this is that it works for any combination of CSS selectors. This was a combination of `id` (#content) and  `element` (a), but it could also have been `class element`, `class class` etc. Also, you can actually string as many together as you like! So if you have an `<a>` in a `<span>` in a `<div>`, you could look for `div span a`.
+Indeed, we got less links this time, because it worked!
+The nice thing about this is that it works for any combination of CSS selectors.
+This was a combination of `id` (#content) and `element` (a), but it could also have been `class element`, `class class` etc.
+Also, you can actually string as many together as you like!
+So if you have an `<a>` in a `<span>` in a `<div>`, you could look for `div span a`.
 
-The second approach is to use the pipe! The `html_elements` function doesn't just work on the entire
-HTML. It also works on selected elements. So we could first look for the `#content` element, and then run `html_elements('a')` on that element. 
+The second approach is to use the pipe!
+The `html_elements` function doesn't just work on the entire HTML.
+It also works on selected elements.
+So we could first look for the `#content` element, and then run `html_elements('a')` on that element.
 
 ```{r}
 'https://en.wikipedia.org/wiki/Hyperlink' %>%
@@ -361,26 +347,24 @@ HTML. It also works on selected elements. So we could first look for the `#conte
   length()
 ```
 
-
-If this is your first run in with CSS and HTML, this might al seem a bit overwhelming. 
+If this is your first run in with CSS and HTML, this might al seem a bit overwhelming.
 The good part though: this should cover most of what you need!
-With just these CSS selectors, and the option to look for elements within elements, you now have a super flexible tool for parsing HTML content. 
+With just these CSS selectors, and the option to look for elements within elements, you now have a super flexible tool for parsing HTML content.
 But if you want to learn more about CSS selectors, you could look through [this list](https://www.w3schools.com/cssref/css_selectors.asp), or play [this game](https://flukeout.github.io/#)
-
-
 
 ## Extracting data from elements
 
 Once you have selected elements, you still need to extract data from them.
-`rvest` offers several nice functions to do this. We've already used the
-`html_table` and `html_text2` functions, but let's shed a little more light on them.
+`rvest` offers several nice functions to do this.
+We've already used the `html_table` and `html_text2` functions, but let's shed a little more light on them.
 
-The `html_table` function doesn't really need much more explanation (right?). Given a table element,
-it can produce a data frame in R.
+The `html_table` function doesn't really need much more explanation (right?).
+Given a table element, it can produce a data frame in R.
 
-The `html_text` and `html_text2` functions both serve to extract text from an element. They don't 
-just get the text directly from the element, but also the text from all its descendants (children, grandchildren, etc.).
-The difference between the two is subtle. `html_text` is faster, but gives you the text as it appears in the html code.
+The `html_text` and `html_text2` functions both serve to extract text from an element.
+They don't just get the text directly from the element, but also the text from all its descendants (children, grandchildren, etc.).
+The difference between the two is subtle.
+`html_text` is faster, but gives you the text as it appears in the html code.
 For example, look at this text from the left column of our toy example:
 
 ```{r}
@@ -388,47 +372,48 @@ html = 'https://bit.ly/3lz6ZRe' %>% read_html
 html %>% html_element('.leftColumn') %>% html_text()
 ```
 
-That's pretty ugly. See all those '\n' and empty spaces? That's because in the HTML source code the developer added some line breaks and empty space to make it look
-better in the code. But in the browser these extra breaks and spaces are ignored. `html_text2` let's you get the text as seen in the browser. In general, you should just
-use html_text2(), but note that for huge amounts of data html_text() might be faster.
+That's pretty ugly.
+See all those '\\n' and empty spaces?
+That's because in the HTML source code the developer added some line breaks and empty space to make it look better in the code.
+But in the browser these extra breaks and spaces are ignored.
+`html_text2` let's you get the text as seen in the browser.
+In general, you should just use html_text2(), but note that for huge amounts of data html_text() might be faster.
 
 ```{r}
 html %>% html_element('.leftColumn') %>% html_text2()
 ```
 
 Another nice function is `html_attr` or `html_attrs`, for getting attributes of elements.
-With `html_attrs` we get all attributes. For example, we can get the attributes of the `#exampleTable`.
+With `html_attrs` we get all attributes.
+For example, we can get the attributes of the `#exampleTable`.
 
 ```{r}
 html %>% html_elements('#exampleTable') %>% html_attrs()
 ```
 
-Being able to access attributes is especially useful for scraping links. 
+Being able to access attributes is especially useful for scraping links.
 Links are typically represented by `<a>` tags, in which the link is stored as the `href` attribute.
 
 ```{r, eval=F}
 html %>% html_elements('a') %>% html_attr('href')
 ```
 
-
-
 # Two demo cases
 
 Now that we have the tools to load HTML into R, select HTML elements and extract data from them, we can go over a few cases to demonstrate web scraping in practice.
 
-Please note that since these examples use actual websites, they might break if the websites change. If the code doesn't work anymore, don't judge us too harshly, and please let us know so we can update the examples.
-
+Please note that since these examples use actual websites, they might break if the websites change.
+If the code doesn't work anymore, don't judge us too harshly, and please let us know so we can update the examples.
 
 ## Scraping single pages: An actor profile from IMDB
 
-Scraping starts with the ability to scrape information from a single web page. 
+Scraping starts with the ability to scrape information from a single web page.
 Often, this involves scraping some specific pieces of this page that you're interested in.
 For news articles, you might want to scrape the headline, date and body, and maybe also things like author and section.
-In this demo we'll be scraping some basic biography information of actors from the Internet Movie Data Base (IMDB)
-This is a huge database that's used by many people, so we don't have to feel too bad about wasting a tiny bit if it's bandwidth for these scraping demos.
+In this demo we'll be scraping some basic biography information of actors from the Internet Movie Data Base (IMDB) This is a huge database that's used by many people, so we don't have to feel too bad about wasting a tiny bit if it's bandwidth for these scraping demos.
 
 So how do we approach this?
-Well, if we look at the page, we see there's this nice separate box that contains info such as name, job categories, where/when born and such. 
+Well, if we look at the page, we see there's this nice separate box that contains info such as name, job categories, where/when born and such.
 Let's first just select this box!
 If you `right click -> inspect element` it, you'll see that this box has `id="name-overview-widget"`.
 Let's grab this, and quickly look at the text to see if we got it right.
@@ -442,11 +427,13 @@ name_overview = html %>%
 html_text2(name_overview)  
 ```
 
-Looks pretty good! Now let's see what we have. The first h1 header in this box is the name.
+Looks pretty good!
+Now let's see what we have.
+The first h1 header in this box is the name.
 It's fairly safe to assume this is always the first header in this box, so we'll take it!
-Note that in the header there are two `<span>`: one with the name, and one with `(I)`. 
-We could just get the first one, but maybe the order shifts sometimes? To be sure,
-we could also use the fact that the span with the actual item property has `class="itemprop"`.
+Note that in the header there are two `<span>`: one with the name, and one with `(I)`.
+We could just get the first one, but maybe the order shifts sometimes?
+To be sure, we could also use the fact that the span with the actual item property has `class="itemprop"`.
 
 ```{r}
 name = name_overview %>% 
@@ -456,7 +443,8 @@ name = name_overview %>%
 name
 ```
 
-Next, let's get the job categories. There's this div with `id="name-job-categories"` just lying there.
+Next, let's get the job categories.
+There's this div with `id="name-job-categories"` just lying there.
 Inside, there are again spans with this `itemprop` class.
 We'll take them, this time using `html_elements` (plural) because we want all of them!
 
@@ -469,7 +457,8 @@ job_categories
 ```
 
 Now for the bio text.
-Inspect the element of the bio text, and you'll as `<div>` with `id="name-bio-text"`. Nice.
+Inspect the element of the bio text, and you'll as `<div>` with `id="name-bio-text"`.
+Nice.
 
 ```{r}
 bio = name_overview %>% 
@@ -479,10 +468,10 @@ bio = name_overview %>%
 bio
 ```
 
-Finally, let's get the birth date and location. 
+Finally, let's get the birth date and location.
 There's a `<div>` with `id="name-born-info"`.
 Inside there is a `<time>`, which shows the date in two ways.
-One is the date presented as text in the `<a>` tags. 
+One is the date presented as text in the `<a>` tags.
 But there's also a `datetime` attribute which uses a more standardized format.
 Let's get that one.
 
@@ -494,23 +483,21 @@ born_date = name_overview %>%
 born_date
 ```
 
-Now, the location is actually a bit tricky. It's in a `<a>` tag, 
-but that's the third `<a>` tag in the name_born node.
-We could assume this is always the case, and then get use `html_elements("a")` and
-pick the third. But if we look closer, we see that the structure is (in simplified form):
+Now, the location is actually a bit tricky.
+It's in a `<a>` tag, but that's the third `<a>` tag in the name_born node.
+We could assume this is always the case, and then get use `html_elements("a")` and pick the third.
+But if we look closer, we see that the structure is (in simplified form):
 
-````
-div (id="name-born-info")
-  h4
-  time
-     a (September 21)
-     a (1950)
-  a (Wilmette, Illinois, USA)
-````
+    div (id="name-born-info")
+      h4
+      time
+         a (September 21)
+         a (1950)
+      a (Wilmette, Illinois, USA)
 
-So the other two `<a>` are children of `<time>`, and the `<a>` we want is the only direct child
-of div. Here we can use another nice CSS selector (not mentioned above), which let's us pick a direct
-child. The format is `element > child`.
+So the other two `<a>` are children of `<time>`, and the `<a>` we want is the only direct child of div.
+Here we can use another nice CSS selector (not mentioned above), which let's us pick a direct child.
+The format is `element > child`.
 
 ```{r}
 born_location = name_overview %>%
@@ -535,7 +522,7 @@ born_date = name_overview %>% html_element('#name-born-info time') %>% html_attr
 born_location = name_overview %>% html_element('#name-born-info > a') %>% html_text2()
 ```
 
-And we can then put the data in a tibble. 
+And we can then put the data in a tibble.
 Note that we'll use `paste(job_categories, collapse=' | ')` to make a single text out of the job categories, where each category is separated by `" | "`.
 
 ```{r}
@@ -543,23 +530,17 @@ tibble(name, born_date, born_location, bio,
        job_categories = paste(job_categories, collapse=' | '))
 ```
 
-
-
 ## Scraping an archive: all actor profiles for a movie
 
 It's nice that we can make a scraper to get the pieces of information that we want from a given web page.
-However, we'd still need to manually get the URLs for these pages. It suddenly become a lot more interesting when we also know how to first scrape these URLs from a webpage, 
-and then loop over them to SCRAPE THEM ALL (\*evil laughter\*)!
-The example given above is that we might get an archive from a news website, get the links
-for all news items, and then scrape these.
+However, we'd still need to manually get the URLs for these pages.
+It suddenly become a lot more interesting when we also know how to first scrape these URLs from a webpage, and then loop over them to SCRAPE THEM ALL (\*evil laughter\*)!
+The example given above is that we might get an archive from a news website, get the links for all news items, and then scrape these.
 
-For this demo we're going to scrape all actors for a film on IMDB, and then re-use 
-our code from the first demo to get all their bio data.
-
+For this demo we're going to scrape all actors for a film on IMDB, and then re-use our code from the first demo to get all their bio data.
 
 We'll go with [The life aquatic with Steve Zissou](https://www.imdb.com/title/tt0362270/).
-On this page we'll find a link to the [full cast](https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm),
-with links to their IMDB profiles.
+On this page we'll find a link to the [full cast](https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm), with links to their IMDB profiles.
 
 Inspect the **Cast** title, and you'll see that below it there's a `<table class="cast_list">`.
 In other words:
@@ -569,14 +550,14 @@ html = read_html('https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm
 html %>% html_element('.cast_list') %>% html_table()
 ```
 
-Ok, pretty sweet. It doesn't give us the URLs though, so let's see where they are.
-In each row (`<tr>`) there are four data elements (`<td>`): the picture, the actor name,
-some seemingly useless ellipsis (...) and the character name. Both the picture and actor
-name also have links to the bio page. We'll just use the picture, because that one has a 
-clear `class="primary_photo"`. 
+Ok, pretty sweet.
+It doesn't give us the URLs though, so let's see where they are.
+In each row (`<tr>`) there are four data elements (`<td>`): the picture, the actor name, some seemingly useless ellipsis (...) and the character name.
+Both the picture and actor name also have links to the bio page.
+We'll just use the picture, because that one has a clear `class="primary_photo"`.
 
-So we have a table with class `cast_list`, and in this table there are rows with class `primary_photo`,
-and within these rows there is the `<a>` tag. We can look for this pattern in one go.
+So we have a table with class `cast_list`, and in this table there are rows with class `primary_photo`, and within these rows there is the `<a>` tag.
+We can look for this pattern in one go.
 Then, we'll extract the `href` attribute that has the link.
 
 ```{r}
@@ -584,13 +565,15 @@ bio_urls = html %>% html_elements('.cast_list .primary_photo a') %>% html_attr('
 head(bio_urls, 5)  # show just first 5 
 ```
 
-Voila. But hey, these aren't URLs yet. Since these are links within the `imdb.com` domain, they don't contain the whole `https://imdb.com/` jingle. We can just paste this onto them though.
+Voila.
+But hey, these aren't URLs yet.
+Since these are links within the `imdb.com` domain, they don't contain the whole `https://imdb.com/` jingle.
+We can just paste this onto them though.
 
 ```{r}
 bio_urls = paste('https://imdb.com', bio_urls, sep='')
 head(bio_urls, 5)  # show just first 5 
 ```
-
 
 ### looping over the URLs
 
@@ -599,12 +582,13 @@ But we don't want to do this manually, of course!
 For these sorts of jobs, we have `for loops`.
 Since you might not be familiar with them (we rarely use them in R), here's a very brief (and simplified) intro.
 
-A `for loop` let's you `loop` over all items in a vector or list. 
+A `for loop` let's you `loop` over all items in a vector or list.
 Then, all the code performed within this for loop will be executed for each single item.
-For example, here we make a vector with some items (2,5,9). Then we loop over this vector with
-`for (item in items) {here is where the loop goes}`. The part between the curly brackets will now
-be executed three times. The first time, `item` has the value 2. The second time it has the value `5`,
-and the third time it has the value `9`. 
+For example, here we make a vector with some items (2,5,9).
+Then we loop over this vector with `for (item in items) {here is where the loop goes}`.
+The part between the curly brackets will now be executed three times.
+The first time, `item` has the value 2.
+The second time it has the value `5`, and the third time it has the value `9`.
 
 ```{r}
 items = c(2,5,9)
@@ -619,7 +603,7 @@ Below it, you see the value printed for `item` in each loop.
 
 We can use this to loop over all of our bio URLs and then scrape each page.
 BUT, we also need to store the results somehow.
-A common approach is to create a `list`, and then fill it with the results. 
+A common approach is to create a `list`, and then fill it with the results.
 This is what it would look like.
 Note that I'll use only the first 5 values of the `bio_urls` for simplicity.
 
@@ -635,9 +619,8 @@ for (bio_url in top3_bio_urls) {
 results
 ```
 
-Ok, let's look at this slowly. 
-We loop over the `top3_bio_urls` and each loop the name `bio_url` refers to 
-one of these urls. 
+Ok, let's look at this slowly.
+We loop over the `top3_bio_urls` and each loop the name `bio_url` refers to one of these urls.
 Then we create the tibble with the bio data based on this url (here we just create a dummy tibble).
 We then say `results[[bio_url]] = bio_tibble`, which means that we're adding a new item to our list.
 The name/id of this item is the url, and the value is the bio_tibble.
@@ -650,10 +633,9 @@ With the `.id = 'url'` argument, we then say that we want to include the name/id
 bind_rows(results, .id = 'url')
 ```
 
-
 ### Putting it all together
 
-Now for the fun part. 
+Now for the fun part.
 We have our code for collecting the biography page URLs.
 We have our code for looping over them and filling a list of results.
 And we have our code for scraping the biography page URLs.
@@ -699,19 +681,17 @@ d = bind_rows(results, .id = 'url')
 d
 ```
 
-
 # Bonus. Doing it more elegantly
 
 As a final note, we thought it would be nice to say something about how to do this a bit more elegantly.
 The code above works fine, but you can imagine that for more complicated scrapers the code can get huge.
 For example, we could add another loop to our IMDB scraper.
-We could go to the [IMDB top 250 rated movies](https://www.imdb.com/chart/top/), loop over each movie,
-the loop over each cast member, and then scrape the biography. 
+We could go to the [IMDB top 250 rated movies](https://www.imdb.com/chart/top/), loop over each movie, the loop over each cast member, and then scrape the biography.
 It's not that much harder than what we did before, but it will become hard to read fast.
 
-The key thing to address here, is that when you're building scripts like this, it becomes really 
-attractive to work with functions. So here we'll repeat the code from the second demo, but using functions.
-As you'll see, the big pieces of code (such as parsing the bio) can then be abstracted away from the looping workflow. 
+The key thing to address here, is that when you're building scripts like this, it becomes really attractive to work with functions.
+So here we'll repeat the code from the second demo, but using functions.
+As you'll see, the big pieces of code (such as parsing the bio) can then be abstracted away from the looping workflow.
 
 ## making functions for the main scraper components
 
@@ -734,7 +714,6 @@ parse_bio_page <- function(bio_url) {
 }
 ```
 
-
 Next, we'd define a function for getting the biography page urls.
 Note that we added a `max_urls` argument so that we can easily limit ourselves to the first n items.
 
@@ -749,11 +728,10 @@ get_bio_urls <- function(cast_url, max_urls=Inf) {
 } 
 ```
 
+## Building a scraper using the functions
 
-## Building a scraper using the functions 
-
-Now that we have taken care of all that lengthy code, we don't have to include it
-in our scraper workflow. This way, you'd also manage several for loops without crying.
+Now that we have taken care of all that lengthy code, we don't have to include it in our scraper workflow.
+This way, you'd also manage several for loops without crying.
 
 ```{r, eval=F}
 movie_cast_url = 'https://www.imdb.com/title/tt0362270/fullcredits?ref_=tt_cl_sm'
@@ -768,6 +746,37 @@ for (bio_url in bio_urls) {
 bind_rows(results, .id = 'url')
 ```
 
-At this point the for loop actually becomes really trivial, and R enthusiasts might point out
-that you could just as well use something like lapply. We'll leave this as an exercise for to the motivated readers.
+At this point the for loop actually becomes really trivial, and R enthusiasts might point out that you could just as well use something like lapply.
+We'll leave this as an exercise for to the motivated readers.
 
+# FAQs
+
+## The *inspect* tool is lying! it shows stuff that's not in the HTML code
+
+Ok, full disclosure, this isn't actually a question we've been asked, but it's related to a very common question: why can't I select certain elements with `html_element` that I CAN find with `inspect element`?
+
+Sometimes, it happens that the *inspect* tool shows you a slightly different version of the HTML code.
+For instance, it might be that the website is updated via Javascript, and then the original html source code is different from the one you see in action.
+
+If the parts that you want to scrape are only visible after the page has been updated (e.g., if the Javascript code has been executed), then you can't just scrape these parts from the HTML source.
+You can probably still scrape the webpage, but you'll need some heavier equipment.1 For instance, you could use [RSelenium](https://cran.r-project.org/web/packages/RSelenium/index.html), which basically controls a web browser via R, and this allows you to execute the Javascript parts.
+
+What you learned here is then still relevant though.
+You still need to be able to select elements and extract information from the HTML.
+You'll just need to use RSelenium first to get the HTML.
+
+## Wait, is this even allowed?
+
+In principle, yes.
+The internet is filled with *robots* that scrape all sorts of content.
+But off course, this does not mean that anything goes.
+If you write a scraper that opens a webpage a thousand times per minute, you're not being a very nice visitor, and the host might kick you out.
+If you collect data from a website, whether manually or automatically, you could run into copyright issues.
+For non-commercial research this is rarely an issue, but just remember to always be mindful that if you use data (in certain ways) it might cause harm, either financially or ethically.
+
+Aside from legal issues, note that there can be ethical concerns as well.
+If you scrape data from a web forum where people share deeply personal stories, you can imagine that they might not like this data being collected.
+As with any form of research involving people, do consider whether the end goals of your research justify the means.
+
+If you're interested, there are various articles dealing with the issue.
+Among recent publications there is [Fiesler, Beard & Keegan, 2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and [Luscombe, Dick & Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).

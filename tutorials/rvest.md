@@ -5,8 +5,6 @@ Kasper Welbers, Wouter van Atteveldt & Philipp Masur
 
 -   [What is web scraping and why learn
     it?](#what-is-web-scraping-and-why-learn-it)
-    -   [But wait, is this even
-        allowed?](#but-wait-is-this-even-allowed)
     -   [Web scraping in a nutshell](#web-scraping-in-a-nutshell)
     -   [How to read this tutorial](#how-to-read-this-tutorial)
 -   [Web scraping HTML pages in three
@@ -29,6 +27,11 @@ Kasper Welbers, Wouter van Atteveldt & Philipp Masur
         components](#making-functions-for-the-main-scraper-components)
     -   [Building a scraper using the
         functions](#building-a-scraper-using-the-functions)
+-   [FAQs](#faqs)
+    -   [The *inspect* tool is lying! it shows stuff that’s not in the
+        HTML
+        code](#the-inspect-tool-is-lying-it-shows-stuff-thats-not-in-the-html-code)
+    -   [Wait, is this even allowed?](#wait-is-this-even-allowed)
 
 # What is web scraping and why learn it?
 
@@ -67,30 +70,6 @@ various useful programming skills, has an engaging puzzle-like element
 in trying to conquer websites, and collecting your own novel data set
 that you could use is pretty awesome. I mean, It’s literally building a
 robot to do work for you! How cool is that?
-
-## But wait, is this even allowed?
-
-In principle, yes. The internet is filled with *robots* that scrape all
-sorts of content. But off course, this does not mean that anything goes.
-If you write a scraper that opens a webpage a thousand times per minute,
-you’re not being a very nice visitor, and the host might kick you out.
-If you collect data from a website, whether manually or automatically,
-you could run into copyright issues. For non-commercial research this is
-rarely an issue, but just remember to always be mindful that if you use
-data (in certain ways) it might cause harm, either financially or
-ethically.
-
-Aside from legal issues, note that there can be ethical concerns as
-well. If you scrape data from a web forum where people share deeply
-personal stories, you can imagine that they might not like this data
-being collected. As with any form of research involving people, do
-consider whether the end goals of your research justify the means.
-
-If you’re interested, there are various articles dealing with the issue.
-Among recent publications there is [Fiesler, Beard & Keegan,
-2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and
-[Luscombe, Dick &
-Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
 
 ## Web scraping in a nutshell
 
@@ -523,8 +502,8 @@ html %>% html_element('.leftColumn') %>% html_text()
 
     ## [1] "\n    Left Column\n\n    This is a simple HTML document. Right click on the page and select view page source \n       (or something similar, depending on browser) to view the HTML source code.\n    \n    Alternatively, right click on a specific element on the page and select inspect element. \n       This also shows the HTML code, but focused on the selected element. You should be able to fold \n       and unfold HTML nodes (using the triangle-like thing before the <tags>), and when you hover \n       your mouse over them, they should light up in the browser. Play around with this for a bit to get \n       a feel for exploring HTML code.\n\n    Here's a stupid table.\n    \n    First column                         \n        Second column                        \n        Third column                         \n      1                                    \n        2                                    \n        3                                    \n      4                                    \n        5                                    \n        6                                    \n      "
 
-That’s pretty ugly. See all those ‘’ and empty spaces? That’s because in
-the HTML source code the developer added some line breaks and empty
+That’s pretty ugly. See all those ‘\\n’ and empty spaces? That’s because
+in the HTML source code the developer added some line breaks and empty
 space to make it look better in the code. But in the browser these extra
 breaks and spaces are ignored. `html_text2` let’s you get the text as
 seen in the browser. In general, you should just use html_text2(), but
@@ -994,6 +973,56 @@ At this point the for loop actually becomes really trivial, and R
 enthusiasts might point out that you could just as well use something
 like lapply. We’ll leave this as an exercise for to the motivated
 readers.
+
+# FAQs
+
+## The *inspect* tool is lying! it shows stuff that’s not in the HTML code
+
+Ok, full disclosure, this isn’t actually a question we’ve been asked,
+but it’s related to a very common question: why can’t I select certain
+elements with `html_element` that I CAN find with `inspect element`?
+
+Sometimes, it happens that the *inspect* tool shows you a slightly
+different version of the HTML code. For instance, it might be that the
+website is updated via Javascript, and then the original html source
+code is different from the one you see in action.
+
+If the parts that you want to scrape are only visible after the page has
+been updated (e.g., if the Javascript code has been executed), then you
+can’t just scrape these parts from the HTML source. You can probably
+still scrape the webpage, but you’ll need some heavier equipment.1 For
+instance, you could use
+[RSelenium](https://cran.r-project.org/web/packages/RSelenium/index.html),
+which basically controls a web browser via R, and this allows you to
+execute the Javascript parts.
+
+What you learned here is then still relevant though. You still need to
+be able to select elements and extract information from the HTML. You’ll
+just need to use RSelenium first to get the HTML.
+
+## Wait, is this even allowed?
+
+In principle, yes. The internet is filled with *robots* that scrape all
+sorts of content. But off course, this does not mean that anything goes.
+If you write a scraper that opens a webpage a thousand times per minute,
+you’re not being a very nice visitor, and the host might kick you out.
+If you collect data from a website, whether manually or automatically,
+you could run into copyright issues. For non-commercial research this is
+rarely an issue, but just remember to always be mindful that if you use
+data (in certain ways) it might cause harm, either financially or
+ethically.
+
+Aside from legal issues, note that there can be ethical concerns as
+well. If you scrape data from a web forum where people share deeply
+personal stories, you can imagine that they might not like this data
+being collected. As with any form of research involving people, do
+consider whether the end goals of your research justify the means.
+
+If you’re interested, there are various articles dealing with the issue.
+Among recent publications there is [Fiesler, Beard & Keegan,
+2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and
+[Luscombe, Dick &
+Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
 
 [1] If you look at the HTML code of our [example
 page](view-source:https://bit.ly/31keW5P), you see that there is this
