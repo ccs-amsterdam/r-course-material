@@ -16,7 +16,7 @@ Kasper Welbers, Wouter van Atteveldt & Philipp Masur
     -   [Selecting descendants (children, children’s children,
         etc.)](#selecting-descendants-children-childrens-children-etc)
     -   [Extracting data from elements](#extracting-data-from-elements)
--   [two demo cases](#two-demo-cases)
+-   [Two demo cases](#two-demo-cases)
     -   [Scraping single pages: An actor profile from
         IMDB](#scraping-single-pages-an-actor-profile-from-imdb)
         -   [Putting it all together](#putting-it-all-together)
@@ -556,7 +556,7 @@ stored as the `href` attribute.
 html %>% html_elements('a') %>% html_attr('href')
 ```
 
-# two demo cases
+# Two demo cases
 
 Now that we have the tools to load HTML into R, select HTML elements and
 extract data from them, we can go over a few cases to demonstrate web

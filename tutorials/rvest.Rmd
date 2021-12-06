@@ -412,7 +412,7 @@ html %>% html_elements('a') %>% html_attr('href')
 
 
 
-# two demo cases
+# Two demo cases
 
 Now that we have the tools to load HTML into R, select HTML elements and extract data from them, we can go over a few cases to demonstrate web scraping in practice.
 
