@@ -49,11 +49,13 @@ The internet is filled with *robots* that scrape all sorts of content.
 But off course, this does not mean that anything goes.
 If you write a scraper that opens a webpage a thousand times per minute, you're not being a very nice visitor, and the host might kick you out.
 If you collect data from a website, whether manually or automatically, you could run into copyright issues.
-For non-commercial research this is rarely an issue, but just remember to always be mindful that not all data is open.
+For non-commercial research this is rarely an issue, but just remember to always be mindful that if you use data (in certain ways) it might cause harm, either financially or ethically.
 
 Aside from legal issues, note that there can be ethical concerns as well.
 If you scrape data from a web forum where people share deeply personal stories, you can imagine that they might not like this data being collected.
 As with any form of research involving people, do consider whether the end goals of your research justify the means.
+
+If you're interested, there are various articles dealing with the issue. Among recent publications there is [Fiesler, Beard \& Keegan, 2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and [Luscombe, Dick \& Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
 
 ## Web scraping in a nutshell
 
@@ -216,7 +218,7 @@ This will open a sidebar in which you see the HTML code, but focused on that ele
 
 ![](img/inspect_element_right_column.png){width=50%}
 
-</center
+</center>
 
 When you hover your mouse over the elements they light up on the page, so you can directly see the correspondence between the code and the page. 
 The tree structure is also made more obvious by allowing you to fold and unfold elements by clicking on the triangles on the left.

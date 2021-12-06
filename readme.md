@@ -84,4 +84,5 @@ In rare cases, installing from source is the only way, in which case you'll have
 
 * [R Markdown codeblock parameters](miscellaneous/RMarkdown_parameters.Rmd)
 * [Gathering Data](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/Gathering_data.md)
+* [Webscraping with rvest](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/rvest.md)
 * [Scraping the Guardian](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/guardian.md)

@@ -12,7 +12,6 @@ Kasper Welbers, Wouter van Atteveldt & Philipp Masur
 -   [Web scraping HTML pages in three
     steps](#web-scraping-html-pages-in-three-steps)
     -   [A short intro to HTML](#a-short-intro-to-html)
-    -   [{html_node}](#html_node)
     -   [Selecting HTML elements](#selecting-html-elements)
     -   [Selecting descendants (children, children’s children,
         etc.)](#selecting-descendants-children-childrens-children-etc)
@@ -77,14 +76,21 @@ If you write a scraper that opens a webpage a thousand times per minute,
 you’re not being a very nice visitor, and the host might kick you out.
 If you collect data from a website, whether manually or automatically,
 you could run into copyright issues. For non-commercial research this is
-rarely an issue, but just remember to always be mindful that not all
-data is open.
+rarely an issue, but just remember to always be mindful that if you use
+data (in certain ways) it might cause harm, either financially or
+ethically.
 
 Aside from legal issues, note that there can be ethical concerns as
 well. If you scrape data from a web forum where people share deeply
 personal stories, you can imagine that they might not like this data
 being collected. As with any form of research involving people, do
 consider whether the end goals of your research justify the means.
+
+If you’re interested, there are various articles dealing with the issue.
+Among recent publications there is [Fiesler, Beard & Keegan,
+2020](https://ojs.aaai.org/index.php/ICWSM/article/view/7290) and
+[Luscombe, Dick &
+Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
 
 ## Web scraping in a nutshell
 
@@ -288,49 +294,39 @@ This will open a sidebar in which you see the HTML code, but focused on that ele
 
 <img src="img/inspect_element_right_column.png" style="width:50.0%" />
 
-</center
+</center>
 
-When you hover your mouse over the elements they light up on the page, so you can directly see the correspondence between the code and the page. 
-The tree structure is also made more obvious by allowing you to fold and unfold elements by clicking on the triangles on the left.
-This is a great tool for web scraping, because it allows you to quickly identify the HTML elements that you want to select.
+When you hover your mouse over the elements they light up on the page,
+so you can directly see the correspondence between the code and the
+page. The tree structure is also made more obvious by allowing you to
+fold and unfold elements by clicking on the triangles on the left. This
+is a great tool for web scraping, because it allows you to quickly
+identify the HTML elements that you want to select.
 
-In our case, we now see that the right column is specified as a `div` with `class="rightColumn"`. 
-We can now select this column by selecting the div element with this class (more on this in the next section).
+In our case, we now see that the right column is specified as a `div`
+with `class="rightColumn"`. We can now select this column by selecting
+the div element with this class (more on this in the next section).
 
+``` r
+html %>% html_element('div.rightColumn') 
+```
 
-```r
-html %>
+    ## {html_node}
+    ## <div class="rightColumn">
+    ## [1] <h4>Right Column</h4>
+    ## [2] <p>Here's another column! The main purpose of this column is just to show ...
+    ## [3] <table class="someTable blue" id="steve">\n<tr class="headerRow">\n<th>nu ...
 
-% html_element(‘div.rightColumn’)
+We can extract the text with the `html_text2` function (more on this
+below).
 
-## {html_node}
+``` r
+text = html %>% 
+  html_element('div.rightColumn') %>%
+  html_text2()
 
-##
-<div class="rightColumn">
-## \[1\]
-<h4>
-Right Column
-</h4>
-## \[2\]
-<p>
-Here’s another column! The main purpose of this column is just to show …
-## \[3\]
-<table class="someTable blue" id="steve">
-<tr class="headerRow">
-<th>
-
-nu …
-
-
-    We can extract the text with the `html_text2` function (more on this below).
-
-
-    ```r
-    text = html %>% 
-      html_element('div.rightColumn') %>%
-      html_text2()
-
-    cat(text)  ## (cat just prints the text more nicely)
+cat(text)  ## (cat just prints the text more nicely)
+```
 
     ## Right Column
     ## 
@@ -598,7 +594,7 @@ name_overview = html %>%
 html_text2(name_overview)  
 ```
 
-    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 500 Up 117 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 794 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
+    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 5000 Down 288 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 794 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
 
 Looks pretty good! Now let’s see what we have. The first h1 header in
 this box is the name. It’s fairly safe to assume this is always the
