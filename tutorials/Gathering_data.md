@@ -1,7 +1,7 @@
 Gathering data into R
 ================
 Kasper Welbers & Wouter van Atteveldt
-January 8, 2020
+January 8, 2021
 
 -   [Tabular data formats](#tabular-data-formats)
     -   [CSV files](#csv-files)
