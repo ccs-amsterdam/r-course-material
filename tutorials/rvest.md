@@ -3,6 +3,7 @@ Web Scraping with RVest
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
 2021-12
 
+-   [Video tutorial](#video-tutorial)
 -   [What is web scraping and why learn
     it?](#what-is-web-scraping-and-why-learn-it)
     -   [Web scraping in a nutshell](#web-scraping-in-a-nutshell)
@@ -32,6 +33,11 @@ Kasper Welbers, Wouter van Atteveldt & Philipp Masur
         HTML
         code](#the-inspect-tool-is-lying-it-shows-stuff-thats-not-in-the-html-code)
     -   [Wait, is this even allowed?](#wait-is-this-even-allowed)
+
+# Video tutorial
+
+This tutorial also has a video version, so if that’s your cup of tea,
+check it out [here](https://www.youtube.com/watch?v=9GR26Y4z_v4)
 
 # What is web scraping and why learn it?
 
@@ -428,7 +434,7 @@ typically in `<a>` tags, so we’ll get all of them, and then use the
   length()
 ```
 
-    ## [1] 536
+    ## [1] 538
 
 Now let’s do this again, but first selecting only the body. If you
 inspect the HTML, you’d find that the body is in an element with the
@@ -445,7 +451,7 @@ that select all `<a>`.
   length()
 ```
 
-    ## [1] 410
+    ## [1] 411
 
 Indeed, we got less links this time, because it worked! The nice thing
 about this is that it works for any combination of CSS selectors. This
@@ -467,7 +473,7 @@ run `html_elements('a')` on that element.
   length()
 ```
 
-    ## [1] 410
+    ## [1] 411
 
 If this is your first run in with CSS and HTML, this might al seem a bit
 overwhelming. The good part though: this should cover most of what you
@@ -573,7 +579,7 @@ name_overview = html %>%
 html_text2(name_overview)  
 ```
 
-    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 5000 Down 288 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 794 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
+    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 5000 Down 236 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 795 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
 
 Looks pretty good! Now let’s see what we have. The first h1 header in
 this box is the name. It’s fairly safe to assume this is always the

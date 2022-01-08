@@ -16,6 +16,10 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(printr)
 ```
 
+# Video tutorial
+
+This tutorial also has a video version, so if that's your cup of tea, check it out [here](https://www.youtube.com/watch?v=9GR26Y4z_v4)
+
 # What is web scraping and why learn it?
 
 The internet is a veritable data gold mine, and being able to mine this data is a valuable skill set.
