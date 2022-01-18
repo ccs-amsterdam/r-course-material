@@ -13,7 +13,7 @@ editor_options:
 ```{r setup, include=FALSE}
 ## include this at top of your RMarkdown file for pretty output
 ## make sure to have the printr package installed: install.packages('printr')
-knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE, fig.keep='none')
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
 #library(printr)
 
 ```
@@ -190,9 +190,9 @@ Using the dtm we can now employ various techniques. You've already seen some of 
 Get most frequent words in corpus.
 
 ```{r quanteda_wordcloud1}
-textplot_wordcloud(dtm, max_words = 50)     ## top 50 (most frequent) words
+textplot_wordcloud(dtm, max_words = 50)                          ## top 50 (most frequent) words
 textplot_wordcloud(dtm, max_words = 50, color = c('blue','red')) ## change colors
-textstat_frequency(dtm, n = 10)             ## view the frequencies 
+textstat_frequency(dtm, n = 10)                                  ## view the frequencies 
 ```
 
 You can also inspect a subcorpus. For example, looking only at Obama speeches. To subset the DTM we can use quanteda's `dtm_subset()`, but we can also use the more general R subsetting techniques (as discussed last week). Here we'll use the latter for illustration. 
@@ -237,12 +237,12 @@ The `kwic()` function can also be used to focus an analysis on a specific search
 ```{r}
 terror <- kwic(tokens(corp), 'terror*')
 terror_corp <- corpus(terror)
-terror_dtm <- terror_corp %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
-  tokens_tolower %>%                                                    
-  tokens_remove(stopwords('en')) %>%                                     
-  tokens_wordstem %>%
-  dfm
+terror_dtm <- terror_corp |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>
+  tokens_tolower() |>
+  tokens_remove(stopwords('en')) |>
+  tokens_wordstem() |>
+  dfm()
 ```
 
 Now you can focus an analysis on whether and how Presidents talk about `terror*`.
