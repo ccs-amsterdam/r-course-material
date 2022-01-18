@@ -1,7 +1,7 @@
 R text analysis: quanteda
 ================
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
-2021-10
+2022-01
 
 -   [Introduction](#introduction)
     -   [The quanteda package](#the-quanteda-package)
