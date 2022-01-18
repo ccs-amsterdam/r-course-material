@@ -13,7 +13,7 @@ editor_options:
 ```{r setup, include=FALSE}
 ## include this at top of your RMarkdown file for pretty output
 ## make sure to have the printr package installed: install.packages('printr')
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
+knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE, fig.keep='none')
 #library(printr)
 
 ```
@@ -131,18 +131,18 @@ In this DTM, "Cats" and "awesome" are as different as "Cats" and "cats", but for
 This can be achieved by using additional `preprocessing` steps. In the next example, we'll again create the DTM, but this time we make all text lowercase, ignore stopwords and punctuation, and perform `stemming`. Simply put, stemming removes some parts at the ends of words to ignore different forms of the same word, such as singular versus plural ("gun" or "gun-s") and different verb forms ("walk","walk-ing","walk-s")
 
 ```{r}
-text2 <- text %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   ## tokenize, removing unnecessary noise
-  tokens_tolower %>%                                                     ## normalize
-  tokens_remove(stopwords('en')) %>%                                     ## remove stopwords (English)
-  tokens_wordstem                                                        ## stemming
+text2 <- text |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>   ## tokenize, removing unnecessary noise
+  tokens_tolower() |>                                                   ## normalize
+  tokens_remove(stopwords('en')) |>                                     ## remove stopwords (English)
+  tokens_wordstem()                                                      ## stemming
 text2
 
 dtm <- dfm(text2)
 dtm
 ```
 
-By now you should be able to understand better how the arguments in this function work. The `tolower` argument determines whether texts are (TRUE) or aren't (FALSE) converted to lowercase. `stem` determines whether stemming is (TRUE) or isn't (FALSE) used. The remove argument is a bit more tricky. If you look at the documentation for the dfm function (`?dfm`) you'll see that `remove` can be used to give "a pattern of user-supplied features to ignore". In this case, we actually used another function, `stopwords()`, to get a list of english stopwords. You can see for yourself.
+By now you should be able to understand better how the arguments in this function work. The `tolower` argument determines whether texts are (`TRUE`) or aren't (`FALSE`) converted to lowercase. `stem` determines whether stemming is (`TRUE`) or isn't (`FALSE`) used. The remove argument is a bit more tricky. If you look at the documentation for the dfm function (`?dfm`) you'll see that `remove` can be used to give "a pattern of user-supplied features to ignore". In this case, we actually used another function, `stopwords()`, to get a list of english stopwords. You can see for yourself.
 
 ```{r}
 stopwords('en')
@@ -158,12 +158,12 @@ There are various alternative preprocessing techniques, including more advanced 
 For this tutorial, we'll use the State of the Union speeches. We already created the corpus above. We can now pass this corpus to the `dfm()` function and set the preprocessing parameters.
 
 ```{r}
-dtm <- corp %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
-  tokens_tolower %>%                                                    
-  tokens_remove(stopwords('en')) %>%                                     
-  tokens_wordstem %>%
-  dfm
+dtm <- corp |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>   
+  tokens_tolower() |>                                                    
+  tokens_remove(stopwords('en')) |>                                     
+  tokens_wordstem() |>
+  dfm()
 dtm
 ```
 
