@@ -1,46 +1,69 @@
-Supervised Machine Learning in R
+Supervised Machine Learning in R with tidymodels
 ================
-Kasper Welbers & Wouter van Atteveldt
-2021-01
+Wouter van Atteveldt & Kasper Welbers
+2022-01
 
-  - [Introduction](#introduction)
-      - [Packages used](#packages-used)
-  - [Obtaining data](#obtaining-data)
-  - [Training and test data](#training-and-test-data)
-  - [Model 1: a decision tree](#model-1-a-decision-tree)
-      - [Validating the model](#validating-the-model)
-  - [Using different models: Support vector
-    machine](#using-different-models-support-vector-machine)
-  - [Parameter tuning](#parameter-tuning)
-      - [Grid search](#grid-search)
+-   [Introduction](#introduction)
+    -   [Packages used](#packages-used)
+-   [Obtaining and exploring data](#obtaining-and-exploring-data)
+-   [Training and test data](#training-and-test-data)
+-   [A naive Bayes model](#a-naive-bayes-model)
+    -   [Fitting the model](#fitting-the-model)
+    -   [Validating the model](#validating-the-model)
+    -   [Using **yardstick** for performance
+        metrics](#using-yardstick-for-performance-metrics)
+-   [SVM: Tuning models, recipes, and
+    workflows](#svm-tuning-models-recipes-and-workflows)
+    -   [Using preprocessing **recipes**](#using-preprocessing-recipes)
+    -   [Creating **workflows**](#creating-workflows)
+    -   [Using workflows](#using-workflows)
+-   [Parameter tuning](#parameter-tuning)
+    -   [Grid search with `tune`](#grid-search-with-tune)
+    -   [Using the best model to
+        predict](#using-the-best-model-to-predict)
+-   [What’s next?](#whats-next)
 
 # Introduction
 
 ## Packages used
 
-In this tutorial, we use the following packages: (and probably some
-others, feel free to add)
+In this tutorial, we use the following packages: (note that there is no
+need to install packages again if you previously installed them)
 
 ``` r
-install.packages(c("tidyverse", "caret", "e1071", "kernlab"))
+install.packages("tidyverse")
+install.packages("tidymodels")
+install.packages("naivebayes")
+install.packages("kernlab")
+install.packages("skimr")
+install.packages("corrplot")
 ```
 
-The main library we use is `caret`, which is a high-level library that
-allows you to train and test many different models using the same
-interface. This pacakage then calls the underlying libraries to train
-specific algorithms (such as `kernlab` for kernel-based SVMs).
+The main library we use is `tidymodels`, which (like `tidyvers`) is a
+‘meta-package’ that includes various packages to do machine learning.
+This tutorial will take you through the most important, including
+
+-   [rsample](https://rsample.tidymodels.org/) to split data into
+    train/test sets
+-   [parsnip](https://parsnip.tidymodels.org/) to do the actual machine
+    learning
+-   [recipes](https://recuoes.tidymodels.org/) to create preprocessing /
+    feature encoding ‘recipes’
+-   [workflows](https://workflows.tidymodels.org/) \` to encode the
+    whole workflow of training and testing models
+-   [tune](https://tune.tidymodels.org/) to do hyperparameter tuning
 
 ``` r
-library(caret)
+library(tidymodels)
 ```
 
-# Obtaining data
+# Obtaining and exploring data
 
 For this tutorial, we will use the ‘german credit data’ dataset:
 
 ``` r
 library(tidyverse)
-d = read_csv("https://www.openml.org/data/get_csv/31/dataset_31_credit-g.arff") 
+d = read_csv("https://www.openml.org/data/get_csv/31/dataset_31_credit-g.arff")
 ```
 
 This dataset contains details about past credit applicants, including
@@ -48,20 +71,66 @@ why they are applying, checking and saving status, home ownership, etc.
 The last column contains the outcome variable, namely whether this
 person is actually a good or bad credit risk.
 
-To explore, you can cross-tabulate e.g. home ownership with credit risk:
+We can get an overview of all columns using the `skimr` package: (note
+that we also convert all character columns to factor, since they are
+represent variables rather than actual text)
 
 ``` r
-table(d$housing, d$class) %>% prop.table(margin = 1)
+d = mutate_if(d, is.character, as.factor)
+skimr::skim(d)
+```
+
+To explore relations between variables, you can cross-tabulate e.g. home
+ownership with credit risk:
+
+``` r
+table(d$housing, d$class) |>
+  prop.table(margin = 1)
 ```
 
 So, home owners have a higher chance of being a good credit risk than
 people who rent or who live without paying (e.g. with family), but the
 difference is lower than you might expect (74% vs 60%).
 
+We can also make a correlation plot of all numeric variables with the
+credit score:
+
+``` r
+d |> 
+  mutate(class=ifelse(class=='good', 1, 0)) |>
+  select_if(is.numeric) |>
+  cor(use = "complete.obs") |>
+  corrplot::corrplot(diag=F, type = "lower")
+```
+
+So, asking for a longer or higher loan is negatively correlated with
+being a good credit risk, while being older is a positive correlate.
+
+For an overview of all relations between the outcome and the factor
+(nominal) predictors, we could plot the distribution of each variable
+grouped by class:
+
+``` r
+d |> 
+  select_if(is.factor) |>
+  pivot_longer(-class) |>
+  ggplot(aes(y=value, fill=class)) + geom_bar(position='fill') + facet_wrap("name", scales="free", ncol=2)
+```
+
+So, we can see that being a foreign worker or having a deficit on your
+checking account make you relatively more likely to be a bad credit
+risk.
+
+Of course, this exploration does not result in a causal interpretation,
+and in general machine learning does not aspire to yield causal models.
+
 Put bluntly, the goal of the machine learning algorithm is to find out
 which variables are good indicators of one’s credit risk, and build a
 model to accurately predict credit risk based on a combination of these
-variables (called features).
+variables (called features), regardless of whether they are causally
+linked with the outcome, or simply proxies or spurious correlates. After
+all, the bank only cares about whether you will repay the loan, not
+about why.
 
 Note that this dataset (with only 1000 cases) is pretty small for a
 machine learning data set. This has the advantage of making it easy to
@@ -78,153 +147,216 @@ suitable for machine learning.
 
 The first step in any machine learning venture is to split the data into
 training data and test (or validation) data, where you need to make sure
-that the validation set is never used in the model training or selection
-process.
+that the validation (or test) set is never used in the model training or
+selection process.
 
-Fort his, we use the `createDataPartition` function in the `caret`
-package, although for a simple case like this we could also directly
-have used the base R `sample` function. See the `createDataPartition`
-help page for details on other functionality of that function,
-e.g. creating multiple folds.
+We use the `initial_split` function from `rsample`, which by defaults
+gives a 75%/25% split: (type `?initial_split` for more information)
 
 ``` r
-set.seed(99)
-train = createDataPartition(y=d$class, p=0.7, list=FALSE)
-train.set = d[train,]
-test.set = d[-train,]
+set.seed(123)
+split = initial_split(d, strata = class)
+train <- training(split)
+test <- testing(split)
 ```
 
-# Model 1: a decision tree
+# A naive Bayes model
 
-The most easily explainable model is probably the decision tree. A
-decision tree is a series of tests which are run in series, ending in a
-decision. For example, a simple tree could be: If someone is a house
-owner, assume good credit. If not, if they have a savings account,
-they’re good credit, but otherwise they are a bad credit risk.
+Let’s fit and test a simple naive bayes model.
 
-In caret, we can train a decision tree using the `rpart` method. The
-following code trains a model on the data, prediction species from all
-other variables (`class ~ .`), using the `train.set` created above.
+First, we specify the model that we want to use:
 
 ``` r
-library(caret)
-tree = train(class ~ ., data=train.set, method="rpart")
+library(discrim)
+nb_spec = naive_Bayes(engine="naivebayes")
 ```
 
-Unlike many other algorithms, the final model of the decision tree is
-interpretable:
+Note that all tidymodels (parsnip) models have an `engine` parameter,
+which determines the actual packages that will be used to fit the data:
+Tidymodels does not actually contain all the various ML algorithms, but
+rather presents a unified interface to the underlying packages, like (in
+this case) `naivebayes`. For that reason, the first time you use a
+particular engine R will prompt you to install the package:
 
 ``` r
-tree$finalModel
+install.packages("naivebayes")
 ```
 
-Each numbered line contains one node, starting from the root (all data).
-The first question is whether someone has `checking_status` ‘no
-checking’ (i.e. that person has no checking account). If they indeed
-do not have a checking account (i.e. `no_checking>=0.5`), you go to node
-3, and conclude that they have a good credit risk. If they do have a
-checking account, you go to node 2, and then look at the duration of the
-requested loan, etc.
-
-To make it easier to inspect, you can also plot this tree:
+In fact, you can use the `translate` function to see how the tidymodels
+specification is translated to the underlying engine:
 
 ``` r
-plot(tree$finalModel, uniform=TRUE, main="Classification Tree")
-text(tree$finalModel, use.n=TRUE, all=F, cex=.8)
+nb_spec |> translate()
 ```
 
-It might seem counterintuitive that not having a checking account is a
-sign of creditworthiness, but apparently that’s what the data says, at
-least in the training data:
+## Fitting the model
+
+Next, we use this model to `fit` the training data:
 
 ``` r
-table(train.set$checking_status, train.set$class) %>% prop.table(margin=1)
+nb_model = fit(nb_spec, class ~ ., data=train)
 ```
-
-So it turns out that people with ‘good’ credit risks either have a full
-checking account, or don’t use a checking account at all; but this
-implementation of decision trees only looks at one value at a time (in
-fact, all categorical variables are turned into dummies before the
-learning starts, hence the cryptic `>=0.5`).
 
 ## Validating the model
 
-So, how well can this model predict the credit risk? Let’s first see how
-it does on the training set:
+So, how well can this model predict the credit risk? Let’s get the
+predicted classes for the test set:
 
 ``` r
-train.pred = predict(tree, newdata = train.set)
-acc = sum(train.pred == train.set$class) / nrow(train.set)
-print(paste("Accuracy:", acc))
+predictions = predict(nb_model, new_data=test) |>
+  bind_cols(select(test, class)) |>
+  rename(predicted=.pred_class, actual=class)
+head(predictions)
 ```
 
-So, on the training set it gets 76% accuracy, which is not very good
-given that just assigning everyone ‘good’ rating would already get you
-70% accuracy. Let’s see how it does on the validation set:
+Since this is just a normal data frame (or tibble), we can compute e.g.
+the accuracy and confusion matrix using regular R functions:
 
 ``` r
-pred = predict(tree, newdata = test.set)
-acc = sum(pred == test.set$class) / nrow(test.set)
-print(paste("Accuracy:", acc))
+print(paste("Accuracy:", mean(predictions$predicted == predictions$actual)))
+table(predictions$predicted, predictions$actual)
 ```
 
-So, as expected it does even worse on the test set. To see which
-outcomes are misclassified, you can create a confusion matrix by
-tabulating the predictions and actual outcomes:
+So, on the training set it gets 68% accuracy, which is not very good for
+a two-way classification. We can see that the most common error is
+mistakenly assigning a `good` credit score.
+
+## Using **yardstick** for performance metrics
+
+Now, we could also write our own code for computing precision, recall,
+etc., but there are functions built into the
+[yardstick](https://yardstick.tidymodels.org) package that make our life
+a bit easier:
 
 ``` r
-table(pred, test.set$class)
+recall(predictions, truth=actual, estimate=predicted)
+precision(predictions, truth=actual, estimate=predicted)
 ```
 
-Finally, we can use various functions from the `caret` package to get
-more information on the performance. The most important one is probably
-`confusionMatrix`. Note that this expects the output class to be a
-factor, so we convert the `class` column (which tidyverse imported as a
-character, possibly not the best choice in this case)
+The common way to use these is to create a `metric set`:
 
 ``` r
-confusionMatrix(pred, factor(test.set$class), mode="prec_recall")
+metrics = metric_set(accuracy, precision, recall, f_meas)
+metrics(predictions, truth = actual, estimate = predicted)
 ```
 
-The top displays the confusion matrix, showing that of the actual ‘bad’
-credit risks 23 where correctly predicted, but 67 were wrongly predicted
-as good. The ‘good’ category does much better, with 196 correct
-predictions out of 210. (Note that overpredicting the most common class
-is a normal problem for some ML algorithms).
+We can see that the model is pretty bad at predicting bad credit risks,
+with a precision of 46% but a recall of about 35%.
 
-Below that it gives a statistical confirmation that 73% is indeed not
-very good, by showing that it is not significantly higher than guessing
-(No information).
+Note that these metrics assume that we are trying to predict ‘bad’
+credit risks, since that is the first level of the class factor (levels
+are alphabetic by default). We could specify `event_level='second'` to
+make precision and recall relative to ‘good’ credit risks, or specify
+`estimator='macro'` to get the (macro-)averaged f scores
 
-Finally, the last block gives the common information retrieval metrics
-assuming `bad` as the reference class (this can be changed by setting
-`positive='good'` on the call). It has decent prediction (if the model
-predicts bad, it’s correct in 62% of cases), but really bad recall: only
-26% of the bad credit risks are identified.
+# SVM: Tuning models, recipes, and workflows
 
-# Using different models: Support vector machine
-
-Let’s try another model, this time a support vector machine.
+Let’s try another model, this time a support vector machine (SVM). We
+can specify and fit it just like the Naive Bayes model above:
 
 ``` r
-set.seed(1)
-m = train(class ~ ., data=train.set, method="svmRadial")
-pred = predict(m, newdata = test.set)
-acc = sum(pred == test.set$class) / nrow(test.set)
-print(paste("Accuracy:", acc))
+svm_spec = svm_poly(degree=2, engine="kernlab", mode="classification")
+svm_model = fit(svm_spec, class ~ ., data=train)
+predictions = predict(svm_model, new_data=test) |>
+  bind_cols(select(test, class)) |>
+  rename(predicted=.pred_class, actual=class)
+metrics(predictions, truth = actual, estimate = predicted)
 ```
 
-Of course, the same functions given above for e.g. diagnostics and
-predicting can be used here as well. Check out the [caret
-documentation](http://topepo.github.io/caret/available-models.html) for
-a full list of available models, and try some out.
+This already improves the F measure quite a bit, although the result is
+still far from great.
+
+Properly using SVM, however, introduces two additional layers of
+complexity: + **Preprocessing**: SVM’s require input data to be
+*centered* and *scaled* (i.e. normalized) as it uses a distance function
+to compute the margin: if the dimensions are not on the same scale
+(e.g. comparing age in years to income in euros), one dimension will be
+much more important in determining this distance. + **Parameter
+tuning**: SVM’s have *hyperparameters*, or parameters that control the
+fitting of the actual model parameters. For all SVM models, there is a
+cost parameter that determines the trade-off between misclassification
+and wider margins. Kernel based SVM models also have parameters based on
+the kernel, for example the polynomial kernel has the `degree`
+hyperparameter.
+
+This allows us to introduce three more useful packages of tidymodels:
+[recipes](https://recipes.tidymodels.org/),
+[workflow](https://workflows.tidymodels.org/) and
+[tune](https://recipes.tidymodels.org/).
+
+## Using preprocessing **recipes**
+
+For SVM, we will center and scale all numeric variables, and create
+dummies for the factor variables. Finally, we remove any columns with
+zero variance:
+
+``` r
+svm_recipe = recipe(class ~ ., data=train) |>
+  step_scale(all_numeric_predictors()) |>
+  step_center(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors()) |>
+  step_zv(all_predictors())
+svm_recipe
+```
+
+We could now `prep` the recipe to fit it on the training data (so it
+knows e.g. which dummies to create), and use it to `bake` the raw data:
+(with apologies for the cullinary metaphors)
+
+``` r
+prepped = prep(svm_recipe, data=train)
+bake(prepped, new_data=train)
+```
+
+As you can see, the numerical values are centered and the factors are
+turned into dummies.
+
+## Creating **workflows**
+
+Rather than doing these steps directly though, it is more convenient to
+create a [workflow](https://workflows.tidymodels.org/) that specifies
+both preprocessing and model fit:
+
+``` r
+svm_workflow = workflow() |>
+  add_recipe(svm_recipe) |>
+  add_model(svm_spec)
+```
+
+Note that it would be possible to do this using regular tidyverse
+commands on the data, and there is no strict need to combine the
+preprocessing and model fit in a single workflow. The benefit of
+creating a workflow like this, however, is that it can directly be
+applied to both training data and testing data. As we will see below, it
+will also come in handy when doing parameter tuning with
+crossvalidation.
+
+## Using workflows
+
+We can now use the created workflow to directly preprocess and fit the
+model:
+
+``` r
+svm_model <- fit(svm_workflow, data = train)
+predict(svm_model, new_data=test) |>
+  bind_cols(select(test, class)) |>
+  rename(predicted=.pred_class, actual=class) |>
+  metrics(truth = actual, estimate = predicted)
+```
+
+Embarrassingly, performance actually decreased a tiny bit. As it turns
+out, the
+[kernlab::kvsm](https://www.rdocumentation.org/packages/kernlab/versions/0.9-29/topics/ksvm)
+function already does scaling itself, and apparently deals with factors
+better than creating dummies. Let’s see if we can improve this by doing
+some parameter tuning!
 
 # Parameter tuning
 
 The SVM model trained above, like many ML algorithms, has a number of
-(hyper)parameters that need to be set, including sigma (the ‘reach’ of
-examples, i.e. how many examples are used as support vectors) and C (the
-tradeoff between increasing the margin and misclassifications).
+(hyper)parameters that need to be set. In this case this includes cost
+(the tradeoff between increasing the margin and misclassifications) and
+degree (the polynomial degree).
 
 Although the defaults are generally reasonable, there is no real
 theoretical reason to choose any value of these parameters. So, the
@@ -241,90 +373,136 @@ the accuracy reported by testing on the test set. So, we will split a
 small set for selecting models from the train set:
 
 ``` r
-tune = createDataPartition(y=train.set$class, p=0.25, list=FALSE)
-tune.set = train.set[tune,]
-train.set2 = train.set[-tune,]
-```
-
-To do this, we will create a for loop over different settings of C,
-store the results in a list, and then turn the list into a data frame.
-Note that we use `as.character(C)` for the list key as fractional
-numbers are not allowed as keys.
-
-``` r
-Cs = c(.5, 1, 2, 4, 8, 16, 32, 64)
 result = list()
-for (C in Cs) {
-  m = train(class ~ ., data=train.set2, method="svmRadial",tuneGrid = data.frame(.C=C, .sigma=.01) )
-  pred = predict(m, newdata = tune.set)
-  cm = confusionMatrix(pred, factor(tune.set$class), mode="prec_recall")
-  result[[as.character(C)]] = cm$byClass 
-  as_tibble(cm$byClass)
+for (cost in 10^(-1:2)) {
+  for (degree in 1:3) {
+    result[[paste(cost, degree, sep="_")]] = svm_poly(cost=cost, degree=degree, engine="kernlab", mode="classification") |>
+      fit(class ~ ., data=train) |>
+      predict(new_data=test) |>
+      bind_cols(select(test, class)) |>
+      metrics(truth = class, estimate = .pred_class) |>
+      add_column(cost=cost, degree=degree)
+  }
 }
-result = bind_rows(result, .id="C") %>% mutate(C = as.numeric(C))
-result
+bind_rows(result) |> 
+  pivot_wider(names_from=.metric, values_from = .estimate) |>
+  arrange(-f_meas)
 ```
 
-And of course we can plot e.g. the effect of C on f-score:
+So in this small example, the best result is achieved with a cost of 3d
+degree kernel. However, we normally don’t want to write the grid search
+ourselves. Moreover, we really shouldn’t be using the test data to do
+model selection, as that compromises our estimation of final model
+performance. Thus, we will turn to the `tune` package to do the grid
+search.
+
+## Grid search with `tune`
+
+The package [tune](https://tune.tidymodels.org) is created to make
+hyperparameter tuning like above less painful. For this, we change the
+model specification to have the degree and cost be `tune`d:
 
 ``` r
-ggplot(result) + geom_line(aes(x=C, y=F1))
+svm_workflow = workflow() |>
+  add_recipe(svm_recipe) |>
+  add_model(svm_poly(mode="classification", cost=tune(), degree=tune()))
 ```
 
-## Grid search
-
-The example above showed that the area around `C=16` might be
-interesting to explore further. However, we didn’t test the effect of
-different values of `sigma`, and it’s quite possible that these
-parameters interact.
-
-So, the common thing to do is to do a **grid search**, i.e. an
-exhaustive search of a range of possible values of each parameter.
-Moreover, rather than using a fixed set for tuning as above, it is
-better to use crossvalidation: With a 5-fold cross-validation, each
-model is trained 5 times on 80% of the data and tested on the remaining
-20%. This is then repeated 5 times with a different split, until every
-case has been used in testing once. This has the benefit of getting a
-better estimate of model performance with a relatively small tuning set,
-while also having multiple trials to control for chance and to get a
-measure of variance as well as the mean performance.
-
-Luckily, doing a grid searc with cross-validation is supported out of
-the box in caret, and is actually easier than the manual example above.
-For example, The following code uses `caret` to run a crossvalidation
-(`repeatedcv`) to test different settings of `sigma` and `C`: (See
-[chapter 5 of the caret
-documentation](https://topepo.github.io/caret/model-training-and-tuning.html)
-for more details)
+Next, we define the `grid` to be searched, specifying 7 levels for the
+cost function and 3 for the degree
 
 ``` r
-set.seed(1)
-paramgrid = expand.grid(sigma = c(.001, .01, .1, .5), C =  c(1, 2, 4, 8, 16, 32, 64))
-traincontrol <- trainControl(method = "repeatedcv", number = 5,repeats=5,verbose = FALSE)
-m = train(class ~ ., data=train.set, method="svmRadial", tuneGrid=paramgrid, 
-          trControl=traincontrol, preProc = c("center","scale"))
-ggplot(m)
+grid = svm_workflow %>%
+  parameters() %>%
+  grid_regular(levels=c(cost=7, degree=3))
+grid
 ```
 
-The `plot` function above by default gives a plot of accuracy against
-the used parameters. Looking at this plot, it might be interesting to
-zoom in around `sigma=0.01` and `C=8` in a second round.
-
-Note that the plot can be tweaked based on the information in
-`m$results`, and other ggplot elements can be added as usual:
+To tune this, we use crossvalidation:
 
 ``` r
-ggplot(m, metric="Kappa", plotType="level") + geom_text(aes(label=round(Kappa,2)))
+set.seed(456)
+folds <- vfold_cv(train, v = 5)
 ```
 
-Note finally that when using the `m` for prediction, caret automatically
-uses the best model:
+Now, we are ready to do the grid tuning. Note that this can take a
+while, as it will fit and test 3 (degrees) \* 5 (folds) \* 7 (costs) =
+105 models. For this reason, and because with more complex models this
+can grow even bigger, we can tell R to run the various models in
+parallel using `doParallel::registerDoParallel()`, so it can take
+advantage of multiple processor cores.
 
 ``` r
-pred = predict(m, newdata = test.set)
-acc = sum(pred == test.set$class) / nrow(test.set)
-print(paste("Accuracy:", acc))
+doParallel::registerDoParallel()
+grid_results = svm_workflow %>% 
+  tune_grid(resamples = folds, grid = grid, metrics = metrics)
 ```
 
-Although arguably after selecting the optimal model, it is best to
-retrain that model on the whole training set to get optimal performance.
+We can gather all results using the `collect_metrics`, or show the top
+results using `show_best`:
+
+``` r
+collect_metrics(grid_results)
+show_best(grid_results, metric = "f_meas")
+```
+
+From this it seems that a simple model with degree 1 performs best
+(quite possibly also because of the small data set). The relationship
+between cost and performance seems less clear, however.
+
+Since `collect_metrics` returns a regular tibble, we can use normal
+tidyverse commands to analyse or visualize it. For example, we can plot
+the relation between cost, degree, and f-score:
+
+``` r
+grid_results %>%
+  collect_metrics() %>%
+  filter(.metric=="f_meas") |>
+  mutate(degree=as.factor(degree)) |>
+  ggplot(aes(x=cost, y=mean, color = degree,)) +
+  geom_ribbon(aes(
+    ymin = mean - std_err,
+    ymax = mean + std_err,
+    fill=degree
+  ),lwd=0, alpha = 0.1) +
+  geom_line() +
+  scale_x_log10() 
+```
+
+So it is important that cost is bigger than about .01, but for the rest
+it is mostly stable.
+
+## Using the best model to predict
+
+To select the best model specification from the grid result
+
+``` r
+final_svm = grid_results |>
+  select_best("f_meas") |>
+  finalize_workflow(x=svm_workflow)
+```
+
+And use it to fit on the full training set and test it on the test set:
+
+``` r
+svm_model <- fit(final_svm, data = train)
+predict(svm_model, new_data=test) |>
+  bind_cols(select(test, class)) |>
+  rename(predicted=.pred_class, actual=class) |>
+  metrics(truth = actual, estimate = predicted)
+```
+
+Not unexpectedly, final performance is slightly lower than the
+performance from the grid search: since we select the model that does
+best on the cross-validation, it is likely that the model will perform
+slightly worse out of sample. However, grid tuning did manage to
+increase our F-score at least a little bit.
+
+# What’s next?
+
+Hopefully, this tutorial gave you an idea of how to do machine learning
+with [tidymodels](https://tidymodels.org). To get more proficient with
+this, try using your own data and play around with various ML algorithms
+and hyperparameters. See the
+[parsnip](https://parsnip.tidymodels.org/reference/) documentation for a
+list of possible models.
