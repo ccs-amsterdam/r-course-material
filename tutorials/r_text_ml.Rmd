@@ -1,7 +1,7 @@
 ---
 title: "Supervised Text Classification"
 author: "Wouter van Atteveldt & Kasper Welbers"
-date: "2020-01"
+date: "2022-01"
 output: 
   github_document:
     toc: yes
@@ -14,129 +14,156 @@ knitr::opts_chunk$set(warning=FALSE, message=FALSE, results=F, fig.keep='none')
 library(printr)
 ```
 
-This handout contains a very brief introduction to using supervised machine learning for text classification in R. Check out  https://cran.r-project.org/web/packages/caret/vignettes/caret.html for a more extensive tutorial. 
+This handout contains a brief introduction to using supervised machine learning for text classification in R. 
+In particular, we will show how both [quanteda.textmodels](https://github.com/quanteda/quanteda.textmodels) and [tidymodels](machine_learning.md) can be used
+to train and fit supervised text classification models. 
 
-# Packages
+In this tutorial, we use the following packages:
+(note that there is no need to install packages again if you previously installed them)
 
-We will use `quanteda` for text processing and some machine learning, and `tidyverse` for general data cleaning. 
+To install the various packages (of course, you can skip this step for packages already installed on your machine):
+
+```{r, eval=F}
+install.packages("tidyverse")
+install.packages("tidymodels")
+install.packages("textrecipes")
+install.packages("quanteda")
+install.packages("quanteda.textmodels")
+```
+
+
+## Getting training data
+
+For machine learning, we need annotated training data. Fortunately, there are many review data files available for free.
+For this exercise, we will use a set of Amazon movie reviews cached as CSV on our github site. 
+See http://deepyeti.ucsd.edu/jianmo/amazon/index.html for other (and more up-to-date) Amazon product reviews.
+
+```{r}
+library(tidyverse)
+reviews = read_csv("https://raw.githubusercontent.com/ccs-amsterdam/r-course-material/master/data/reviews.csv")
+head(reviews)
+table(reviews$overall)
+```
+
+As you can see, there's the star rating (`overall`), a summary text, the full review text, and the ID of the reviewer and the product (ASIN). 
+
+Before getting started, let's define a two-class rating from the numeric overall rating:
+
+```{r}
+reviews = mutate(reviews, rating=as.factor(ifelse(overall==5, "good", "bad")))
+```
+
+The goal for this tutorial is supervised sentiment analysis, i.e. to predict the star rating given the review text. 
+
+# Supervised text analysis with quanteda
+
+To get started, let's use quanteda to do the textual preprocessing and `quanteda.textmodels` to run the machine learning. 
+
+First, let's create a corpus using both summary and reviewtext, and creating a two-way class `rating` in addition to the numeric `overall` score:
 
 ```{r}
 library(quanteda)
-library(tidyverse)
+review_corpus = reviews |> 
+  mutate(text = paste(summary, reviewText, sep="\n\n"),
+         doc_id = paste(asin, reviewerID, sep=":")) |>
+  select(-summary, -reviewText) |>
+  corpus()
 ```
 
-We also use `caret` for more machine learning options. This probably requires R version 3.5. If you have trouble installing it, you can still follow the quanteda part of this tutorial. 
-The top line also installs the packages needed for the actual model training. 
-
-```{r}
-#install.packages(c("caret", "e1071", "LiblineaR"))
-library(caret)
-```
-
-# Data
-
-For machine learning, we need annotated training data. Fortunately, there are many review data files available for free. A corpus of movie reviews is included in the `quanteda.corpora` package, which you need to install from github directly:
-
-```{r, eval=F}
-if (!require("devtools")) install.packages("devtools")
-devtools::install_github("quanteda/quanteda.corpora")
-```
-
-Now we can get the data:
-
-```{r}
-reviews = quanteda.corpora::data_corpus_movies
-reviews
-head(docvars(reviews))
-```
-
-Note: if you have trouble with `install_github`, you can also download and load the data directly from github:
-
-```{r, eval=F}
-download.file("https://github.com/quanteda/quanteda.corpora/blob/master/data/data_corpus_movies.rda?raw=true", "reviews.rda")
-load("reviews.rda")
-reviews = data_corpus_movies
-```
-
-## Training and test data
-
-We split off a test set for testing performance (using `set.seed` for reproducibility),
-and create subsets of the corpus for training and testing:
+Now, we can split the corpus into test and train set: (using `set.seed` for reproducibility)
 
 ```{r}
 set.seed(1)
-testset = sample(docnames(reviews), 500)
-reviews_test =  reviews %>% corpus_subset(docnames(reviews) %in% testset)
-reviews_train = reviews %>% corpus_subset(!docnames(reviews) %in% testset)
-actual_train = as.factor(docvars(reviews_train, "Sentiment"))
-actual_test = as.factor(docvars(reviews_test, "Sentiment"))
+testset = sample(docnames(review_corpus), 2000)
+reviews_test =  corpus_subset(review_corpus, docnames(review_corpus) %in% testset)
+reviews_train = corpus_subset(review_corpus, !docnames(review_corpus) %in% testset)
 ```
 
+## Training the model using quanteda
 
-# Training the model using quanteda
-
-To prepare the data, we need to create matrices for the training and test data.
-
-Now, we create the training dfm:
+First, we create a dfm from the training data, using stemming and trimming:
 
 ```{r}
-dfm_train = reviews_train %>%  dfm(stem = TRUE) %>% 
-  dfm_select(min_nchar = 2) %>% dfm_trim(min_docfreq=10)
+dfm_train = reviews_train |> 
+  tokens() |>
+  dfm() |> 
+  dfm_wordstem(language='english') |>
+  dfm_select(min_nchar = 2) |>
+  dfm_trim(min_docfreq=10)
 ```
 
-And train the model:
+And now we can train a model, for example a naive bayes model. 
 
 ```{r}
-m_nb <- textmodel_nb(dfm_train, actual_train)
-summary(m_nb)
+library(quanteda.textmodels)
+rating_train = docvars(reviews_train, field="rating")
+m_nb <- textmodel_nb(dfm_train, rating_train)
 ```
+
+We can also inspect the NB parameters directly to find out which words are the best predictors.
+The parameters in the model are the 'class conditional posterior estimates', or `P(w|C)`.
+We are interested in the opposite, but can use Bayes' theorem `P(C|w)=P(w|C)P(C)/P(w)`.
+We also know that `P(w)=Sum(P(w|C)P(C))`, so if we assume an equal prior distribution of the classes we can simplify to
+`P(good|w)=P(w|good)/(P(w|good) + P(w|bad))`:
+
+```{r}
+scores = t(m_nb$param) |> 
+  as_tibble(rownames = "word") |> 
+  mutate(relfreq=bad+good,
+         bad=bad/relfreq,
+         good=good/relfreq) 
+scores |>
+  filter(relfreq > .0001) |>
+  arrange(-bad) |>
+  head()
+```
+
+So, negative predictors are flare, energ(y), and useless. Positive predictors include awesom(e), amaz(ing), and excel(lent). 
 
 ## Testing the model
 
 To see how well the model does, we test it on the test data.
+
 For this, it's important that the test data uses the same features (vocabulary) as the training data
-The model contains parameters for these features, not for words that only occur in the test data,
+The model contains parameters for these features, not for words that only occur in the test data.
+So, we also skip the selection and trimming steps, and instead adapt the test vocabulary (dfm columns)
+to those in the train set:
 
 ```{r}
-dfm_test <- reviews_test %>% dfm(stem = TRUE) %>% 
+dfm_test = reviews_test |> 
+  tokens() |>
+  dfm() |> 
+  dfm_wordstem(language='english') |>
   dfm_match(featnames(dfm_train))
+```
+
+Now, we can predict the classes of the test data:
+
+```{r}
 nb_pred <- predict(m_nb, newdata = dfm_test)
 head(nb_pred)
 ```
 
-To see how well we do, we compare the predicted sentiment to the actual sentiment:
+To see how well we do, we can compare the predicted sentiment to the actual sentiment:
 
 ```{r}
-mean(nb_pred == actual_test)
+predictions = docvars(reviews_test) |>
+  as_tibble() |>
+  add_column(prediction=nb_pred)
+predictions |> 
+  mutate(correct=prediction == rating) |>
+  summarize(accuracy=mean(correct))
 ```
 
-So (at least on my computer), 81% accuracy. Not bad for a first try -- but movie reviews are quite simple, this will be a lot harder for most political text...
+So (at least on my computer), 75% accuracy. Not bad for a first try -- but movie reviews are quite simple, this will be a lot harder for most political text...
 
-We can use the regular `table`  command to create a cross-table, often called a 'confusion matrix' (as it shows what kind of errors the model makes):
-
-```{r}
-confusion_matrix = table(actual_test, nb_pred)
-confusion_matrix
-```
-
-The `caret` package has a function can be used to produce the 'regular' metrics from this table:
+We can also use the yardstick metrics from tidymodels:
 
 ```{r}
-confusionMatrix(nb_pred, actual_test, mode = "everything")
-```
-
-We can also inspect the actual parameters assigned to the words, to see which words are indicative of bad and good movies:
-
-```{r}
-scores = t(m_nb$PcGw) %>% as_tibble(rownames = "word")
-scores %>% arrange(-neg)
-```
-
-Interestingly, the most negative words seem more indicative of genres than of evaluations
-(and after installing spacyr on more windows computers than I care for, I think the negative value for anaconda is certainly understandable...)
-
-```{r}
-scores %>% arrange(-pos)
+library(tidymodels)
+metrics = metric_set(accuracy, precision, recall, f_meas)
+metrics(predictions, truth = rating, estimate = prediction)
+conf_mat(predictions, truth = rating, estimate = prediction)
 ```
 
 # Aside: Scaling with Quanteda
@@ -145,66 +172,108 @@ Quanteda also allows for supervised and unsupervised scaling.
 Although wordfish is an unsupervised method (so doesn't really belong to this tutorial), it produces a nice visualization:
 
 ```{r}
-library(magrittr)
+library(quanteda.textplots)
 set.seed(1)
 m_wf <- textmodel_wordfish(dfm_train, sparse=T)
-topwords = c(scores %$% head(word, 10), scores %>% arrange(-neg) %$% head(word, 10))
-textplot_scale1d(m_wf, margin = "features", highlighted = c(topwords, "coen", "scorses", "paltrow", "shakespear"))
+bestwords = scores |> 
+  mutate(value=pmax(good, bad)) |>
+  group_by(round(log10(relfreq))) |>
+  slice_max(value, n=15)
+
+textplot_scale1d(m_wf, margin = "features", highlighted = bestwords$word)
 ```
 
-(note the use of %$% to expose the columns directly to the next function without sending the whole tibble)
+Wordfish automatically scales all documents according to an underlying latent variable (the beta),
+which is assumed to correspond to the most interesting dimension in the data. 
+To make this easier to read, I highlight the words with the most explanatory value in the naive bayes model,
+taking a stratified sample of 15 words per frequency band. 
 
-I highlighted the most positive and negative words according to naive bayes (and some other words).
-The most positive/negative words are interestingly located mostly in the center of the 2-dimensional scaling.
-So the (unsupervised) scaling captures genre more than sentiment, it seems. 
+# Supervised machine learning with tidymodels
 
-# Using Caret
+Using the preprocessing steps from [textrecipes](https://textrecipes.tidymodels.org),
+we can also use tidymodels to test our data.
 
-Finally, let's use the caret library to train and test some models. 
-First, we set the train control to none, as we don't want to do any resampling (like crossvalidation) yet:
+Although this involves a bit more steps if you are already using quanteda, 
+using tidymodels allows more flexibility in selecting and tuning the best models. 
+
+The example below will quickly show how to train and test a model using these recipes.
+See the [machine learning with Tidymodels](machine_learning.md) handout and/or the
+[tidyverse documentation](https://tidyverse.org) for more information. 
+
+## Using `textrecipes` to turn text into features
 
 ```{r}
-trctrl = trainControl(method = "none")
-dtm_train = convert(dfm_train, to='matrix')
-dtm_test = convert(dfm_test, to='matrix')
+library(tidymodels)
+library(textrecipes)
+rec = recipe(rating ~ summary + reviewText, data=reviews) |>
+  step_tokenize(all_predictors())  |>
+  step_tokenfilter(all_predictors(), min_times = 3) |>
+  step_tf(all_predictors())
 ```
 
-We show two algorithms here, but caret can be used to train a very large number of different models. 
-Note that caret doesn't include most algorithms, so you may need to install additional packages.
-Often, you also need to check the documentation for these packages (referenced in the caret docs)
-to understand exactly what the model does and what the hyperparameters are. 
-See https://topepo.github.io/caret/train-models-by-tag.html for more information. 
-
-## SVM
-
-Train a simple SVM from the `LiblineaR` package, setting the hyperparameters to (hopefully) sensible defaults:
+We can inspect the results of the preprocessing by `prepping` the recipe and baking the training data:
 
 ```{r}
-set.seed(1)
-m_svm = train(x = dtm_train, y = actual_train, method = "svmLinearWeights2",
-              trControl = trctrl, tuneGrid = data.frame(cost = 1, Loss = 0, weight = 1))
-svm_pred = predict(m_svm, newdata = dtm_test)
-confusionMatrix(svm_pred, actual_test)
+rec |> 
+  prep(reviews) |>
+  bake(new_data=NULL) |> 
+  select(1:10)
 ```
 
-*Note:* For more information on the algorithm, including the meaning of the parameters and how to tune them, you need to consult the documentation of the underlying package. The caret documentation linked above will tell you which package is used (in this case: LiblineaR), and that package will contain a more technical explanation of the algorithm, generally including examples and references. 
 
-## Neural Network
+## Fitting and testing a model
 
-Train a simple Nueral Network (using `nnet`), choosing a single hidden layer and a small decay parameter. 
-Note that since we need to set the maxnwts to the number of features time the number of layers
+First, we create a *worflow* from the recipe and model specification. 
+Let's start with a naive bayes model:
 
 ```{r}
-set.seed(1)
-m_nn = train(x = dtm_train, y = actual_train, method = "nnet", 
-             trControl = trctrl, tuneGrid = data.frame(size = 1, decay = 5e-4), MaxNWts = 6000)
-nn_pred <- predict(m_nn, newdata = dtm_test)
-confusionMatrix(nn_pred, actual_test)
+library(discrim)
+lr_workflow = workflow() |>
+  add_recipe(rec) |>
+  add_model(logistic_reg(mixture = 0, penalty = 0.1))
+```   
+
+Now, we can split our data, fit the model on the train data, and validate it on the test data:
+
+```{r}
+split = initial_split(reviews)
+m <- fit(lr_workflow, data = training(split))
+predict(m, new_data=testing(split)) |>
+  bind_cols(select(testing(split), rating)) |>
+  rename(predicted=.pred_class, actual=rating) |>
+  metrics(truth = actual, estimate = predicted)
 ```
 
-## Parameter tuning
+So, we get a slightly better accuracy than with the naive bayes model tested above.
+To see which words are the most important predictors, we can use the `vip` package
+to extract the predictors, and then use regular tidyverse/ggplot functions to visualize it:
 
-Most algorithms have (hyper)parameters that need to be tuned, like the misclassification cost in SVM and the number and size of hidden layers in a neural network. There are often no good theoretical grounds to set these, so the best you can do is try a lot of them and taking the best.
+```{r}
+m |> extract_fit_parsnip() |>
+  vip::vi() |> 
+  group_by(Sign) |>
+  top_n(20, wt = abs(Importance)) %>%
+  ungroup() |>
+  mutate(
+    Importance = abs(Importance),
+    Variable = str_remove(Variable, "tf_"),
+    Variable = fct_reorder(Variable, Importance)
+  ) |>
+  ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~Sign, scales = "free_y") +
+  labs(y = NULL)
+```
 
-You can do this yourself, but caret also has built-in functions to do an automatic grid search. 
-For this, set the `tuneGrid` to multiple values per parameter, and choose a different `trainControl` method, like crossvalidation. See https://topepo.github.io/caret/random-hyperparameter-search.html for more information, and https://cran.r-project.org/web/packages/caret/vignettes/caret.html for a good tutorial.
+The positive predictors make perfect sense: *great*, *best*, *excellent*, etc. 
+So, interestingly *not*, *but*, and *ok* are the best negative predictors, and *good* in the summary is also not a good sign. 
+This makes it interesting to see if using ngrams will help performance, as it is quite possible that it is *not good*, rather than good. 
+Have a look at the [textrecipes documentation](https://textrecipes.tidymodels.org/reference/) to see the possibilities for text preprocessing.
+
+Also, we just tried out a regularization penalty of 0.1, and it is quite possible that this is not the best choice possible.
+Thus, it is a good idea to now do some hyperparameter tuning for the regularization penalty and other parameters. 
+Take a look at the [machine learning handout](machine_learning.md) and/or the [tune documentation](https://tune.tidymodels.org/)
+to see how to do parameter tuning. 
+
+Of course, you can also try one of the other classification models in [parsnip](https://parsnip.tidymodels.org/),
+and/or try a regression model instead to predict the actual star value. 
