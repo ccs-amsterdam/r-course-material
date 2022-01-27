@@ -59,7 +59,7 @@ This tutorial will take you through the most important, including
 
 
 
-This might sound daunting, but there is method to the madness. This image (from the free online book (Tidyverse Skills for Data Science)[https://jhudatascience.org/tidyversecourse/]) gives a nice overview:
+This might sound daunting, but there is method to the madness. This image (from the free online book [Tidyverse Skills for Data Science](https://jhudatascience.org/tidyversecourse/)) gives a nice overview:
 
 ![The tidyverse ecosystem](https://jhudatascience.org/tidyversecourse/images/book_figures/MachineLearning_tidymodels.png)
 
