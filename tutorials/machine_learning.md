@@ -39,6 +39,10 @@ install.packages("skimr")
 install.packages("corrplot")
 ```
 
+``` r
+library(tidymodels)
+```
+
 The main library we use is `tidymodels`, which (like `tidyvers`) is a
 ‘meta-package’ that includes various packages to do machine learning.
 This tutorial will take you through the most important, including
@@ -53,9 +57,26 @@ This tutorial will take you through the most important, including
     whole workflow of training and testing models
 -   [tune](https://tune.tidymodels.org/) to do hyperparameter tuning
 
-``` r
-library(tidymodels)
-```
+
+
+This might sound daunting, but there is method to the madness. This image (from the free online book (Tidyverse Skills for Data Science)[https://jhudatascience.org/tidyversecourse/]) gives a nice overview:
+
+![The tidyverse ecosystem](https://jhudatascience.org/tidyversecourse/images/book_figures/MachineLearning_tidymodels.png)
+
+So, the core of the actual 'machine learning' happens in the `parsnip` package. 
+Before this, you can use the `rsample` package for splitting the dataset,
+and the `recipes` package for the various preprocessing and feature selection/engineering steps
+needed to go from raw data to the input variables for the machine learning. 
+After model fitting, the `tune` package is used to do fine-tuning of the model (hyperparameter tuning),
+and `yardstick` is used to compute the various evaluation metrics. 
+Finally, the `workflows` package helps package the pre-processing and fitting into a single workflow
+which makes it easier to use. 
+
+The tutorial below will go through each of these steps. For reference, this figure (from the same source)
+gives an overview of these packages and key functions:
+
+![Tidymodels packages and functions](https://jhudatascience.org/tidyversecourse/images/book_figures/Updated_tidymodels_basics.png)
+
 
 # Obtaining and exploring data
 
