@@ -1,0 +1,36 @@
+---
+title: 'Moderation Analysis'
+author: "Philipp Masur"
+date: "2021-11"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE, fig.keep='none')
+library(printr)
+```
+
+# Introduction
+
+## Basic idea
+
+## Steps
+
+A moderation analysis typically consists of the following steps.
+
+1. Compute the interaction term $XZ = X * Z$.
+2. Fit a multiple regression model with $X$, $Z$, and $XZ$ as predictors.
+3. Test whether the regression coefficient for $XZ$ is significant or not.
+4. Interpret the moderation effect.
+5. Display the moderation effect graphically.
+
+
+
+```{r}
+
+```
+
