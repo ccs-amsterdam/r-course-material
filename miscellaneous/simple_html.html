@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<style>
+body {
+  font-family: Sans-serif;
+}
+h2, h4 {
+  text-align: center;
+}
+div.columns {
+  display: table;
+  text-align: justify;
+  text-justify: inter-word;
+}
+div.leftColumn {
+  width: 45%;
+  padding: 2.5%;
+  display: table-cell;
+}
+div.rightColumn {
+  width: 45%;
+  padding: 2.5%;
+  display: table-cell;
+}
+table.someTable {
+  border-top: 1.5px solid; 
+  border-bottom: 1.5px solid;
+  text-align: left;
+  width: 50%;
+  margin-left: 25%;
+  border-collapse: collapse;
+}
+table.blue {
+  color: blue;
+}
+tr.headerRow {
+  border-bottom: 1.5px solid;
+}
+th, td {
+  padding-right: 10px;
+}
+</style>
+<body>
+
+<h2>Looking behind the curtains of an HTML page</h2>
+
+<div class="columns">
+  <div class="leftColumn">
+    <h4>Left Column</h4>
+
+    <p>This is a simple HTML document. Right click on the page and select <b>view page source</b> 
+       (or something similar, depending on browser) to view the HTML source code.</p>
+    
+    <p>Alternatively, right click on a specific element on the page and select <a href="https://blog.hubspot.com/website/how-to-inspect"><b>inspect element</b></a>. 
+       This also shows the HTML code, but focused on the selected element. You should be able to fold 
+       and unfold HTML nodes (using the triangle-like thing before the &lt;tags&gt;), and when you hover 
+       your mouse over them, they should light up in the browser. Play around with this for a bit to get 
+       a feel for exploring HTML code.</p>
+
+    <p>Here's a stupid table.</p>
+    
+    <table class="someTable" id="exampleTable">       <!-- table                -->
+      <tr class="headerRow">                          <!--    table row         -->
+        <th>First column</th>                         <!--       table header   -->
+        <th>Second column</th>                        <!--       table header   -->
+        <th>Third column</th>                         <!--       table header   -->
+      </tr>
+      <tr>                                            <!--    table row         -->
+        <td>1</td>                                    <!--       table data     -->
+        <td>2</td>                                    <!--       table data     -->
+        <td>3</td>                                    <!--       table data     -->
+      </tr>
+      <tr>                                            <!--    table row         -->
+        <td>4</td>                                    <!--       table dat      -->
+        <td>5</td>                                    <!--       table dat      -->
+        <td>6</td>                                    <!--       table data     -->
+      </tr>
+    </table>
+  
+  </div>
+  
+  <div class="rightColumn">
+    <h4>Right Column</h4>
+    
+    <p>Here's another column! The main purpose of this column is just to show that you can
+       use CSS selectors to get all elements in a specific column.
+    </p>
+
+    <table class="someTable blue" id="steve">
+      <tr class="headerRow">
+        <th>numbers</th>
+        <th>letters</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>A</td>
+      </tr>
+       <tr>
+        <td>2</td>
+        <td>B</td>
+      </tr>
+       <tr>
+        <td>3</td>
+        <td>C</td>
+      </tr>
+       <tr>
+        <td>4</td>
+        <td>D</td>
+      </tr>
+       <tr>
+        <td>5</td>
+        <td>E</td>
+      </tr>
+       <tr>
+        <td>6</td>
+        <td>F</td>
+      </tr>
+    </table>
+  </div>
+</div>

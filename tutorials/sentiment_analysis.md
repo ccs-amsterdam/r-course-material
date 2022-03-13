@@ -1,7 +1,7 @@
 Supervised Sentiment Analysis in R
 ================
 Wouter van Atteveldt & Kasper Welbers
-2020-03
+2022-01
 
 -   [Introduction](#introduction)
 -   [Getting a DTM](#getting-a-dtm)
@@ -39,18 +39,21 @@ For more information and critical perspectives on dictionary based
 sentiment analysis in political communication, see e.g. the references
 below:
 
+-   Wouter van Atteveldt, Mariken A. C. G. van der Velden & Mark
+    Boukes (2021) The Validity of Sentiment Analysis:Comparing Manual
+    Annotation, Crowd-Coding, Dictionary Approaches, and Machine
+    Learning Algorithms, Communication Methods and Measures (online),
+    [doi.org/10.1080/19312458.2020.1869198](https://doi.org/10.1080/19312458.2020.1869198)
 -   Soroka, S., Young, L., & Balmas, M. (2015). Bad news or mad news?
     sentiment scoring of negativity, fear, and anger in news content.
     The ANNALS of the American Academy of Political and Social Science,
     659 (1), 108–121.
+    [doi.org/10.1177/0002716215569217](https://doi.org/10.1177/0002716215569217)
 -   González-Bailón, S., & Paltoglou, G. (2015). Signals of public
     opinion in online communication: A comparison of methods and data
     sources. The ANNALS of the American Academy of Political and Social
     Science, 659(1), 95-107.
--   Barberá, P., Boydstun, A., Linn, S., McMahon, R., & Nagler, J.
-    (2016, August). Methodological challenges in estimating tone:
-    Application to news coverage of the US economy. In Meeting of the
-    Midwest Political Science Association, Chicago, IL.
+    [doi.org/10.1177/0002716215569192](https://doi.org/10.1177/0002716215569192)
 
 For this tutorial, the main lessons of these papers are that you should
 always validate to make sure your results are valid for your task and
@@ -92,10 +95,10 @@ emoticons.
 
 ``` r
 library(quanteda)
-dtm <- corp %>% 
-  tokens %>% 
-  tokens_tolower %>%
-  dfm
+dtm <- corp |>
+  tokens() |>
+  tokens_tolower() |>
+  dfm()
 dtm
 ```
 
@@ -190,10 +193,10 @@ last step is purely optional, but it makes working with it within
 tidyverse slightly easier:
 
 ``` r
-result <- dtm %>% 
-  dfm_lookup(GI_dict) %>% 
-  convert(to = "data.frame") %>% 
-  as_tibble
+result <- dtm |>
+  dfm_lookup(GI_dict) |> 
+  convert(to = "data.frame") |>
+  as_tibble()
 result
 ```
 
@@ -202,7 +205,7 @@ length of documents. We use the `ntoken` function, where a `token` is a
 fancy linguistic term for a word:
 
 ``` r
-result <- result %>% 
+result <- result |> 
   mutate(length = ntoken(dtm))
 ```
 
@@ -214,7 +217,7 @@ a measure of subjectivity to get an idea of how much sentiment is
 expressed in total:
 
 ``` r
-result <- result %>% 
+result <- result |> 
   mutate(sentiment1=(positive - negative) / (positive + negative),
          sentiment2=(positive - negative) / length,
          subjectivity=(positive + negative) / length)
@@ -246,7 +249,10 @@ docs <- docvars(corp)
 docs$doc_id = docnames(corp)
 docs$text = as.character(corp)
 
-docs %>% filter(doc_id %in% sample_ids) %>% mutate(manual_sentiment="") %>% write_csv("to_code.csv")
+docs |> 
+  filter(doc_id %in% sample_ids) |> 
+  mutate(manual_sentiment="") |>
+  write_csv("to_code.csv")
 ```
 
 Then, you can open the result in excel, code the documents by filling in
@@ -255,7 +261,9 @@ results above. Note that I rename the columns and turn the document
 identifier into a character column to facilitate matching it:
 
 ``` r
-validation = read_csv("to_code.csv") %>% mutate(doc_id=as.character(doc_id)) %>% inner_join(result)
+validation = read_csv("to_code.csv") |>
+  mutate(doc_id=as.character(doc_id)) |>
+  inner_join(result)
 ```
 
 Now let’s see if my (admittedly completely random) manual coding matches
@@ -269,7 +277,7 @@ We can also get a ‘confusion matrix’ if we create a nominal value from
 the sentiment using the `cut` function:
 
 ``` r
-validation <- validation %>% 
+validation <- validation |> 
   mutate(sent_nom = cut(sentiment1, breaks=c(-1, -0.1, 0.1, 1), labels=c("-", "0", "+")))
 cm <- table(manual = validation$manual_sentiment, dictionary = validation$sent_nom)
 cm
@@ -294,8 +302,8 @@ feature is in the dictionary:
 
 ``` r
 freqs <- textstat_frequency(dtm)
-freqs %>% 
-  as_tibble %>% 
+freqs |> 
+  as_tibble() |> 
   filter(feature %in% HL_dict$positive)
 ```
 
@@ -324,9 +332,9 @@ HL_dict2 <- dictionary(list(positive = positive.cleaned, negative = negation.wor
 To check, look at the top positive words that are now found:
 
 ``` r
-freqs %>% 
-  filter(feature %in% HL_dict2$positive) %>%
-  as_tibble
+freqs |> 
+  filter(feature %in% HL_dict2$positive) |>
+  as_tibble()
 ```
 
 This seems like a lot of work for each word, but even just checking the
@@ -338,8 +346,8 @@ not matched by any of the terms (using `!` to negate the condition)
 
 ``` r
 sent.words <- c(HL_dict$positive, HL_dict$negative)
-freqs %>% 
-  filter(!feature %in% sent.words) %>% 
+freqs |>
+  filter(!feature %in% sent.words) |> 
   View
 ```
 
@@ -422,8 +430,11 @@ that the last step is done using a regular expression, see for example
 [regexone.com](https://regexone.com/) for a gentle introduction.
 
 ``` r
-dtm_war <- get_dfm(war, feature='token') %>% dfm_trim(min_docfreq=5) %>% dfm_remove(stopwords('english')) %>% 
-  dfm_tolower %>% dfm_remove("[^a-z]", valuetype="regex")
+dtm_war <- get_dfm(war, feature='token') |>
+  dfm_trim(min_docfreq=5) |>
+  dfm_remove(stopwords('english')) |> 
+  dfm_tolower() |>
+  dfm_remove("[^a-z]", valuetype="regex")
 ```
 
 Now let’s have a look at the top words:

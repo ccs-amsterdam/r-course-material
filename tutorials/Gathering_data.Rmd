@@ -1,7 +1,7 @@
 ---
 title: "Gathering data into R"
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "January 8, 2020"
+date: "January 8, 2021"
 output: 
   github_document:
     toc: yes
@@ -11,7 +11,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, fig.show='hide', warning = FALSE, message = FALSE)
 library(printr)
 ```
 
@@ -124,7 +124,7 @@ Instead, it is easier to first `unnest` the data. And as always, tidyverse has t
 First, let's make it into a tibble.
 
 ```{r}
-pt = as.tibble(post)
+pt = as_tibble(post)
 pt
 ```
 
@@ -179,7 +179,8 @@ You can also use the `rvest` package for webscraping to parse XML files. This is
 
 ## HTML (sort of)
 
-HTML is not really used to publish data, but it is good to realize that it is also hierarchically organized. If you have data in HTML format (e.g., on a webpage), you can extract it with the `rvest` package (but you'll need to learn some webscraping)
+HTML is not really used to publish data, but it is good to realize that it is also hierarchically organized. If you have data in HTML format (e.g., on a webpage), you can extract it with the `rvest` package. This is basically what web scraping is all about, as discussed below.
+
 
 
 # APIs
@@ -190,57 +191,86 @@ The great thing about APIs is that it can give you easy access to data. The prob
 
 If an API exists, another thing to look for is if there is already an R package that provides bindings for working with the API. While you can write these yourself, it requires some knowledge of API protocols and even then can take quite some time to figure out. For many usefull APIs there are already R packages, so please do use them.
 
-## Example: The Guardian
+## Google trends
 
-The Guardian (newspaper) has a very nice API that let's you download news content, and there is an R package `guardianR` that allows you to easily access this. 
-
-First, install GuardianR from CRAN as normal and get an API key from https://open-platform.theguardian.com/access/. Then replace the 'test' key below with your actual key:
+Google trends data can be pretty cool if you want to get a decent proxy of what people were interested in over time. 
+It tells you the relative frequency that people searched for certain terms.
+Conveniently, Google trends has an API, and the `gtrends` package provides bindings for this API.
 
 ```{r}
-key = "eb739546-9621-4af7-aa97-fd90f406ad27"
+library(gtrendsR)
 ```
 
-Sending a single query to the API is simple. Let's query the news on the 'backstop'  in the week before Brexit was supposed to happen.
-Note, by default the body (full text) is returned as factor, so we convert it to text and also create a column with the html stripped:
+Now we can for instance look for when people searched for 'covid'. In addition, we distinguish between the Netherlands (NL) and the United States (US), and we'll look from the start of 2020 till the end of 2021.
 
-```{r, eval=F}
-library(GuardianR)
-news = get_guardian("backstop", from.date="2019-03-23", to.date="2019-03-29", api.key = key) %>%
-  as_tibble %>% mutate(body = as.character(body), date=as.Date(webPublicationDate), 
-                       text=str_remove_all(body, "<[^>]+>"))
-news %>% select(webUrl, publication, headline, date, body) %>% mutate(len=str_length(body))
+```{r}
+trend = gtrends('covid', geo=c("NL","US"), time = '2020-01-01 2021-12-31')
+plot(trend)
 ```
 
-As you can see, this includes the metadata (url, headline, date) and full body of the article. 
-For more information on the query syntax and possibilities, see https://open-platform.theguardian.com/documentation/. 
+Note that the y-axis only tells something about the relative frequency of searches. 
+It is an index, where the day with the highest number of searches is 100, and the day with the lowest number of searches is 0.
+But Google trends won't tell you the actual frequency at 0 or 100. 
+For certain types of questions that's OK, but it showcases an important limitation of APIs. 
+You'll be entirely dependent on what information the organization behind the API is willing to provide you with. 
 
-With `GuardianR`, you can only query one month at a time. 
-To query a longer time frame, you can use a for loop like so:
+The `trend` data can also be extracted as a tibble. 
 
-```{r, eval=F}
-library(lubridate)
-results = list()
-months = seq(as.Date("2019-01-01"), by = "month", length = 3) 
-for (i in seq_along(months)) {
-  from = months[i]
-  message(str_c("Querying: ", i, ": ", from))
-  # calculate last day of month
-  to = from
-  month(to) = month(to) + 1
-  to = to - 1
-  # query
-  news = get_guardian("backstop", from.date=from, to.date=to, api.key = key)
-  # store in list 
-  results[[as.character(from)]] = news
-}
-# combine all results and postpr
-results = bind_rows(results)
-print(str_c("Retrieved ", nrow(results), " articles"))
+```{r}
+as_tibble(trend$interest_over_time)
+```
+
+Note that `hits` has these weird `<1` values. A good R lesson here is that the column is now a character (`<chr>`) type, so if you want to plot this data yourself, or do some sort of statistical analysis, you'd first have to replace these values with actual numbers (0 or 1) and convert the column to numeric.
+
+```{r}
+as_tibble(trend$interest_over_time) %>%
+  mutate(hits = as.numeric(ifelse(hits == '<1', 0, hits)))
+```
+
+There's some other fun stuff as well, such as related queries.
+
+```{r}
+as_tibble(trend$related_queries)
+```
+
+## Yahoo stock exchange data
+
+If you're into studying markets, it would be convenient to directly read stock market data into R.
+`Yahoo` has an API for getting this data, and the `quantmod` package provides bindings for working with this API.
+
+```{r, message=F}
+library(quantmod)
+```
+
+In this example, we'll first use the symbol TSLA to get the Tesla Inc stock data.
+For other organizations, you can search [the Yahoo finance page](https://finance.yahoo.com).
+For reference, [ticker symbols](https://en.wikipedia.org/wiki/Ticker_symbol)  are simply unique company identifiers.
+
+```{r, warning=F, cache=T, message=F}
+start_date = as.Date('2010-07-01')
+end_date = as.Date('2021-12-31')
+tesla = getSymbols('TSLA', from=start_date, to=end_date, src='yahoo', auto.assign = F)
+```
+
+The output is a special type of data frame for time series analysis, because often you'd want to use time series to analyse this data. For instance, you could link it to other time series to see if changes in stocks are related to certain developments in society.
+
+For now, let's just have a look at the data. The `candleChart` function from the quantmod package is designed to quickly inspect the overall developments in the stock market over time.
+
+```{r, fig.show='hide'}
+candleChart(tesla)
+```
+
+You could also transform it to a `tibble`, so that you can use all the tidyverse stuff that you know and love.
+Here `as_tibble(tesla)` turns the data into a tibble, but to get the date from the time series object we need to use `index(tesla`). 
+With `bind_cols` we then simply bind the `date = index(tesla)` column and the `as_tibble(tesla)` tibble into a single tibble. 
+
+```{r, results='hide'}
+bind_cols(date = index(tesla), as_tibble(tesla))
 ```
 
 ## Example: CBS
 
-Some providers of open data (such as government institutions) also provide APIs to access their datasets. And moreover, some of them also provide R packages for using these APIs. 
+Some providers of open data (such as government institutions) provide APIs to access their datasets. And moreover, some of them also provide R packages for using these APIs. 
 
 How this works really depends on the package. Here we provide an example of the Dutch CBS (central agency for statistics).
 
@@ -285,4 +315,4 @@ The nice thing about web scrapers is that they are highly versatile. If you find
 
 The sad thing about web scrapers is that they can take some time to build, and it also requires some time to learn how to build proper webscrapers. Covering this topic is out of the scope of this tutorial, but there are good resources available for learning how to build web scrapers. In our experience the Python programming language is more convenient for building scrapers, but with the `rvest` package (for ha-rvest-ing data) it is certainly possible to do webscraping in R. It is also a good way to learn about webscraping (and basic HTML), and the skills are easily transferable to Python.
 
-[This tutorial](https://towardsdatascience.com/tidy-web-scraping-in-r-tutorial-and-resources-ac9f72b4fe47) from Keith McNulty is a nice way to get started, as it also discussed basic HTML and using the Google Chrome Developer tools (that come with Google Chrome). 
+Since this is a pretty big topic, we have a separate tutorial on [web scraping in R](https://www.youtube.com/watch?v=9GR26Y4z_v4).

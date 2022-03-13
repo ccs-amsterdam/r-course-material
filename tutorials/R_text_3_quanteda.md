@@ -1,7 +1,7 @@
 R text analysis: quanteda
 ================
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
-2021-10
+2022-01
 
 -   [Introduction](#introduction)
     -   [The quanteda package](#the-quanteda-package)
@@ -189,11 +189,11 @@ different forms of the same word, such as singular versus plural (“gun”
 or “gun-s”) and different verb forms (“walk”,“walk-ing”,“walk-s”)
 
 ``` r
-text2 <- text %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   ## tokenize, removing unnecessary noise
-  tokens_tolower %>%                                                     ## normalize
-  tokens_remove(stopwords('en')) %>%                                     ## remove stopwords (English)
-  tokens_wordstem                                                        ## stemming
+text2 <- text |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>   ## tokenize, removing unnecessary noise
+  tokens_tolower() |>                                                   ## normalize
+  tokens_remove(stopwords('en')) |>                                     ## remove stopwords (English)
+  tokens_wordstem()                                                      ## stemming
 text2
 
 dtm <- dfm(text2)
@@ -202,13 +202,13 @@ dtm
 
 By now you should be able to understand better how the arguments in this
 function work. The `tolower` argument determines whether texts are
-(TRUE) or aren’t (FALSE) converted to lowercase. `stem` determines
-whether stemming is (TRUE) or isn’t (FALSE) used. The remove argument is
-a bit more tricky. If you look at the documentation for the dfm function
-(`?dfm`) you’ll see that `remove` can be used to give “a pattern of
-user-supplied features to ignore”. In this case, we actually used
-another function, `stopwords()`, to get a list of english stopwords. You
-can see for yourself.
+(`TRUE`) or aren’t (`FALSE`) converted to lowercase. `stem` determines
+whether stemming is (`TRUE`) or isn’t (`FALSE`) used. The remove
+argument is a bit more tricky. If you look at the documentation for the
+dfm function (`?dfm`) you’ll see that `remove` can be used to give “a
+pattern of user-supplied features to ignore”. In this case, we actually
+used another function, `stopwords()`, to get a list of english
+stopwords. You can see for yourself.
 
 ``` r
 stopwords('en')
@@ -233,12 +233,12 @@ created the corpus above. We can now pass this corpus to the `dfm()`
 function and set the preprocessing parameters.
 
 ``` r
-dtm <- corp %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
-  tokens_tolower %>%                                                    
-  tokens_remove(stopwords('en')) %>%                                     
-  tokens_wordstem %>%
-  dfm
+dtm <- corp |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>   
+  tokens_tolower() |>                                                    
+  tokens_remove(stopwords('en')) |>                                     
+  tokens_wordstem() |>
+  dfm()
 dtm
 ```
 
@@ -277,9 +277,9 @@ different parameters.
 Get most frequent words in corpus.
 
 ``` r
-textplot_wordcloud(dtm, max_words = 50)     ## top 50 (most frequent) words
+textplot_wordcloud(dtm, max_words = 50)                          ## top 50 (most frequent) words
 textplot_wordcloud(dtm, max_words = 50, color = c('blue','red')) ## change colors
-textstat_frequency(dtm, n = 10)             ## view the frequencies 
+textstat_frequency(dtm, n = 10)                                  ## view the frequencies 
 ```
 
 You can also inspect a subcorpus. For example, looking only at Obama
@@ -346,12 +346,12 @@ terrorist, terror, etc.).
 ``` r
 terror <- kwic(tokens(corp), 'terror*')
 terror_corp <- corpus(terror)
-terror_dtm <- terror_corp %>%
-  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) %>%   
-  tokens_tolower %>%                                                    
-  tokens_remove(stopwords('en')) %>%                                     
-  tokens_wordstem %>%
-  dfm
+terror_dtm <- terror_corp |>
+  tokens(remove_punct = T, remove_numbers = T, remove_symbols = T) |>
+  tokens_tolower() |>
+  tokens_remove(stopwords('en')) |>
+  tokens_wordstem() |>
+  dfm()
 ```
 
 Now you can focus an analysis on whether and how Presidents talk about

@@ -1,0 +1,17 @@
+base
+printr
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+forcats
+jsonlite
+gtrendsR
+zoo
+xts
+TTR
+quantmod

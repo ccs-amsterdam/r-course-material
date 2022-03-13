@@ -1,12 +1,13 @@
 ---
 title: 'R String Basic'
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "2018-09"
+date: "2022-01"
 output: 
   github_document:
     toc: yes
 editor_options: 
   chunk_output_type: console
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +21,7 @@ library(printr)
 
 The goal of this tutorial is to get you acquainted with basic string handling in R. 
 A large part of this uses the `stringr` included in the [Tidyverse](https://www.tidyverse.org/). 
-See also chapter 14 of [R for Data Science](http://r4ds.had.co.nz/) and the [stringr cheat sheet](https://www.rstudio.com/resources/cheatsheets/#stringr)
+See also chapter 14 of [R for Data Science](http://r4ds.had.co.nz/) and the [stringr cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/strings.pdf)
 
 Note that 'string' is not an official word in R (which uses `character` to denote textual data), 
 but since it's the word used in most documentations I will also use `strings` to refer to objects containing textual data. (AFAIK, the name originates from seeing a text as a `string` or sequence of characters)
@@ -43,10 +44,9 @@ tib = tibble(name=c("john", "mary"))
 class(tib$name)
 ```
 
-(Note that this can be avoided by setting `StringsAsFactors=F` for ~data.frame~ or ~read.csv~)
+Before R version 4.0, textual columns in data frames were automatically converted to a `factor`. A `factor` looks like a `character` column, but it is intended for groups or nominal values. Internally it is stored as a number, with a label attached to each possible value. 
 
-Sometimes, you get unexpected results when you apply a text-based function to a factor. 
-For example, normally `as.numeric` can be used to convert strings to numbers, setting non-numeric strings to NA:
+This makes storing large amounts of data more efficient (numbers are smaller than texts), but sometimes, you get unexpected results when you apply a text-based function to a factor. For example, normally `as.numeric` can be used to convert strings to numbers, setting non-numeric strings to NA:
 
 ```{r}
 as.numeric(c("22", "16", "x"))
@@ -55,7 +55,7 @@ as.numeric(c("22", "16", "x"))
 However, if we have this data encoded as a factor, it gives a completely different result:
 
 ```{r}
-survey = data.frame(age=c("22", "16", "x"))
+survey = data.frame(age=c("22", "16", "1"), stringsAsFactors = TRUE)
 as.numeric(survey$age)
 ```
 
@@ -66,11 +66,11 @@ The trick is to remember that factors are intended as labeled groups, and intern
 as.numeric(as.character(survey$age))
 ```
 
-In general, you can avoid most of these problems by using `tibble` and `read_csv` rather than the base functions, or by making sure you set `StringsAsFactors=F`. For more information on dealing with factors, see the [forcats package](https://www.rstudio.com/resources/cheatsheets/#forcats)
+Since R version 4.0, these problems are much less common, but it's good to be aware of the difference between factors and strings. Also, when using `ggplot` it's important to set factor data types and levels correctly for nominal values as they control the ordering and visualization of nominal data. For more information on dealing with factors, see the [forcats package](https://forcats.tidyverse.org/) and [cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/factors.pdf)
 
 # String basics
 
-R has a number of functions for dealing with strings. For example, `str_length` gives the length of the string:
+The package `stringr` has a number of functions for dealing with strings. For example, `str_length` gives the length of the string:
 
 ```{r}
 str_length("john")
@@ -81,14 +81,14 @@ As usual, these functions can be applied to a vector or column of strings direct
 ```{r}
 str_length(c("john", "mary"))
 str_length(df$name)
-df %>% mutate(len=str_length(name))
+mutate(df, len=str_length(name))
 ```
 
-Other useful functions are str_to_lower, str_to_upper (which mostly mimic built-in `tolower` and `toupper`), and str_to_title.
+Other useful functions are `str_to_lower`, `str_to_upper` (which mostly mimic built-in `tolower` and `toupper`), and `str_to_title`.
 
 ## Combining strings
 
-To combine two strings, you can use str_c (which is equivalent to built-in `paste0`):
+To combine two strings, you can use `str_c` (which is equivalent to built-in `paste0`):
 
 ```{r}
 str_c("john", "mary")
@@ -102,7 +102,7 @@ names = c("john", "mary")
 str_c("Hello, ", names)
 ```
 
-Finally, you can also ask it to ~collapse~ onger vectors after the initial pasting:
+Finally, you can also ask it to *collapse* longer vectors after the initial pasting:
 
 ```{r}
 str_c(names, collapse=" & ")
@@ -111,10 +111,10 @@ str_c("Hello, ", names, collapse=" and ")
 
 ## Subsetting strings
 
-To take a fixed subset of a string, you can use str_. This can be useful, for example, to strip the time part off dates:
+To take a fixed subset of a string, you can use str_sub. This can be useful, for example, to strip the time part off dates:
 
 ```{r}
-dates = c("2019-04-01T12:00", "2012-07-29 1:12")
+dates = c("2019-04-01T12:00", "2012-07-29 01:12")
 str_sub(dates, start = 1, end = 10)
 ```
 
