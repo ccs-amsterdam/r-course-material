@@ -10,7 +10,7 @@ editor_options:
 ---
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE)
 library(printr)
 ```
 
