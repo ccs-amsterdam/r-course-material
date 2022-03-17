@@ -18,7 +18,7 @@ knitr::opts_chunk$set(warning=FALSE, results = FALSE, message=FALSE, fig.path = 
 
 # This tutorial
 
-This tutorial walks you through the formula of a regression model. It is not intended as a first introduction into regression analysis, but serves to help you develop a better intuition for 
+This tutorial walks you through the formula of a regression model. It is not intended as a first introduction into regression analysis, but serves to help you develop a better intuition
 
 In particular, we will focus on developing an understanding of the residual term, which is important to understand in order to more on to more complex models, specifically generalized linear models and multilevel models.
 
@@ -107,13 +107,85 @@ $$y_i = \color{green}{\beta_0 + \beta_1{x}_i} + \color{red}{\epsilon_i}$$
 $$ 5.90 = \color{green}{3.05 + 0.29*7.37} + \color{red}{0.68}$$
 So, we have an observation where $x_i = 7.37$ is 7.37, and $y_i = 5.90$, which is the blue dot in the scatterplot. The prediction for this observation is $3.05 + 0.29*7.37 = 5.22$, which is the point below the blue dot on the green line. The difference of the prediction and the real value of $y_i$ is $5.90 - 5.22 = 0.68$, which is represented by the red line.
 
+Understanding the random component of the regression equation also paves the way to understanding the $R2$ measure. This is a value between 0 and 1 that represent the proportion of variance in $y$ that is explained by the model. 
+
+Recall that the residuals are normally distributed with mean 0. The lower the variance of this distribution, the better the model fit. If the variance is zero (i.e. all dots exactly on the regression line) then the model perfectly explains/predicts $y$ ($R2 = 1$). 
+
+```{r}
+y = b0 + b1*x + rnorm(n, mean=0, sd=0)
+m = lm(y ~ x)
+summary(m)$r.squared
+```
+
+Let's break this down a bit. The R2 of 1 tells us that there is no unexplained variance, by which we mean that the predicted value is exactly the real value of y. In a scatterplot, all dots would be exactly on the regression line. 
+To make this even more obvious, let's again separate the structural and random/error component
+
+```{r}
+structural = b0 + b1*x
+error = rnorm(n, mean=0, sd=0)   ## this is just zero
+predicted_y = structural         ## so this is just the structural part
+```
+
+Now that we have our (perfect) prediction, we can calculate the sum of the squared error (SSE). The error is the difference between the real value of *y*, and the predicted value. So the SSE is literally just squaring these values, and then taking the sum.
+
+```{r}
+error = y - predicted_y
+squared_error = error^2
+sum(squared_error)   
+```
+
+So obviously, if there is no error, the sum of the squared error is zero, and our R2 value is 1 (i.e. no unexplained variance). In other words, we know that the lower boundary of the sum of squares is zero. But what then is the upper boundary? 
+Let's first add some error to the equation, by setting the standard deviation of the error distribution to 1.
+
+```{r}
+structural = b0 + b1*x
+error = rnorm(n, mean=0, sd=1)   ## no longer zero
+y = structural + error
+predicted_y = structural         ## so this is just the structural part
+sum((y - predicted_y)^2)
+```
+
+So we get a value, but how do we know *how high* this is? It makes sense that 0 is the lowest value, but what is the highest value? How large should the variance be for us to say the the explained variance (R2) is 0?
+
+The answer is again quite intuitive. Our goal is to *explain the variance of y*. So what we want to know is *how much of the variance of y has the model explained*?. Thus, our upper boundary is the variance of y itself. 
+
+```{r}
+y - mean(y)
+```
 
 
 
+## Caveat: the calculation of variance is slightly different
 
-Understanding the random component of the regression equation also paves the way to undestanding the $R2$ measure. This is a value between 0 and 1 that represent the proportion of variance in $y$ that is explained by the model. 
 
-Recall that the residuals are normally distributed with mean 0. The lower the variance of this distribution, the better the model fit. If the variance is zero (i.e. all dots exactly on the regression line) then the model perfectly explains/predicts $y$ ($R2 = 1$). The higher the variance of the residuals, the more variance in $y$ that is unexplained. 
+
+```{r}
+structural = b0 + b1*x
+error = rnorm(n, mean=0, sd=1)   ## no longer zero
+y = structural + error
+predicted_y = structural         ## so this is just the structural part
+
+m = lm(y ~ x)
+summary(m)
+
+1 - sum((y - predict(m))^2) / sum((y - mean(y))^2)
+
+```
+
+
+
+So it makes sense that the least possible variance is no variance.
+But how do we know what the largest possible variance is?
+
+
+
+that the least amount of unexplained variance is no variance. 
+
+So we know that 
+
+The higher the variance of the residuals, the more variance in $y$ that is unexplained. 
+
+So we 
 
 The total variance in $y$ is calculated as the sum of the squared difference from the mean of $y$. The variance of the residual is calculated as the sum of the squared difference of the 
 

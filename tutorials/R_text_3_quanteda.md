@@ -122,8 +122,8 @@ I read them from an online source here, but you can also read them from
 your hard drive by specifying the path:
 
 ``` r
-texts <- reattext("c:/path/to/files")
-texts <- reattext("/Users/me/Documents/files")
+texts <- readtext("c:/path/to/files")
+texts <- readtext("/Users/me/Documents/files")
 ```
 
 You can convert the texts directly into a corpus object as above:
@@ -292,7 +292,7 @@ With `docvars(dtm)$President`, we get the character vector with
 president names. Thus, with `docvars(dtm)$President == 'Barack Obama'`
 we look for all documents where the president was Obama. To make this
 more explicit, we store the logical vector, that shows which documents
-are ‘TRUE’, as is\_obama. We then use this to select these rows from the
+are ‘TRUE’, as is_obama. We then use this to select these rows from the
 DTM.
 
 ``` r
@@ -304,10 +304,10 @@ textplot_wordcloud(obama_dtm, max_words = 25)
 ## Compare corpora
 
 Compare word frequencies between two subcorpora. Here we (again) first
-use a comparison to get the is\_obama vector. We then use this in the
+use a comparison to get the is_obama vector. We then use this in the
 `textstat_keyness()` function to indicate that we want to compare the
-Obama documents (where is\_obama is TRUE) to all other documents (where
-is\_obama is FALSE).
+Obama documents (where is_obama is TRUE) to all other documents (where
+is_obama is FALSE).
 
 ``` r
 is_obama <- docvars(dtm)$President == 'Barack Obama' 
@@ -316,7 +316,7 @@ head(ts, 20)    ## view first 20 results
 ```
 
 We can visualize these results, stored under the name `ts`, by using the
-textplot\_keyness function
+textplot_keyness function
 
 ``` r
 textplot_keyness(ts)
