@@ -10,7 +10,7 @@ editor_options:
 ---
 
 ```{r, echo=F, message=F}
-knitr::opts_chunk$set(echo = TRUE, results = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE)
 library(printr)
 ```
 
@@ -300,9 +300,23 @@ parameterEstimates(fit_mod2) %>%
 
 Structural equation modeling allows to estimate models of varying complexity. This includes simply path models, complex latent variable estimations, but also time series, growth curve modelling, cross-lagged-panel analyses and even multilevel structural equation modelling. With `blavaan`, there is even a package to run Bayesian SEMs in R. To get started, check out the following books and websites: 
 
+- [lavaan project website](https://lavaan.ugent.be/)
+
+- [blavaan CRAN repository](https://cran.r-project.org/web/packages/blavaan/index.html)
+
 - Hair, J. F., Black,W., Babin, B., & Andersen, R. (2010). Multivariate data analysis (7th ed.). Upper Saddle River, NJ: Pearson Prentice Hall.
 
 - Kline, R. B. (2016). Principles and practice of structural equation modeling (4th ed.). Methodology in the social sciences. New York: The Guilford Press.
 
-- Bean, J. (2021). Using R for Social Work Research. https://bookdown.org/bean_jerry/using_r_for_social_work_research/structural-equation-modeling.html
+- Very good chapter on SEM by Jerry Bean (in Bean, J.(2021). Using R for Social Work Research.): https://bookdown.org/bean_jerry/using_r_for_social_work_research/structural-equation-modeling.html
 
+
+# References
+
+- Dienlin, T., & Metzger, M. J. (2016). An extended privacy calculus model for SNSs-Analyzing self-disclosure and self-withdrawal in a U.S. representative sample. Journal of Computer Mediated Communication, 21, 368–383. doi:10.1111/jcc4.12163 ([data](https://osf.io/bu74a/))
+
+- Hair, J. F., Black,W., Babin, B., & Andersen, R. (2010). Multivariate data analysis (7th ed.). Upper Saddle River, NJ: Pearson Prentice Hall.
+
+- Kline, R. B. (2016). Principles and practice of structural equation modeling (4th ed.). Methodology in the social sciences. New York: The Guilford Press.
+
+- Krasnova, H., Spiekermann, S., Koroleva, K., & Hildebrand, H. (2010). Online socialnetworks: Why we disclose.Journal of InformationTechnology, 24, 109-125.
