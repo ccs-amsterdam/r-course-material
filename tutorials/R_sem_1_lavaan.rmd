@@ -18,19 +18,19 @@ library(printr)
 
 # Introduction
 
-This tutorial explains the basics of using the package `lavaan` (latent variable analysis) to conduct structural equation modeling (SEM) with latent variables. Although we will focus on SEM with latent variables, `lavaan` can actually be used for a large variety of multivariate statistical models including, path analysis, confirmatory factor analysis, structural equation modeling, multi-group analyses, or growth curve models. For more information have a look at the respective [website](https://lavaan.ugent.be/).
+This tutorial explains the basics of using the package `lavaan` (*la*tent *va*riable *an*alysis) to conduct structural equation modeling (SEM) with latent variables. Although we will focus on SEM with latent variables, `lavaan` can actually be used for a large variety of multivariate statistical models, including path analysis, confirmatory factor analysis, structural equation modeling, multigroup structural equation analyses, multilevel structural equation modeling, and various growth curve models. For more information have a look at the respective [website](https://lavaan.ugent.be/).
 
 ## Basics
 
-In a previous tutorial on [confirmatory factor analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_1_cfa.md) (CFA), I already explained why it is often useful to estimate a "reflective measurement model" when we are interested in somewhat "abstract" concepts (e.g., emotions, attitudes, concerns, personality...). As these concept cannot be measured directly, we have to assess them indirectly using observable indicators such as items in a questionnaire. By using latent modeling, we can estimate these concepts with less measurement error and thus estimate relationship between such concepts with more accuracy.
+In a previous tutorial on [confirmatory factor analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_1_cfa.md) (CFA), I already explained why it is often useful to estimate a *reflective* measurement model when we are interested in somewhat abstract concepts (e.g., emotions, attitudes, concerns, personality...). As these concept cannot be measured directly, we have to assess them indirectly using observable indicators such as items in a questionnaire. By using latent modeling, we can estimate these concepts with less measurement error and thus estimate relationship between such concepts with more accuracy.
 
-Structural equation modeling is basically a combination of latent measurement (as used in CFAs) and standard regressions modeling. We first define our measurement models, i.e., how each item is explained by a latent variable, and then model the relationships between these measurement models. For example, as shown in Figure 1, we estimate intelligence and academic performance based on different observable indicator (e.g., scales, scores, etc.) and then estimate their relationship (in this case b = .8). 
+Structural equation modeling is basically a combination of latent measurement (as used in CFAs) and standard regressions modeling. We first define our measurement models, i.e., how each item is explained by a latent variable and then model the relationships between these measurement models. For example, as shown in Figure 1, we could estimate intelligence and academic performance based on different observable indicators (e.g., scales, scores, etc.) and then estimate their relationship (in this case b = .8). 
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Example_Structural_equation_model.svg/1200px-Example_Structural_equation_model.svg.png)
 *Figure 1*. Example of a structural equation model with latent variables. 
 
 
-But structural equation modeling does not only allow to model bi-variate relationship with more precision. We can model various relationships between several variables:
+But structural equation modeling does not only allow to model bi-variate relationship with more precision. We can model various relationships between several variables. Take, for example, the following model by Krasnova et al. (2010) which puts 9 distinct variables in theoretically derived relationships. In contrast to standard regression modeling, there can be several dependent variables, and some dependent variables can furher be independent variables predicting other dependent variables. As such, SEM is in a way the "big brother" of mediation analyses or path analyses. 
 
 ![](../tutorials/img/sem.png)
 
@@ -38,10 +38,9 @@ But structural equation modeling does not only allow to model bi-variate relatio
 *Figure 2.* Structural equation model with latent variables as estimated by Krasnova et al., 2010. 
 
 
-
 ## Terminology and visual representation
 
-A SEM thus represents theoretically assumed relationships. Estimating a SEM thus requires a better theoretical understanding and a priori formulation of the relationships of interest. As introduced already earlier, such models are often represent visually. For such visualization, we need to follow certain rules (see Figure 3). We need to distinguish latent vs. observed variables, unidirectional and correlational paths, as well as various error representations:
+A SEM thus represents theoretically assumed relationships. Estimating a SEM thus requires a better theoretical understanding and *a priori* formulation of the relationships of interest. As introduced already earlier, such models are often represented visually. For such visualizations, we should follow certain rules (see Figure 3). We need to distinguish latent vs. observed variables, unidirectional and correlational paths, as well as various error representations:
 
 ![](../tutorials/img/legend_pathanalysis.png)
 *Figure 3.* Typical symbols used in path and structural equation models. 
@@ -49,16 +48,13 @@ A SEM thus represents theoretically assumed relationships. Estimating a SEM thus
 
 We further have to distinguish *endogeneous* and *exogeneous* variables. Endogeneous variables are predicted by one or several other variables in the model (e.g., academic performance in Figure 1). Exogeneous variables are not predicted by any other variables in the model (e.g., intelligence in Figure 1). 
 
-
 In contrast to standard regression modeling, SEM allows us to estimate all paths of a potentially infinitely complex model in one step. This is done by creating regression equations for all endogeneous variables. The combination of all equations is what we call the structural equation system. I won't go into the mathematical details here. For more information, have a look at the book "Principles and Practice of Structural Equation Modeling" by Rex Kline.   
 
 # Preparation
 
-In this tutorial, we will estimate several structrural equation models based on the data by Dienlin & Metzger 2016) collected responses from n = 1,156 US American participants to test and extended versions of the privacy calculus model. 
+In this tutorial, we will estimate several structural equation models based on the data by Dienlin & Metzger (2016) who collected responses from n = 1,156 US-American participants to test an extended version of the privacy calculus model. 
 
-To run structurual equation models, we only need the package `lavaan`. Some further functions to evaluate SEMs are included in the package `semTools`, which we will load as well. 
-
-But as we will have to wrangle the data bit and want to assess normality in the data, we will also load the package collection `tidyverse` and the package `psych`
+To run structurual equation models, we only need the package `lavaan`. But as we will have to wrangle the data bit and want to assess normality in the data, we will also load the package collection `tidyverse` and the package `psych`
 
 
 
@@ -67,16 +63,13 @@ But as we will have to wrangle the data bit and want to assess normality in the 
 library(tidyverse)
 library(psych)
 
-# Structural equation modeling packages
+# Structural equation modeling package
 library(lavaan)
-library(semTools)
-
-
 ```
 
 ## Getting the data
 
-Dienlin and Metzger fortunately published the data on the Open Science Framework (osf.io). The function `read.csv()` fortunately allows us to load the data directly from the website. 
+Dienlin and Metzger (2016) fortunately published the data on the Open Science Framework (https://osf.io/bu74a/). The function `read.csv()` allows us to load the data directly from the website. 
 
 ```{r}
 d <- read.csv("https://osf.io/bu74a/download", header=TRUE, na.strings="NA") %>%
@@ -106,7 +99,7 @@ names(d)
 
 The authors state that the sample is representative for the US. Participants are on average M = 46.91 years old and 42.6% are female. 
 
-The data sets includes items that measured:
+The data sets includes the following scales:
 
 - Perceived benefits of using Facebook (FB.BEN*)
 - Perceived concerns (PRI.CON*)
@@ -119,7 +112,7 @@ The data sets includes items that measured:
 
 ## Simple confirmatory factor analysis
 
-Technically speaking, a simple reflective measurement model already represents a SEM. So let's start simple and estimate a comparatively simple CFA for the latent variable "privacy concerns". Before we do so, we should check whether the items are normally distributed and whether the assumptions of multivariate normality is violated. 
+Technically speaking, a simple reflective measurement model already represents a SEM. So let's start simple and estimate a comparatively simple CFA for the latent variable "privacy concerns". Before we do so, we should check whether the items are normally distributed and whether the assumption of multivariate normality is violated. 
 
 ```{r}
 # Check normal distribution of individual items
@@ -139,7 +132,7 @@ d %>%
 # Check multivariate normal distribution
 d %>%
   select(PRI.CON_1:PRI.CON_4) %>%
-  mardia(plot = FALSE) # We should use MLR instead of ML
+  mardia(plot = FALSE) # We could use MLR instead of ML
 ```
 
 Based on these analyses, we can conclude that all items are fairly normally distributed. The assumption of multivariate normality, however, was nonetheless violated (significant Mardia tests for skewness and kurtosis). This is not necessarily a problem (in fact psychological measurements are hardly ever multivariate normally distributed), but we can choose a more robust estimator later to account for this. 
@@ -148,7 +141,7 @@ Based on these analyses, we can conclude that all items are fairly normally dist
 
 `latent variable =~ indicator1 + indicator2 + ... + indicator_n`
 
-The reason why this model syntax is so short, is that behind the scenes, the sem() function, which wraps around this model in the next step, will take care of several things. First, by default, the factor loading of the first indicator of a latent variable is fixed to 1, thereby fixing the scale of the latent variable. Second, residual variances are added automatically. We can get a comprehensive output via the `summary()` function. 
+The reason why this model syntax is so short is that behind the scenes, the sem() function, which wraps around this model in the next step, will take care of several things. First, by default, the factor loading of the first indicator of a latent variable is fixed to 1, thereby fixing the scale of the latent variable. Second, residual variances are added automatically. We can get a comprehensive output via the `summary()` function. 
 
 ```{r}
 # Model as a string
@@ -158,9 +151,11 @@ cfa_priv <- "
 
 # Fitting the model
 fit_cfa <- sem(model = cfa_priv, data = d)
+fit_cfa_robust <- sem(model = cfa_priv, estimator = "MLR", data = d) # Fitting the same model with a robust estimator
 
 # Most comprehensive output
 summary(fit_cfa)
+summary(fit_cfa_robust)
 ```
 
 
@@ -188,14 +183,19 @@ model1 <- "
   self_dis ~ priv_con
 "
 
+# Fit model
 fit_m1 <- sem(model = model1, 
-               data = d)
-summary(fit_m1, std = T)
+              estimator = "MLR",
+              data = d)
+
+# Output
+summary(fit_m1, 
+        std = T)
 ```
 
-Note that I added the argument `std = T` to the summary function to also get standarized beta coefficients for the estimated relationships. These can be interpreted as effect sizes as they range from 0 to 1. 
+Note that I added the argument `std = T` to the summary function to also get standardized beta coefficients for the estimated relationships. These can be interpreted as effect sizes as they range from 0 to 1. 
 
-We now see that the "Parameter Estimates" section of the output not only include latent variables, but also regressions. We can see that the relationship between privacy concerns and self-disclosure is estimated to be $b = -0.27, $\beta$ = = .32, p < .001$. This can be regarded as a medium-sized, negative relationship. 
+We now see that the "Parameter Estimates" section of the output not only include latent variables, but also regressions. We can see that the relationship between privacy concerns and self-disclosure is estimated to be b = -0.27, $\beta$ = = .32, p < .001. This can be regarded as a medium-sized, negative relationship. 
 
 
 ## Model from the paper
@@ -203,6 +203,8 @@ We now see that the "Parameter Estimates" section of the output not only include
 Let us move on to estimate the actual model from the paper. Figure 4 shows the path model (including all results) from the article:
 
 ![](../tutorials/img/dienlin_sem.png)
+*Figure 4*: Structural equation model estimated by Dienlin & Metzger (2016).
+
 We can see that we have to define five latent variables that consistn of 3-4 items each. Further, we have to define two regression equations as there are two endogeneous variables in the model (Self-Disclosure and Self-Withdrawal). 
 
 
@@ -220,7 +222,7 @@ model2 <- "
   self_wit ~ priv_con + perc_ben + self_eff
 "
 
-fit_mod2 <- sem(model2, data = d)
+fit_mod2 <- sem(model2, estimator = "MLR", data = d)
 summary(fit_mod2, std = T)
 ```
 
@@ -258,17 +260,17 @@ summary(fit_mod2, fit = T, std = T)
 
 # Reporting results
 
-As a final aspect of SEM, we should talk about how we can report results from such a complex analysis. There are generally three ways: 
+As a final aspect of SEM, we should talk about how to report results from such a complex analysis. There are generally three ways: 
 
-1. We draw a respective path model and include the standardized coefficients on the arrows (this is done most often).
+1. We draw a respective path model and include the standardized coefficients on the arrows (this is done most often, see Figure 1).
 2. We create a table that includes all relevant coefficients and information about each of the paths. 
 3. We plot a so-called coefficient plot.
 
-In the following, we will shortly engage with 2. and 3. Although there are packages to plot the path models directly as well (e.g., `tidySEM` or `semPaths`), they usually don't work as simply. 
+In the following, we will shortly engage with 2. and 3. Although there are packages to plot the path models directly as well (e.g., `tidySEM` or `semPaths`, see Figure 4), they usually don't work that well and drawing the model with e.g., powerpoint is - in my opinion - still the better option. 
 
 ## Inspecting individual paths
 
-We can use the function `parameterEstimates()` to get all coefficients estimated in the model including their unstandarized estimates, confidence intervalls, and standardized coefficients. 
+We can use the function `parameterEstimates()` to get all coefficients estimated in the model including their unstandardized estimates, confidence intervals, and standardized coefficients. 
 
 ```{r}
 parameterEstimates(fit_mod2, standardized = T)
@@ -277,7 +279,7 @@ parameterEstimates(fit_mod2, standardized = T)
 
 ## Plotting results
 
-A very elegant way of presenting the results is to plot the unstandardized effects with their confidence intervalls in a so-called coefficient plot. For this, we have to filter those paths that contain regressions, rename some variables and simply use the `geom_pointrange()` function from the ggplot2 package to get the right plot. 
+A very elegant way of presenting the results is to plot the unstandardized effects with their 95% confidence intervals in a so-called coefficient plot. For this, we have to filter those paths that contain regressions, rename some variables and simply use the `geom_pointrange()` function from the ggplot2 package to get the right plot. 
 
 ```{r}
 parameterEstimates(fit_mod2) %>%
@@ -292,7 +294,6 @@ parameterEstimates(fit_mod2) %>%
   theme_minimal() +
   labs(x = "", y = "unstd. estimate")
 ```
-
 
 
 
