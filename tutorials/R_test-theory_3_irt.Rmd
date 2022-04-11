@@ -1,0 +1,380 @@
+---
+title: 'Item Response Theory: Basics'
+author: "Philipp Masur"
+date: "2022-03"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE)
+library(printr)
+```
+
+
+# Introduction
+
+This tutorial provides an introduction to fitting item response theory (IRT) models with the R package `mirt` (multidimensional item response theory, version 1.36.1; Chalmers, 2022, [CRAN page](https://cran.r-project.org/web/packages/mirt/index.html)). 
+
+IRT refers to a set of mathematical models which aim to explain the relationship between a latent ability, trait, or proficiency (denoted $\Theta$) and its observable manifestations (e.g., multiple-choice questions, true-false items, items...). In contrast to classical test theory (CTT), IRT focuses on the pattern of responses and considers responses in probabilistic terms, rather than focusing on composite variables and linear regression theory. IRT thereby accounts for...
+
+- *item discrimination*: ability of an item to differentiate between respondents with different levels of proficiency.
+- *item difficulty*: the likelihood of a correct response, expressed as the proficiency level at which 50% of the participant sample is estimated to answer an item correctly.
+- Depending on the model some other parameters such as e.g., *guessing probability*...
+
+Assessing item difficulties is useful in matching the test and trait levels of a target population and in ensuring that the entire range of the proficiency is covered. Therefore, there are several advantages to IRT models (compared to CTT models):
+
+1. The stronger focus on item difficulty generally leads to scales that perform better at differentiating at the extremes of proficiency.
+
+2. Item banks that are developed using IRT often provide a good basis for creating smaller scales or parallel tests that still exhibit a high validity and reliability. 
+
+3. It allows for computer adaptive testing (CAT). This approach can greatly approach the efficiency of testing. In CAT, the test items are selected to match each individual's proficiency, so that the s/he will not be bored by easy items or frustrated by overly difficult items.
+
+4. Specific IRT models (e.g., the Rasch model, see further below) has specific mathematical properties that are highly desirable, such as a) the number-correct score is a sufficient estimation of $\Theta$, b) specific objectivity, which means that item and person parameters will be similar even if only a subset of the item pool is used or a different population is studied. 
+
+The theoretical background of IRT models is to comprehensive to be covered here. Rather, this tutorial aims to introduce the main models and discuss their properties. For further study, we refer to the excellent book "Item Response Theory" by Christine DeMars. In this short introductory tutorial, we focus on three of the most used IRT models: the 3PL model, the 2PL model, and finally the 1PL or Rasch model. These models are named by the number of item parameter used in the function that models the relationship between $\Theta$ and the item response (0/1). Each model has unique properties but all of them are suited to estimate latent variables from binary items (e.g., knowledge tests), which we will deal with in this tutorial. There are also more complex IRT models, such as e.g., graded response models, which can be used for non-binary items (e.g., likert-type scales). Yet, these will be discussed in a more advanced tutorial. 
+
+# Preparation and Data
+
+Although we are going to focus on the the package `mirt` in this tutorial, there are actually several packages that can be used to estimated IRT models. The most common ones are [`ltm`](https://cran.r-project.org/web/packages/ltm/index.html), [`eRm`](https://cran.r-project.org/web/packages/eRm/index.html), or [`TAM`](https://cran.r-project.org/web/packages/TAM/index.html). This article by Choi & Asilkalkan (2019) also provides an overview of all available packages and their specific advantages: https://doi-org.vu-nl.idm.oclc.org/10.1080/15366367.2019.1586404. 
+
+For this tutorial, we are going to load the `tidyverse` (for data wrangling and visualization) and `mirt` (for the main IRT analyses). We further are going to load the package `ggmirt`, which represents an extension to `mirt` and provides functions to plot more publication-ready figures and helps to assess item, person, and model fit. 
+
+```{r packages}
+# Data wrangling
+library(tidyverse)
+
+# Very comprehensive package for IRT analyses
+library(mirt)
+
+# Extension for 'mirt' 
+# devtools::install_github("masurp/ggmirt")
+library(ggmirt)
+```
+
+For `ggmirt` package includes a convenient function to simulate data for IRT analyses. Let's quickly create a data set with 500 observations and 10 items that should fit a 3PL, 2PL and perhaps even a 1PL model. 
+
+```{r}
+set.seed(42)
+d <- sim_irt(500, 10, discrimination = .25, seed = 42)
+head(d)
+
+```
+
+As you can see, each "participants" has answered 10 items that are binary. Imagine we would have administered a test (e.g., LSAT, PISA, knowledge test, exam,...) to 500 people. The score 1 means this person has answered a particular question/item *correctly*. The score 0 means, this person has answered this item falsely. 
+
+# 3PL model
+
+The 3PL model takes item discrimination (first parameter: $a$), item difficulty (second parameter: $b$), and guessing probability (third parameter: $c$) into account. Take a look at Fig. 1 below. It shows a typical item characteristic curve (ICC, but not to be mistaken for the intra-class correlation). The x-axis shows the latent ability ($\Theta$) ranging from -4 to 4, with 0 being the average ability in the studied population. The y-axis shows the probability of solving the item. The curve thus represents the probability of answering this item given a certain level on the latent ability. In this example, this 3PL model provides a smooth curve for this item because it is based on item discrimination (steepness of the slope), difficulty (point of inflexion at which the probability of answering the item correctly is 50%) and the guessing probability (slightly raised lower asymptote).
+
+```{r, echo = F, fig.width = 5, fig.height = 3.75}
+example <- mirt(d, 1, itemtype = "3PL", guess = .25, verbose = F)
+extr <- extract.item(example, 4)
+theta <- matrix(seq(-4, 4, by = 0.01))
+trace <- probtrace(extr, theta)
+d2 <- data.frame(x = as.vector(theta), y = trace[,2])
+
+ggplot(d2, aes(x = x, y = y)) +
+  geom_line() +
+  geom_hline(yintercept = .5, linetype = "dashed", size = .5, color = "grey") +
+  geom_vline(xintercept = .71, linetype = "dashed", size = .5, color = "grey") +
+  geom_hline(yintercept = .0923, linetype = "dashed", size = .5, color = "grey") +
+  geom_point(aes(x = 0.71, y = 0.50), size = 2) +
+  theme_classic() +
+  ylim(0, 1) +
+  labs(x = expression(theta), y = expression(P(theta)))
+```
+
+The steeper the slope, the better the item is at differentiating people clearly in close proximity to its difficulty. The lower the asymptote, the lower the likelihood of selecting the right response by chance. As the item difficulty (point of inflexion is slightly above the average: 0.71), the item can be solved by a majority of potential participants. 
+
+So how do we fit such a model?
+
+## Fitting the model
+
+To fit any IRT model, we simply use the function `mirt()`. In a first step, we specify the model itself. In this case, we simply want to estimate a uni-dimensional model, so we use the following string command `"Factor = item_1 - item_n"`. The syntax for specifying models is comparatively simple, but for more complex (e.g., multidimensional models), see the some examples using `?mirt`. It makes sense to save this string in a separate object. 
+
+Next, we provide the function itself with
+
+a) the data set, which only contains the relevant variables (i.e., potential id variables have to be excluded)
+b) the previously specifed model (string)
+c) the type of model we want to estiamte (in this case "3PL")
+
+I am adding `verbose = FALSE` to not print information about the iterations. But you can remove this as well. 
+
+```{r}
+unimodel <- 'F1 = 1-10'
+
+fit3PL <- mirt(data = d, 
+               model = unimodel,  # alternatively, we could also just specify model = 1 in this case
+               itemtype = "3PL", 
+               verbose = FALSE)
+fit3PL
+```
+
+The created object is of class "SingleGroupClass" and contains all necessary information and data to assess the model. By running the object itself, we get some information about the type of estimation as well as some model fit indices (including AIC and BIC), which can be used to compare models with one another. 
+
+## Understanding IRT parameter
+
+To a certain degree, an IRT analysis is similar to a factor analysis in CTT. If we use the `summary()` function, we get the so-called factor solution including factor loadings (F1) and the communalities (h2), which are squared factor loadings and are interpreted as the variance accounted for in an item by the latent trait. Almost all of the items in this case have a substantive relationship (loadings > .50) with the latent trait.
+
+```{r}
+# Factor solution
+summary(fit3PL)
+```
+
+
+In IRT, however, we are usually more interested in the actual IRT parameters as discussed above (discrimination, difficulty and guessing probability). They can be extracted as follows:
+
+```{r}
+params3PL <- coef(fit3PL, IRTpars = TRUE, simplify = TRUE)
+round(params3PL$items, 2) # g = c = guessing parameter
+```
+
+The values of the slope (a-parameters) parameters ranged from 0.84 to 1.80. This parameter is a measure of how well an item differentiates individuals with different theta levels. Larger values, or steeper slopes, are better at differentiating people. A slope also can be interpreted as an indicator of the strength of a relationship between and item and latent trait, with higher slope values corresponding to stronger relationships. 
+
+The location or difficulty parameters (b-parameter) is also listed for each item. Location parameters are interpreted as the value of theta that corresponds to a .50 probability of responding correctly at or above that location on an item. The location parameters show that the items cover a wide range of the latent trait.
+
+## Model fit, person fit, and item fit evaluation
+
+Similar to factor analytical approaches, we can assess how well the model fits the data. Rather than using a a $\chi^2$ statisic, we use a specific index, *M2*, which is specifically designed to assess the fit of item response models. 
+
+```{r}
+M2(fit3PL)
+```
+
+As we can see, the M2 statistic is comparatively low and non-significant. So there are no concerning differences between the model and the data. This is further supported by a very low RMSEA and a CFA and TLI of 1.
+
+In IRT, however, we are usually more interested in *item*- and *person*-fit indices. IRT allows us to assess how well each items fits the model and whether the indiviual response patterns align with the model. 
+
+
+Let us start with item fit: Similar to many other areas, different indices have been proposed to assess item fit. We can use the function `itemfit()` to get a variety of them. By default, we receive the `S_X2` by Orlando and Thissen (2000) and the corresponding dfs, RMSEA and p-values. This test should be non-significant to indicate good item fit. As we can see here, only item V9 shows a lower fit with the model. Proponents of the "Rasch Model" (see further below) often rather report infit and outfit statistics. We can get those by adding the argument `fit_stats = "infit"`). We get both mean-squared and standardized versions of these measures (Linacre provides some guidelines to interpret these: https://www.rasch.org/rmt/rmt162f.htm). Roughly speaking the non-standardized values should be between .5 and 1.5 to not be degrading. In the package `ggmirt`, we can also use the function ´itemfitPlot()` to inspect this visually. 
+
+```{r}
+itemfit(fit3PL)
+itemfit(fit3PL, fit_stats = "infit") # typical for Rasch modeling
+itemfitPlot(fit3PL)
+```
+
+We again see that item V9 has a lower fit (outfit value close to .5), but according to Linacre's guidelines, this should not be concerning. 
+
+## Assessing person fit
+
+We can technically produce the exact same measures for each person to assess how well each person's response patterns aligns with this model. Think about it this way: If a person with a high theta (that is high latent ability) answers does not answer an easy item correctly, this person does not fit the model. Conversely, if a person with a low ability answer a very difficult question correctly, it likewise doesn't fit the model. In practice, there will most likely be a few people who do not fit the model well. But as long as the number of non-fitting respondents is low, we are good. We mostly look again at infit and outfit statistics. If less than 5% of the respondents have higher or lower infit and outfit values than 1.96 and -1.96, we are good. 
+
+```{r}
+head(personfit(fit3PL))
+personfit(fit3PL) %>%
+  summarize(infit.outside = prop.table(table(z.infit > 1.96 | z.infit < -1.96)),
+            outfit.outside = prop.table(table(z.outfit > 1.96 | z.outfit < -1.96))) # lower row = non-fitting people
+personfitPlot(fit3PL)
+```
+
+
+## Typical IRT plots
+
+Next to overall model fit, item and person fit, we can evaluate many more things. Some typical questions include:
+
+1. How well do the items cover the range of the latent ability?
+2. Is there any redundancy in the items?
+3. At what theta levels does the scale perform best?
+
+A lot of these questions can be answered by visualizing different aspects of the IRT models. 
+
+## Item Person Map (Wright Map)
+
+The first question can be assessed using a so-called "Item Person Map" (also known as Kernel Density Plots or Wright Maps). This visualization first plots the distribution of the latent ability in the studied sample. Next, we also plot each item's difficulty on the same theta scale. Aligning both plots shows us how well the items cover the latent ability. 
+
+```{r, fig.height=6.5, fig.width = 5}
+itempersonMap(fit3PL)
+```
+
+### Item Characteristics Curves (Trace Plots)
+
+Item characteristic curves or trace plots (we already saw one earlier) visualize all three IRT parameters for all the items. This visualization is helpful in better understanding the unique properties of each item. It can also be helpful to identify gaps in assessment as well as differences in slope
+
+```{r}
+tracePlot(fit3PL, data = d)
+tracePlot(fit3PL, data = d, facet = F, legend = T) + scale_color_brewer(palette = "Set3")
+```
+
+Particularly when plotted on top of each other, we can clearly see the differences in slope, difficulty, and guessing. 
+
+
+### Item Information Curves
+
+Another way of looking at the quality of each item is by plotting so call item information curves. Information is a statistical concept that refers to the ability of an item to accurately estimate scores on theta. Item level information clarifies how well each item contributes to score estimation precision with higher levels of information leading to more accurate score estimates.
+
+
+```{r}
+itemInfoPlot(fit3PL, data = d) + scale_color_brewer(palette = "Set3")
+itemInfoPlot(fit3PL, data = d, facet = T)
+```
+
+Here we, see clearly that some items offer most information on higher theta levels whereas others cover the entire range of theta. 
+
+
+### Test Information Curves
+
+The concept of "information" can also be applied to the entire scale. Here, we see that the scale is very good at estimating theta scores between -2 and 3, but has less precision at estimate theta scores at the extremes.
+
+```{r}
+testInfoPlot(fit3PL, adj_factor = 2)
+```
+
+
+### Scale Characteristic Curves
+
+A last quality of a IRT model can be that the bare number-correct-score (sum score of correct responses) is a sufficiently good estimation of the underlying trait. A plot of the so-called scale characteristic curve allows to assess this visually by plotting the relationship between theta and the number-correct-score. 
+
+```{r}
+scaleCharPlot(fit3PL)
+```
+
+This curve usually takes the form of a S-shape as the relationship is stronger in the middle range of theta and worse at the extremes (as already seen in the test information curve). We can of course also test this with a simple correlation. First, we extract the latent IRT score using the function `fscores()`. We then correlate it with the simple number-correct-score. 
+
+```{r}
+score <- fscores(fit3PL)
+sumscore <- rowSums(d)
+cor.test(score, sumscore)
+```
+
+As we can see, they correlate almost perfectly. 
+
+# 2PL model
+
+The 2PL model only differs from the 3PL model in one regard: All items are assumed to have no guessing probability. So the model only takes item discrimination (a) and item difficulty into account. The general procedure to estimate and assess the model remains the same. I hence only pinpoint to differences and do not repeat all steps outlined for the 3PL model. 
+
+## Fitting the model
+
+```{r}
+fit2PL <- mirt(d, 1, itemtype = "2PL")
+fit2PL
+```
+
+## Compare fit with Rasch model
+
+We can always compare different models that are based on the same data. Using the function `anova()`, we can check whether the models differ based on various fit indices and a $\chi^2$ test. In this case, the 2PL actually fits the data sightly better, but the difference is not significant. 
+
+```{r}
+anova(fit2PL, fit3PL)
+```
+
+If we inspect the IRT parameters, the third parameter (c, here denoted as g) is fixed to 0. 
+
+```{r}
+coef(fit2PL, IRTpars = TRUE, simplify = TRUE)
+```
+
+
+## Trace plot
+
+The difference between the 3PL and the 2PL model is particularly visible in the trace plot. 
+
+```{r}
+tracePlot(fit2PL, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+  scale_color_brewer(palette = "Set3") +
+  labs(title = "2PL - Traceplot")
+```
+
+The curves have different slopes, but they do not have different asymptotes (yintercepts = guessing probability). 
+
+
+# 1PL or Rasch model
+
+The 1PL model gets rid of yet another parameter: item discrimination. It basically constrains item discrimination to be equal across all items. Only item difficulty is allowed to vary. 
+
+This constrained model is rather an "ideal" measurement model than a model that can be perfectly fitted to the data. Yet, if we find items that fit this model sufficiently, it actually has some mathematical properties that cannot be obtained with
+less constrained models (e.g., 2PL or 3PL models). For this reason, many scholars favor this measurement model (particularly those following the Rasch School of Measurement)
+
+1. For this model, the number-correct score is particularly a sufficient estimation of theta.
+2. Due to the fixed discrimination parameter, item characteristic curves cannot cross. Items thus do not differ in how well they differentiate respondents.
+3. Such a model has a so-called specific objectivity: Because the Rasch model is based on the idea that items are designed to fit certain properties, instead of finding a model that fits the data, item as well as person parameter estimates are invariant across samples. Person (i.e., proficiency scores) and item parameters (i.e., item difficulty) thus will be similar even if only a subset of the item pool is used or a different population is studied. This makes it very easy to create smaller tests, parallel test or even adaptive testing pools. 
+
+## Fitting the model
+
+```{r}
+fitRasch <- mirt(d, 1, itemtype = "Rasch")
+fitRasch
+```
+
+## Compare models
+
+```{r}
+anova(fitRasch, fit2PL)
+```
+
+If we inspect the IRT parameters, the first (a, item discrimination) is constrained to be equal and the third parameter (c, here denoted as g) is fixed to 0. 
+
+```{r}
+coef(fitRasch, IRTpars = TRUE, simplify = TRUE)
+```
+
+
+## Trace plot
+
+Again, the difference between the 3PL, 2PL and the 1PL (Rasch) model is particularly visible in the trace plot: 
+
+```{r}
+tracePlot(fitRasch, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+  scale_color_brewer(palette = "Set3") +
+  labs(title = "1PL - Traceplot")
+```
+
+All items have the exact same slope.
+
+
+## Creating smaller tests or parallel tests
+
+```{r}
+itempersonMap(fitRasch)
+```
+
+We can create smaller, but parallel tests by distributing similar items into to subset pools. Here, I am simply inspecting the item person map and try to form to sets that equally cover the range of the latent ability. 
+
+```{r}
+subset1 <- d %>%
+  select(V2, V10, V3, V4, V7)
+subset2 <- d %>%
+  select(V6, V8, V5, V1, V9)
+
+test1 <- mirt(subset1, 1, itemtype = "Rasch")
+test2 <- mirt(subset2, 1, itemtype = "Rasch")
+```
+
+
+We can assess their similarity be plotting two test information curves on top of each other:
+
+```{r}
+testInfoCompare(test1, test2)
+```
+
+As we can see, both test sufficiently overlap in their information curve. So they are very likely to correlate highly with the original test 
+
+```{r}
+cor.test(fscores(test1), fscores(fitRasch))
+cor.test(fscores(test2), fscores(fitRasch))
+```
+
+
+# Where to go next?
+
+IRT is a broad field and there are many more models (e.g., graded response models, multidimensional models, 4PL models...). A good starting point is the extended literature:
+
+- DeMars, C. (2010). Item response theory. Oxford University Press.
+
+- Embretson, S. E., & Reise, S. P. (2013). Item response theory (2nd ed.). Psychology Press.
+
+There are also good online resources:
+
+- Website dedicated to Rasch modeling: https://www.rasch.org/
+
+
+
+# References
+
+- DeMars, C. (2010). Item response theory. Oxford University Press.
+
+- Orlando, M. & Thissen, D. (2000). Likelihood-based item fit indices for dichotomous item response theory models. Applied Psychological Measurement, 24, 50-64.
