@@ -48,6 +48,7 @@ The following tutorials can be used to teach basics of test theory and particula
 |----|---|---|
 | [Test Theory and Confirmatory Factor Analysis](tutorials/R_test-theory_1_cfa.md) | [CFA in R](https://www.youtube.com/watch?v=uKlagNgC-GY) | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia; [lavaan](https://lavaan.ugent.be/): cfa, fitMeasures, modindices; [semTools](https://cran.r-project.org/web/packages/semTools/semTools.pdf): reliability |
 | [Exploratory Factor Analysis](tutorials/R_test-theory_2_efa.md) | [EFA in R](https://youtu.be/AXaBMDA34YM) | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia, fa.parallel, nfactors, fa, fa.diagram, omega |
+| [Item Response Theory (IRT)](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt.md) |  | mirt: mirt; ggmirt: various |
 
 
 # Text analysis 
