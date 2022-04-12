@@ -4,6 +4,7 @@ author: "Philipp Masur"
 date: "2022-03"
 output: 
   github_document:
+    pandoc_args: --webtex
     toc: yes
 editor_options: 
   chunk_output_type: console
@@ -92,7 +93,7 @@ ggplot(d2, aes(x = x, y = y)) +
 
 In this example, this 3PL model provides a smooth curve for this item because it is based on item discrimination (steepness of the slope), difficulty (point of inflexion at which the probability of answering the item correctly is 50%) and the guessing probability (slightly raised lower asymptote). The mathematical form of the 3PL model is:
 
-$P(\theta_j) = c_i + (1-c_i)\frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$
+$$P(\theta_j) = c_i + (1-c_i)\frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$$
 
 Here, the probability of a correct response $P(\theta)$ given a person's ability $\theta$ is expressed as a function of all three item parameters and a person's ability, where $i$ indicates the item and $j$ indicates an individual person. In the figure, the steeper the slope, the better the item is at differentiating people clearly in close proximity to its difficulty. The lower the asymptote, the lower the likelihood of selecting the right response by chance. As the item difficulty (point of inflexion is slightly above the average: 0.71), the item can be solved by a majority of potential participants. 
 
@@ -253,7 +254,7 @@ As we can see, they correlate almost perfectly.
 The 2PL model only differs from the 3PL model in one regard: All items are assumed to have no guessing probability. So the model only takes item discrimination (a) and item difficulty into account. The mathematical form is hence (we simply delete the part before the fraction):
 
 
-$P(\theta_j) = \frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$
+$$P(\theta_j) = \frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$$
 
 
 The general procedure to estimate and assess the model remains the same. I hence only pinpoint to differences and do not repeat all steps outlined for the 3PL model. 
@@ -297,11 +298,11 @@ The curves have different slopes, but they do not have different asymptotes (yin
 
 The 1PL model gets rid of yet another parameter: item discrimination. It basically constrains item discrimination to be equal across all items. Only item difficulty is allowed to vary. The mathematical form hence becomes:
 
-$P(\theta_j) = \frac{e^{1.7a(\theta_j-b_i)}}{1+e^{1.71a(\theta_j-b_i)}}$
+$$P(\theta_j) = \frac{e^{1.7a(\theta_j-b_i)}}{1+e^{1.71a(\theta_j-b_i)}}$$
 
 Note that there is no subscript for the letter $a$, because it is constrained to be the same for all items. The Rasch model (stemming from a different scholarly tradition) is mathematically equivalent, but is often expressed slightly differently:
 
-$P(\beta) = \frac{e^{(\beta-\delta_i)}}{1+ e^{(\beta-\delta_i)}}$
+$$P(\beta) = \frac{e^{(\beta-\delta_i)}}{1+ e^{(\beta-\delta_i)}}$$
 
 It is basically the same as the equation above, but the 1.7 constant is omitted. Further, the typical notational system uses $\delta$ instead of $b$ and $\beta$ instead of $\theta$. 
 

@@ -40,7 +40,8 @@ page](https://cran.r-project.org/web/packages/mirt/index.html)).
 
 IRT refers to a set of mathematical models which aim to explain the
 relationship between a latent ability, trait, or proficiency (denoted
-*Θ*) and its observable manifestations (e.g., multiple-choice questions,
+![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta")) and
+its observable manifestations (e.g., multiple-choice questions,
 true-false items, items…). In contrast to classical test theory (CTT),
 IRT focuses on the pattern of responses and considers responses in
 probabilistic terms, rather than focusing on composite variables and
@@ -74,7 +75,8 @@ IRT models (compared to CTT models):
 
 4.  Specific IRT models (e.g., the Rasch model, see further below) has
     specific mathematical properties that are highly desirable, such
-    as a) the number-correct score is a sufficient estimation of *Θ*, b)
+    as a) the number-correct score is a sufficient estimation of
+    ![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta"), b)
     specific objectivity, which means that item and person parameters
     will be similar even if only a subset of the item pool is used or a
     different population is studied.
@@ -86,13 +88,14 @@ excellent book “Item Response Theory” by Christine DeMars. In this short
 introductory tutorial, we focus on three of the most used IRT models:
 the 3PL model, the 2PL model, and finally the 1PL or Rasch model. These
 models are named by the number of item parameter used in the function
-that models the relationship between *Θ* and the item response (0/1).
-Each model has unique properties but all of them are suited to estimate
-latent variables from binary items (e.g., knowledge tests), which we
-will deal with in this tutorial. There are also more complex IRT models,
-such as e.g., graded response models, which can be used for non-binary
-items (e.g., likert-type scales). Yet, these will be discussed in a more
-advanced tutorial.
+that models the relationship between
+![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta") and
+the item response (0/1). Each model has unique properties but all of
+them are suited to estimate latent variables from binary items (e.g.,
+knowledge tests), which we will deal with in this tutorial. There are
+also more complex IRT models, such as e.g., graded response models,
+which can be used for non-binary items (e.g., likert-type scales). Yet,
+these will be discussed in a more advanced tutorial.
 
 # Preparation and Data
 
@@ -152,17 +155,20 @@ person has answered this item falsely.
 
 # 3PL model
 
-The 3PL model takes item discrimination (first parameter: *a*), item
-difficulty (second parameter: *b*), and guessing probability (third
-parameter: *c*) into account. As such, the 2PL and 1PL model (discussed
-below, are special cases, or constrained versions of the 3PL model).
-Take a look at Fig. 1 below. It shows a typical item characteristic
-curve (ICC, but not to be mistaken for the intra-class correlation). The
-x-axis shows the latent ability (*Θ*) ranging from -4 to 4, with 0 being
-the average ability in the studied population. The y-axis shows the
-probability of solving the item. The curve thus represents the
-probability of answering this item given a certain level on the latent
-ability.
+The 3PL model takes item discrimination (first parameter:
+![a](https://latex.codecogs.com/png.latex?a "a")), item difficulty
+(second parameter: ![b](https://latex.codecogs.com/png.latex?b "b")),
+and guessing probability (third parameter:
+![c](https://latex.codecogs.com/png.latex?c "c")) into account. As such,
+the 2PL and 1PL model (discussed below, are special cases, or
+constrained versions of the 3PL model). Take a look at Fig. 1 below. It
+shows a typical item characteristic curve (ICC, but not to be mistaken
+for the intra-class correlation). The x-axis shows the latent ability
+(![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta"))
+ranging from -4 to 4, with 0 being the average ability in the studied
+population. The y-axis shows the probability of solving the item. The
+curve thus represents the probability of answering this item given a
+certain level on the latent ability.
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -172,17 +178,21 @@ difficulty (point of inflexion at which the probability of answering the
 item correctly is 50%) and the guessing probability (slightly raised
 lower asymptote). The mathematical form of the 3PL model is:
 
-$P(\\theta\_j) = c\_i + (1-c\_i)\\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}$
+![P(\\theta\_j) = c\_i + (1-c\_i)\\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}](https://latex.codecogs.com/png.latex?P%28%5Ctheta_j%29%20%3D%20c_i%20%2B%20%281-c_i%29%5Cfrac%7Be%5E%7B1.7a_i%28%5Ctheta_j-b_i%29%7D%7D%7B1%2Be%5E%7B1.71a_i%28%5Ctheta_j-b_i%29%7D%7D "P(\theta_j) = c_i + (1-c_i)\frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}")
 
-Here, the probability of a correct response *P*(*θ*) given a person’s
-ability *θ* is expressed as a function of all three item parameters and
-a person’s ability, where *i* indicates the item and *j* indicates an
-individual person. In the figure, the steeper the slope, the better the
-item is at differentiating people clearly in close proximity to its
-difficulty. The lower the asymptote, the lower the likelihood of
-selecting the right response by chance. As the item difficulty (point of
-inflexion is slightly above the average: 0.71), the item can be solved
-by a majority of potential participants.
+Here, the probability of a correct response
+![P(\\theta)](https://latex.codecogs.com/png.latex?P%28%5Ctheta%29 "P(\theta)")
+given a person’s ability
+![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta") is
+expressed as a function of all three item parameters and a person’s
+ability, where ![i](https://latex.codecogs.com/png.latex?i "i")
+indicates the item and ![j](https://latex.codecogs.com/png.latex?j "j")
+indicates an individual person. In the figure, the steeper the slope,
+the better the item is at differentiating people clearly in close
+proximity to its difficulty. The lower the asymptote, the lower the
+likelihood of selecting the right response by chance. As the item
+difficulty (point of inflexion is slightly above the average: 0.71), the
+item can be solved by a majority of potential participants.
 
 So how do we fit such a model?
 
@@ -315,9 +325,10 @@ items cover a wide range of the latent trait.
 ## Model fit, person fit, and item fit evaluation
 
 Similar to factor analytical approaches, we can assess how well the
-model fits the data. Rather than using a a *χ*<sup>2</sup> statisic, we
-use a specific index, *M2*, which is specifically designed to assess the
-fit of item response models.
+model fits the data. Rather than using a a
+![\\chi^2](https://latex.codecogs.com/png.latex?%5Cchi%5E2 "\chi^2")
+statisic, we use a specific index, *M2*, which is specifically designed
+to assess the fit of item response models.
 
 ``` r
 M2(fit3PL)
@@ -575,7 +586,7 @@ item discrimination (a) and item difficulty into account. The
 mathematical form is hence (we simply delete the part before the
 fraction):
 
-$P(\\theta\_j) = \\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}$
+![P(\\theta\_j) = \\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}](https://latex.codecogs.com/png.latex?P%28%5Ctheta_j%29%20%3D%20%5Cfrac%7Be%5E%7B1.7a_i%28%5Ctheta_j-b_i%29%7D%7D%7B1%2Be%5E%7B1.71a_i%28%5Ctheta_j-b_i%29%7D%7D "P(\theta_j) = \frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}")
 
 The general procedure to estimate and assess the model remains the same.
 I hence only pinpoint to differences and do not repeat all steps
@@ -616,9 +627,10 @@ fit2PL
 
 We can always compare different models that are based on the same data.
 Using the function `anova()`, we can check whether the models differ
-based on various fit indices and a *χ*<sup>2</sup> test. In this case,
-the 2PL actually fits the data sightly better, but the difference is not
-significant.
+based on various fit indices and a
+![\\chi^2](https://latex.codecogs.com/png.latex?%5Cchi%5E2 "\chi^2")
+test. In this case, the 2PL actually fits the data sightly better, but
+the difference is not significant.
 
 ``` r
 anova(fit2PL, fit3PL)
@@ -684,18 +696,22 @@ basically constrains item discrimination to be equal across all items.
 Only item difficulty is allowed to vary. The mathematical form hence
 becomes:
 
-$P(\\theta\_j) = \\frac{e^{1.7a(\\theta\_j-b\_i)}}{1+e^{1.71a(\\theta\_j-b\_i)}}$
+![P(\\theta\_j) = \\frac{e^{1.7a(\\theta\_j-b\_i)}}{1+e^{1.71a(\\theta\_j-b\_i)}}](https://latex.codecogs.com/png.latex?P%28%5Ctheta_j%29%20%3D%20%5Cfrac%7Be%5E%7B1.7a%28%5Ctheta_j-b_i%29%7D%7D%7B1%2Be%5E%7B1.71a%28%5Ctheta_j-b_i%29%7D%7D "P(\theta_j) = \frac{e^{1.7a(\theta_j-b_i)}}{1+e^{1.71a(\theta_j-b_i)}}")
 
-Note that there is no subscript for the letter *a*, because it is
+Note that there is no subscript for the letter
+![a](https://latex.codecogs.com/png.latex?a "a"), because it is
 constrained to be the same for all items. The Rasch model (stemming from
 a different scholarly tradition) is mathematically equivalent, but is
 often expressed slightly differently:
 
-$P(\\beta) = \\frac{e^{(\\beta-\\delta\_i)}}{1+ e^{(\\beta-\\delta\_i)}}$
+![P(\\beta) = \\frac{e^{(\\beta-\\delta\_i)}}{1+ e^{(\\beta-\\delta\_i)}}](https://latex.codecogs.com/png.latex?P%28%5Cbeta%29%20%3D%20%5Cfrac%7Be%5E%7B%28%5Cbeta-%5Cdelta_i%29%7D%7D%7B1%2B%20e%5E%7B%28%5Cbeta-%5Cdelta_i%29%7D%7D "P(\beta) = \frac{e^{(\beta-\delta_i)}}{1+ e^{(\beta-\delta_i)}}")
 
 It is basically the same as the equation above, but the 1.7 constant is
-omitted. Further, the typical notational system uses *δ* instead of *b*
-and *β* instead of *θ*.
+omitted. Further, the typical notational system uses
+![\\delta](https://latex.codecogs.com/png.latex?%5Cdelta "\delta")
+instead of ![b](https://latex.codecogs.com/png.latex?b "b") and
+![\\beta](https://latex.codecogs.com/png.latex?%5Cbeta "\beta") instead
+of ![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta").
 
 This constrained model is rather an “ideal” measurement model than a
 model that can be perfectly fitted to the data. Yet, if we find items
