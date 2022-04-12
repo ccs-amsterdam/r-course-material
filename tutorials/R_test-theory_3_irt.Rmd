@@ -68,7 +68,9 @@ As you can see, each "participants" has answered 10 items that are binary. Imagi
 
 # 3PL model
 
-The 3PL model takes item discrimination (first parameter: $a$), item difficulty (second parameter: $b$), and guessing probability (third parameter: $c$) into account. Take a look at Fig. 1 below. It shows a typical item characteristic curve (ICC, but not to be mistaken for the intra-class correlation). The x-axis shows the latent ability ($\Theta$) ranging from -4 to 4, with 0 being the average ability in the studied population. The y-axis shows the probability of solving the item. The curve thus represents the probability of answering this item given a certain level on the latent ability. In this example, this 3PL model provides a smooth curve for this item because it is based on item discrimination (steepness of the slope), difficulty (point of inflexion at which the probability of answering the item correctly is 50%) and the guessing probability (slightly raised lower asymptote).
+The 3PL model takes item discrimination (first parameter: $a$), item difficulty (second parameter: $b$), and guessing probability (third parameter: $c$) into account. As such, the 2PL and 1PL model (discussed below, are special cases, or constrained versions of the 3PL model). Take a look at Fig. 1 below. It shows a typical item characteristic curve (ICC, but not to be mistaken for the intra-class correlation). The x-axis shows the latent ability ($\Theta$) ranging from -4 to 4, with 0 being the average ability in the studied population. The y-axis shows the probability of solving the item. The curve thus represents the probability of answering this item given a certain level on the latent ability. 
+
+
 
 ```{r, echo = F, fig.width = 5, fig.height = 3.75}
 example <- mirt(d, 1, itemtype = "3PL", guess = .25, verbose = F)
@@ -88,7 +90,11 @@ ggplot(d2, aes(x = x, y = y)) +
   labs(x = expression(theta), y = expression(P(theta)))
 ```
 
-The steeper the slope, the better the item is at differentiating people clearly in close proximity to its difficulty. The lower the asymptote, the lower the likelihood of selecting the right response by chance. As the item difficulty (point of inflexion is slightly above the average: 0.71), the item can be solved by a majority of potential participants. 
+In this example, this 3PL model provides a smooth curve for this item because it is based on item discrimination (steepness of the slope), difficulty (point of inflexion at which the probability of answering the item correctly is 50%) and the guessing probability (slightly raised lower asymptote). The mathematical form of the 3PL model is:
+
+$P(\theta_j) = c_i + (1-c_i)\frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$
+
+Here, the probability of a correct response $P(\theta)$ given a person's ability $\theta$ is expressed as a function of all three item parameters and a person's ability, where $i$ indicates the item and $j$ indicates an individual person. In the figure, the steeper the slope, the better the item is at differentiating people clearly in close proximity to its difficulty. The lower the asymptote, the lower the likelihood of selecting the right response by chance. As the item difficulty (point of inflexion is slightly above the average: 0.71), the item can be solved by a majority of potential participants. 
 
 So how do we fit such a model?
 
@@ -148,7 +154,6 @@ M2(fit3PL)
 As we can see, the M2 statistic is comparatively low and non-significant. So there are no concerning differences between the model and the data. This is further supported by a very low RMSEA and a CFA and TLI of 1.
 
 In IRT, however, we are usually more interested in *item*- and *person*-fit indices. IRT allows us to assess how well each items fits the model and whether the indiviual response patterns align with the model. 
-
 
 Let us start with item fit: Similar to many other areas, different indices have been proposed to assess item fit. We can use the function `itemfit()` to get a variety of them. By default, we receive the `S_X2` by Orlando and Thissen (2000) and the corresponding dfs, RMSEA and p-values. This test should be non-significant to indicate good item fit. As we can see here, only item V9 shows a lower fit with the model. Proponents of the "Rasch Model" (see further below) often rather report infit and outfit statistics. We can get those by adding the argument `fit_stats = "infit"`). We get both mean-squared and standardized versions of these measures (Linacre provides some guidelines to interpret these: https://www.rasch.org/rmt/rmt162f.htm). Roughly speaking the non-standardized values should be between .5 and 1.5 to not be degrading. In the package `ggmirt`, we can also use the function ´itemfitPlot()` to inspect this visually. 
 
@@ -245,7 +250,13 @@ As we can see, they correlate almost perfectly.
 
 # 2PL model
 
-The 2PL model only differs from the 3PL model in one regard: All items are assumed to have no guessing probability. So the model only takes item discrimination (a) and item difficulty into account. The general procedure to estimate and assess the model remains the same. I hence only pinpoint to differences and do not repeat all steps outlined for the 3PL model. 
+The 2PL model only differs from the 3PL model in one regard: All items are assumed to have no guessing probability. So the model only takes item discrimination (a) and item difficulty into account. The mathematical form is hence (we simply delete the part before the fraction):
+
+
+$P(\theta_j) = \frac{e^{1.7a_i(\theta_j-b_i)}}{1+e^{1.71a_i(\theta_j-b_i)}}$
+
+
+The general procedure to estimate and assess the model remains the same. I hence only pinpoint to differences and do not repeat all steps outlined for the 3PL model. 
 
 ## Fitting the model
 
@@ -254,7 +265,7 @@ fit2PL <- mirt(d, 1, itemtype = "2PL")
 fit2PL
 ```
 
-## Compare fit with Rasch model
+## Compare fit with 3PL model
 
 We can always compare different models that are based on the same data. Using the function `anova()`, we can check whether the models differ based on various fit indices and a $\chi^2$ test. In this case, the 2PL actually fits the data sightly better, but the difference is not significant. 
 
@@ -284,7 +295,15 @@ The curves have different slopes, but they do not have different asymptotes (yin
 
 # 1PL or Rasch model
 
-The 1PL model gets rid of yet another parameter: item discrimination. It basically constrains item discrimination to be equal across all items. Only item difficulty is allowed to vary. 
+The 1PL model gets rid of yet another parameter: item discrimination. It basically constrains item discrimination to be equal across all items. Only item difficulty is allowed to vary. The mathematical form hence becomes:
+
+$P(\theta_j) = \frac{e^{1.7a(\theta_j-b_i)}}{1+e^{1.71a(\theta_j-b_i)}}$
+
+Note that there is no subscript for the letter $a$, because it is constrained to be the same for all items. The Rasch model (stemming from a different scholarly tradition) is mathematically equivalent, but is often expressed slightly differently:
+
+$P(\beta) = \frac{e^{(\beta-\delta_i)}}{1+ e^{(\beta-\delta_i)}}$
+
+It is basically the same as the equation above, but the 1.7 constant is omitted. Further, the typical notational system uses $\delta$ instead of $b$ and $\beta$ instead of $\theta$. 
 
 This constrained model is rather an "ideal" measurement model than a model that can be perfectly fitted to the data. Yet, if we find items that fit this model sufficiently, it actually has some mathematical properties that cannot be obtained with
 less constrained models (e.g., 2PL or 3PL models). For this reason, many scholars favor this measurement model (particularly those following the Rasch School of Measurement)

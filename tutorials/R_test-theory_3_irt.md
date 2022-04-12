@@ -20,7 +20,7 @@ Philipp Masur
         -   [Scale Characteristic Curves](#scale-characteristic-curves)
 -   [2PL model](#2pl-model)
     -   [Fitting the model](#fitting-the-model-1)
-    -   [Compare fit with Rasch model](#compare-fit-with-rasch-model)
+    -   [Compare fit with 3PL model](#compare-fit-with-3pl-model)
     -   [Trace plot](#trace-plot)
 -   [1PL or Rasch model](#1pl-or-rasch-model)
     -   [Fitting the model](#fitting-the-model-2)
@@ -154,25 +154,35 @@ person has answered this item falsely.
 
 The 3PL model takes item discrimination (first parameter: *a*), item
 difficulty (second parameter: *b*), and guessing probability (third
-parameter: *c*) into account. Take a look at Fig. 1 below. It shows a
-typical item characteristic curve (ICC, but not to be mistaken for the
-intra-class correlation). The x-axis shows the latent ability (*Θ*)
-ranging from -4 to 4, with 0 being the average ability in the studied
-population. The y-axis shows the probability of solving the item. The
-curve thus represents the probability of answering this item given a
-certain level on the latent ability. In this example, this 3PL model
-provides a smooth curve for this item because it is based on item
-discrimination (steepness of the slope), difficulty (point of inflexion
-at which the probability of answering the item correctly is 50%) and the
-guessing probability (slightly raised lower asymptote).
+parameter: *c*) into account. As such, the 2PL and 1PL model (discussed
+below, are special cases, or constrained versions of the 3PL model).
+Take a look at Fig. 1 below. It shows a typical item characteristic
+curve (ICC, but not to be mistaken for the intra-class correlation). The
+x-axis shows the latent ability (*Θ*) ranging from -4 to 4, with 0 being
+the average ability in the studied population. The y-axis shows the
+probability of solving the item. The curve thus represents the
+probability of answering this item given a certain level on the latent
+ability.
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-The steeper the slope, the better the item is at differentiating people
-clearly in close proximity to its difficulty. The lower the asymptote,
-the lower the likelihood of selecting the right response by chance. As
-the item difficulty (point of inflexion is slightly above the average:
-0.71), the item can be solved by a majority of potential participants.
+In this example, this 3PL model provides a smooth curve for this item
+because it is based on item discrimination (steepness of the slope),
+difficulty (point of inflexion at which the probability of answering the
+item correctly is 50%) and the guessing probability (slightly raised
+lower asymptote). The mathematical form of the 3PL model is:
+
+$P(\\theta\_j) = c\_i + (1-c\_i)\\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}$
+
+Here, the probability of a correct response *P*(*θ*) given a person’s
+ability *θ* is expressed as a function of all three item parameters and
+a person’s ability, where *i* indicates the item and *j* indicates an
+individual person. In the figure, the steeper the slope, the better the
+item is at differentiating people clearly in close proximity to its
+difficulty. The lower the asymptote, the lower the likelihood of
+selecting the right response by chance. As the item difficulty (point of
+inflexion is slightly above the average: 0.71), the item can be solved
+by a majority of potential participants.
 
 So how do we fit such a model?
 
@@ -561,10 +571,15 @@ As we can see, they correlate almost perfectly.
 
 The 2PL model only differs from the 3PL model in one regard: All items
 are assumed to have no guessing probability. So the model only takes
-item discrimination (a) and item difficulty into account. The general
-procedure to estimate and assess the model remains the same. I hence
-only pinpoint to differences and do not repeat all steps outlined for
-the 3PL model.
+item discrimination (a) and item difficulty into account. The
+mathematical form is hence (we simply delete the part before the
+fraction):
+
+$P(\\theta\_j) = \\frac{e^{1.7a\_i(\\theta\_j-b\_i)}}{1+e^{1.71a\_i(\\theta\_j-b\_i)}}$
+
+The general procedure to estimate and assess the model remains the same.
+I hence only pinpoint to differences and do not repeat all steps
+outlined for the 3PL model.
 
 ## Fitting the model
 
@@ -597,7 +612,7 @@ fit2PL
     ## G2 (1003) = 498.96, p = 1
     ## RMSEA = 0, CFI = NaN, TLI = NaN
 
-## Compare fit with Rasch model
+## Compare fit with 3PL model
 
 We can always compare different models that are based on the same data.
 Using the function `anova()`, we can check whether the models differ
@@ -666,7 +681,21 @@ asymptotes (yintercepts = guessing probability).
 
 The 1PL model gets rid of yet another parameter: item discrimination. It
 basically constrains item discrimination to be equal across all items.
-Only item difficulty is allowed to vary.
+Only item difficulty is allowed to vary. The mathematical form hence
+becomes:
+
+$P(\\theta\_j) = \\frac{e^{1.7a(\\theta\_j-b\_i)}}{1+e^{1.71a(\\theta\_j-b\_i)}}$
+
+Note that there is no subscript for the letter *a*, because it is
+constrained to be the same for all items. The Rasch model (stemming from
+a different scholarly tradition) is mathematically equivalent, but is
+often expressed slightly differently:
+
+$P(\\beta) = \\frac{e^{(\\beta-\\delta\_i)}}{1+ e^{(\\beta-\\delta\_i)}}$
+
+It is basically the same as the equation above, but the 1.7 constant is
+omitted. Further, the typical notational system uses *δ* instead of *b*
+and *β* instead of *θ*.
 
 This constrained model is rather an “ideal” measurement model than a
 model that can be perfectly fitted to the data. Yet, if we find items
