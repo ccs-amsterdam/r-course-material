@@ -40,7 +40,7 @@ page](https://cran.r-project.org/web/packages/mirt/index.html)).
 
 IRT refers to a set of mathematical models which aim to explain the
 relationship between a latent ability, trait, or proficiency (denoted
-![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta")) and
+![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta")) and
 its observable manifestations (e.g., multiple-choice questions,
 true-false items, items…). In contrast to classical test theory (CTT),
 IRT focuses on the pattern of responses and considers responses in
@@ -76,7 +76,7 @@ IRT models (compared to CTT models):
 4.  Specific IRT models (e.g., the Rasch model, see further below) has
     specific mathematical properties that are highly desirable, such
     as a) the number-correct score is a sufficient estimation of
-    ![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta"), b)
+    ![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta"), b)
     specific objectivity, which means that item and person parameters
     will be similar even if only a subset of the item pool is used or a
     different population is studied.
@@ -89,7 +89,7 @@ introductory tutorial, we focus on three of the most used IRT models:
 the 3PL model, the 2PL model, and finally the 1PL or Rasch model. These
 models are named by the number of item parameter used in the function
 that models the relationship between
-![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta") and
+![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta") and
 the item response (0/1). Each model has unique properties but all of
 them are suited to estimate latent variables from binary items (e.g.,
 knowledge tests), which we will deal with in this tutorial. There are
@@ -155,16 +155,14 @@ person has answered this item falsely.
 
 # 3PL model
 
-The 3PL model takes item discrimination (first parameter:
-![a](https://latex.codecogs.com/png.latex?a "a")), item difficulty
-(second parameter: ![b](https://latex.codecogs.com/png.latex?b "b")),
-and guessing probability (third parameter:
-![c](https://latex.codecogs.com/png.latex?c "c")) into account. As such,
-the 2PL and 1PL model (discussed below, are special cases, or
-constrained versions of the 3PL model). Take a look at Fig. 1 below. It
-shows a typical item characteristic curve (ICC, but not to be mistaken
-for the intra-class correlation). The x-axis shows the latent ability
-(![\\Theta](https://latex.codecogs.com/png.latex?%5CTheta "\Theta"))
+The 3PL model takes item discrimination (first parameter: *a*), item
+difficulty (second parameter: *b*), and guessing probability (third
+parameter: *c*) into account. As such, the 2PL and 1PL model (discussed
+below, are special cases, or constrained versions of the 3PL model).
+Take a look at Fig. 1 below. It shows a typical item characteristic
+curve (ICC, but not to be mistaken for the intra-class correlation). The
+x-axis shows the latent ability
+(![\\theta](https://latex.codecogs.com/png.latex?%5Ctheta "\theta"))
 ranging from -4 to 4, with 0 being the average ability in the studied
 population. The y-axis shows the probability of solving the item. The
 curve thus represents the probability of answering this item given a
