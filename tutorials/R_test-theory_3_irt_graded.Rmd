@@ -1,0 +1,150 @@
+---
+title: 'Item Response Theory: Graded Response Models'
+author: "Philipp Masur"
+date: "2022-03"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+  
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, results = TRUE, message = FALSE, warning = FALSE)
+library(printr)
+```
+
+
+# Introduction
+
+In a previous [tutorial](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt.md), I introduced the basics of Item Response Theory (IRT) and how they can be applied to estimate unidimensional models based on dichotomous items. This tutorial is much shorter as it heavily builds on the previous one. So if you are new to IRT, consider working through the previous tutorial first.  
+
+Although IRT models for binary items are more common, IRT can also be used for non-binary items. In that sense, it provides an interesting alternative to the standard confirmatory factor analyses (CFA, see [this tutorial](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_1_cfa.md)) as we can estimate similar models, but can benefit from all the advantages and opportunities of IRT-based analyses.
+
+The *graded response model* is recommended for estimating IRT models from ordered polytomous response data (e.g., Likert-type scales). We again can use the packages `tidyverse` (for data wrangling), `mirt` (for estimating the IRT models) and the extension `ggmirt` (for publication-ready visualizations). We are also going to load the package `lavaan` as we will compare IRT and CTT approaches in this tutorial. 
+
+
+```{r}
+library(tidyverse)
+library(mirt)
+library(lavaan)
+
+# devtools::install_github("masurp/ggmirt")
+library(ggmirt)
+```
+
+
+# Preparation and Data
+
+Let's first load some data. In this case, we are going to use some data provided by Dienlin & Metzger (2016). The data can be assessed via the OSF (https://osf.io/bu74a/). For this tutorial, we will only use 4 items assessing "online privacy" concerns. They were measured on a 5-point scale ranging from 1 = `*strongly disagree* to 5 = *strongly agree*. Several answers were reverse coded (Example item: "I do not feel especially concerned about my privacy online"). 
+
+```{r}
+d <- read.csv("https://osf.io/bu74a/download", header=TRUE, na.strings="NA") %>%
+  as_tibble %>%
+  select(PRI.CON_1: PRI.CON_4) %>%
+  na.omit
+
+head(d)
+
+```
+
+
+## Fitting the model
+
+To fit the model, we can again simply use the function `mirt()` and simply indicate that the itemtype is "graded". 
+
+```{r}
+fitGraded <- mirt(d, 1, itemtype = "graded")
+fitGraded
+```
+
+By using the `summary()` function, we can produce the factor solution and inspect the factor loadings. Just for fun, let's quickly compare with the factor solution of a CFA.
+
+```{r}
+fitCTT <- cfa("privacyconcerns =~ PRI.CON_1 + PRI.CON_2 + PRI.CON_3 + PRI.CON_4", data = d)
+
+# IRT solution
+summary(fitGraded)
+
+# CTT solution
+standardizedsolution(fitCTT) %>%
+  filter(op == "=~") %>% select(rhs, F1 = est.std)
+```
+
+We can see that the factor loadings are not completely the same, but the are very "similar". For example, the item PRI.CON_2 has the highest loading in both approaches. 
+
+
+## IRT parameters
+
+```{r}
+params <- coef(fitGraded, IRTpars = TRUE, simplify = TRUE)
+round(params$items, 2) # g = c = guessing parameter
+```
+
+Similar to the simpler 3PL, 2PL, or 1PL models, the values of the slope (a) parameters represent a measure of how well an item differentiates respondents with different levels of the latent trait. Larger values, or steeper slopes, are better at differentiating theta.
+
+However, in contrast to models based on binary response items, we know see four location parameters (b) for each item. These location or item difficulty parameters are interpreted as the value of theta that corresponds to a .5 probability of responding at or above that location on an item. There are `m-1` location parameters where `m` refers to the number of response categories on the response scale (in this case, 5-1). The location parameters indicate that responses covered a wide range of the latent trait. We also can already see that the answer options cover different ranges on the latent trait. This is of course expected, with "strongly disgree" naturally covering lower ranges of the trait than e.g., "strongly agree". 
+
+## Model fit, item fit, person fit
+
+Similar to simpler models, we can inspect model fit, item fit, and person fit indices. 
+
+```{r}
+M2(fitGraded, type = "C2", calcNULL = FALSE)
+itemfit(fitGraded)
+head(personfit(fitGraded))
+```
+
+
+## Typical Plots
+
+The differences between IRT models based on dichotomous data and a graded response model becomes particularly clear when we look at trace plots and scale information curves. Technically, we can use all the plot functions that we already got to know in the previous tutorial, but the results will differ slightly. 
+
+### Trace Plots
+
+Trace plots are particularly useful to examine the probabilities of responding to specific categories in an item's response scale. These probabilities are graphically displayed in the *category* response curves shown below (not item characteristic curves as in the other IRT models). 
+
+```{r}
+tracePlot(fitGraded) +
+  labs(color = "Answer Options")
+```
+
+These curves have a clear relationship with theta: As theta increases, the probability of endorsing a category increases and then decreases as responses transition to the next higher category. Again, we see clearly that all of the item's answer options cover a wide range of the latent trait. 
+
+
+### Item Information Curves
+
+```{r}
+itemInfoPlot(fitGraded, d, facet = T)
+```
+
+By plot item information curves, we can also see that not all items provide the same amount of information. From these curves, it becomes quite clear that items 1 and 2 are better suited to measure the latent trait (something we already saw in the higher factor loadings!).
+
+
+### Test Information Curve
+
+```{r}
+testInfoPlot(fitGraded, adj_factor = .5)
+```
+
+Looking at the overall test information curve, we can again see that the scale is based at differentiating people between -3 and 2 on the latent theta trait. 
+
+
+# Comparison with CFA results
+
+You may wonder in how far IRT and CFA led to the same results. We can simply extract the respective factor scores from both models and correlate them. 
+
+```{r}
+cor.test(predict(fitCTT), fscores(fitGraded))
+```
+
+As can be seen, they are almost equivalent. A nice example of how two different approaches lead to almost the same estimation of the latent trait. 
+
+
+# References
+
+- Dienlin, T., & Metzger, M. J. (2016). An extended privacy calculus model for SNSs-Analyzing self-disclosure and self-withdrawal in a U.S. representative sample. Journal of Computer Mediated Communication, 21, 368–383. doi:10.1111/jcc4.12163 ([data](https://osf.io/bu74a/))
+
+
+
