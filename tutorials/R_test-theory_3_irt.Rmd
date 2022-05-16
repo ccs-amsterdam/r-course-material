@@ -202,8 +202,8 @@ itempersonMap(fit3PL)
 Item characteristic curves or trace plots (we already saw one earlier) visualize all three IRT parameters for all the items. This visualization is helpful in better understanding the unique properties of each item. It can also be helpful to identify gaps in assessment as well as differences in slope
 
 ```{r}
-tracePlot(fit3PL, data = d)
-tracePlot(fit3PL, data = d, facet = F, legend = T) + scale_color_brewer(palette = "Set3")
+tracePlot(fit3PL)
+tracePlot(fit3PL, facet = F, legend = T) + scale_color_brewer(palette = "Set3")
 ```
 
 Particularly when plotted on top of each other, we can clearly see the differences in slope, difficulty, and guessing. 
@@ -215,8 +215,8 @@ Another way of looking at the quality of each item is by plotting so call item i
 
 
 ```{r}
-itemInfoPlot(fit3PL, data = d) + scale_color_brewer(palette = "Set3")
-itemInfoPlot(fit3PL, data = d, facet = T)
+itemInfoPlot(fit3PL) + scale_color_brewer(palette = "Set3")
+itemInfoPlot(fit3PL, items = c(1:3), facet = T) # only few items individually
 ```
 
 Here we, see clearly that some items offer most information on higher theta levels whereas others cover the entire range of theta. 
@@ -229,6 +229,23 @@ The concept of "information" can also be applied to the entire scale. Here, we s
 ```{r}
 testInfoPlot(fit3PL, adj_factor = 2)
 ```
+
+
+### Conditional reliability
+
+The concept of reliability differs between CTT and IRT. In IRT, we can actually compute the *conditional* reliability, i.e., the reliability of the scale at different levels of theta. This curve is mathematically related to both scale information and conditional standard errors through simple transformations (see figure above). 
+
+```{r}
+conRelPlot(fit3PL)
+```
+
+Yet, it is also possible to compute a single reliability estimate. 
+
+
+```{r}
+marginal_rxx(fit3PL)
+```
+
 
 
 ### Scale Characteristic Curves
@@ -286,7 +303,7 @@ coef(fit2PL, IRTpars = TRUE, simplify = TRUE)
 The difference between the 3PL and the 2PL model is particularly visible in the trace plot. 
 
 ```{r}
-tracePlot(fit2PL, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+tracePlot(fit2PL, theta_range = c(-5, 5), facet = F, legend = T) + 
   scale_color_brewer(palette = "Set3") +
   labs(title = "2PL - Traceplot")
 ```
@@ -338,7 +355,7 @@ coef(fitRasch, IRTpars = TRUE, simplify = TRUE)
 Again, the difference between the 3PL, 2PL and the 1PL (Rasch) model is particularly visible in the trace plot: 
 
 ```{r}
-tracePlot(fitRasch, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+tracePlot(fitRasch, theta_range = c(-5, 5), facet = F, legend = T) + 
   scale_color_brewer(palette = "Set3") +
   labs(title = "1PL - Traceplot")
 ```
@@ -381,7 +398,7 @@ cor.test(fscores(test2), fscores(fitRasch))
 
 # Where to go next?
 
-IRT is a broad field and there are many more models (e.g., graded response models, multidimensional models, 4PL models...). A good starting point is the extended literature:
+IRT is a broad field and there are many more models (e.g., graded response models, multidimensional models, 4PL models...). In a follow-up tutorial, you can learn how to estimate [graded response models](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt_graded.md). A good starting point for diving deeper into the extended literature on IRT, see:
 
 - DeMars, C. (2010). Item response theory. Oxford University Press.
 

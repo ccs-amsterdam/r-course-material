@@ -17,6 +17,7 @@ Philipp Masur
             Plots)](#item-characteristics-curves-trace-plots)
         -   [Item Information Curves](#item-information-curves)
         -   [Test Information Curves](#test-information-curves)
+        -   [Conditional reliability](#conditional-reliability)
         -   [Scale Characteristic Curves](#scale-characteristic-curves)
 -   [2PL model](#2pl-model)
     -   [Fitting the model](#fitting-the-model-1)
@@ -484,13 +485,13 @@ It can also be helpful to identify gaps in assessment as well as
 differences in slope
 
 ``` r
-tracePlot(fit3PL, data = d)
+tracePlot(fit3PL)
 ```
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-tracePlot(fit3PL, data = d, facet = F, legend = T) + scale_color_brewer(palette = "Set3")
+tracePlot(fit3PL, facet = F, legend = T) + scale_color_brewer(palette = "Set3")
 ```
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
@@ -508,13 +509,13 @@ estimation precision with higher levels of information leading to more
 accurate score estimates.
 
 ``` r
-itemInfoPlot(fit3PL, data = d) + scale_color_brewer(palette = "Set3")
+itemInfoPlot(fit3PL) + scale_color_brewer(palette = "Set3")
 ```
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-itemInfoPlot(fit3PL, data = d, facet = T)
+itemInfoPlot(fit3PL, items = c(1:3), facet = T) # only few items individually
 ```
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
@@ -535,6 +536,28 @@ testInfoPlot(fit3PL, adj_factor = 2)
 
 ![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
+### Conditional reliability
+
+The concept of reliability differs between CTT and IRT. In IRT, we can
+actually compute the *conditional* reliability, i.e., the reliability of
+the scale at different levels of theta. This curve is mathematically
+related to both scale information and conditional standard errors
+through simple transformations (see figure above).
+
+``` r
+conRelPlot(fit3PL)
+```
+
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+Yet, it is also possible to compute a single reliability estimate.
+
+``` r
+marginal_rxx(fit3PL)
+```
+
+    ## [1] 0.6682414
+
 ### Scale Characteristic Curves
 
 A last quality of a IRT model can be that the bare number-correct-score
@@ -547,7 +570,7 @@ theta and the number-correct-score.
 scaleCharPlot(fit3PL)
 ```
 
-![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 This curve usually takes the form of a S-shape as the relationship is
 stronger in the middle range of theta and worse at the extremes (as
@@ -677,12 +700,12 @@ The difference between the 3PL and the 2PL model is particularly visible
 in the trace plot.
 
 ``` r
-tracePlot(fit2PL, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+tracePlot(fit2PL, theta_range = c(-5, 5), facet = F, legend = T) + 
   scale_color_brewer(palette = "Set3") +
   labs(title = "2PL - Traceplot")
 ```
 
-![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 The curves have different slopes, but they do not have different
 asymptotes (yintercepts = guessing probability).
@@ -815,12 +838,12 @@ Again, the difference between the 3PL, 2PL and the 1PL (Rasch) model is
 particularly visible in the trace plot:
 
 ``` r
-tracePlot(fitRasch, d, theta_range = c(-5, 5), facet = F, legend = T) + 
+tracePlot(fitRasch, theta_range = c(-5, 5), facet = F, legend = T) + 
   scale_color_brewer(palette = "Set3") +
   labs(title = "1PL - Traceplot")
 ```
 
-![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 All items have the exact same slope.
 
@@ -830,7 +853,7 @@ All items have the exact same slope.
 itempersonMap(fitRasch)
 ```
 
-![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 We can create smaller, but parallel tests by distributing similar items
 into to subset pools. Here, I am simply inspecting the item person map
@@ -861,7 +884,7 @@ on top of each other:
 testInfoCompare(test1, test2)
 ```
 
-![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](R_test-theory_3_irt_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 As we can see, both test sufficiently overlap in their information
 curve. So they are very likely to correlate highly with the original
@@ -902,8 +925,11 @@ cor.test(fscores(test2), fscores(fitRasch))
 # Where to go next?
 
 IRT is a broad field and there are many more models (e.g., graded
-response models, multidimensional models, 4PL models…). A good starting
-point is the extended literature:
+response models, multidimensional models, 4PL models…). In a follow-up
+tutorial, you can learn how to estimate [graded response
+models](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt_graded.md).
+A good starting point for diving deeper into the extended literature on
+IRT, see:
 
 -   DeMars, C. (2010). Item response theory. Oxford University Press.
 
