@@ -1,7 +1,7 @@
 Basics of data visualization
 ================
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
-2021-10
+2022-06
 
 -   [A Basic ggplot plot](#a-basic-ggplot-plot)
     -   [Important note on ggplot command
@@ -43,8 +43,8 @@ of columns for now:
 
 ``` r
 library(tidyverse)
-csv_folder_url <- "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv"
-facts <- read_csv(paste(csv_folder_url, "county_facts.csv", sep = "/")) 
+url <- "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv/county_facts.csv"
+facts <- read_csv(url) 
 facts_subset <- facts %>% 
   select(fips, area_name, state_abbreviation, 
          population = Pop_2014_count, 
@@ -98,8 +98,8 @@ see a clear correlation between education level and income. There is one
 clear outlier on the top-right. Can you guess which state that is?
 
 Due to the layer logic of ggplot, we can add more `geoms` to the plot
-(e.g., a regression line). If we provided the aesthetics within the
-`ggplot`-function, these are passed to the following `geoms`.
+(e.g., a regression line). Remember that if we provide aesthetics within
+the `ggplot`-function, these are passed to all `geoms`.
 
 ``` r
 # Loess curve
@@ -177,7 +177,7 @@ ggplot(data = facts_state) +
 
 Instead of setting colour to a constant value, we can also let it vary
 with the data. For example, we can colour the states by percentage of
-population above 65:
+population that is identified as ‘white’:
 
 ``` r
 ggplot(data = facts_state) + 
@@ -235,7 +235,9 @@ Transformations](R-tidy-5-transformation.md) and [Joining
 data](R-tidy-13a-joining.md) for more information if needed)
 
 ``` r
-results_state <- read_csv(paste(csv_folder_url, "primary_results.csv", sep = "/")) %>% 
+url_state <- "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv/primary_results.csv"
+
+results_state <- read_csv(url_state) %>% 
   group_by(state, party, candidate) %>% 
   summarize(votes=sum(votes))
 
@@ -244,41 +246,45 @@ nh_gop <- results_state %>%
 nh_gop
 ```
 
-Now, let’s make a bar plot with votes (y) per candidate (x). Since we
-don’t want ggplot to summarize it for us (we already did that
-ourselves), we set `stat="identity"` to set the grouping statistic to
-the identity function, i.e. just use each point as it is.
+Now, let’s make a bar plot with votes (y) per candidate (x). We use
+`geom_col` here, which means that we provide a `y` aesthetic rather than
+having ggplot calculate it from the frequencies. Equivalently, we could
+have users `geom_bar(stat="identity")` to create a bar plot with an
+‘identity’ statistics.
 
 ``` r
-# We can also store parts of a plot in an object
-plot1 <- ggplot(nh_gop) + 
-  geom_bar(aes(x=candidate, y=votes), 
-           stat='identity')
-plot1
+ggplot(nh_gop) + 
+  geom_col(aes(x=candidate, y=votes))
 ```
 
 ## Setting graph options
 
 Some options, like labels, legends, and the coordinate system are
 graph-wide rather than per layer. You add these options to the graph by
-adding extra functions to the call. For example, we can use
-coord\_flip() to swap the x and y axes:
-
-``` r
-plot1 + 
-  coord_flip()
-```
-
-You can also reorder categories with the `reorder` function, for example
-to sort by number of votes. Also, let’s add some colour (just because we
-can!):
+adding extra functions to the call. For example, we can use coord_flip()
+to swap the x and y axes:
 
 ``` r
 ggplot(nh_gop) + 
-  geom_bar(aes(x=reorder(candidate, votes), y=votes, fill=candidate), 
+  geom_col(aes(x=candidate, y=votes)) +
+  coord_flip()
+```
+
+You can also reorder categories with the `fct_reorder` function, for
+example to sort by number of votes. Also, let’s add some colour (just
+because we can!):
+
+``` r
+ggplot(nh_gop) + 
+  geom_bar(aes(x=fct_reorder(candidate, votes), y=votes, fill=candidate), 
            stat='identity') + 
   coord_flip()
 ```
+
+(Note: this works because ggplot assumes all labels are `factor`s, which
+have an ordering; you can use other functions from the `forcats` package
+(generally starting with `fct_`) to do other things such as reversing
+the order, manually specifying the order, etc).
 
 This is getting somewhere, but the y-axis label is not very pretty and
 we don’t need guides for the fill mapping. This can be remedied by more
@@ -291,7 +297,7 @@ ggplot(nh_gop) +
            stat='identity') + 
   coord_flip() + 
   xlab("Candidate") + 
-  guides(fill=F) + 
+  guides(fill="none") + 
   theme_minimal()
 ```
 
@@ -304,44 +310,41 @@ then group by candidate:
 ``` r
 gop2 <- results_state %>% 
   filter(party == "Republican" & (state == "New Hampshire" | state == "Iowa")) 
-ggplot(gop2) + 
-  geom_bar(aes(x=state, y=votes, fill=candidate), 
-           stat='identity')
+ggplot(gop2) + geom_col(aes(x=state, y=votes, fill=candidate))
 ```
 
 By default, the groups are stacked. This can be controlled with the
 position parameter, which can be `dodge` (for grouped bars) or `fill`
-(stacking to 100%):
+(stacking to 100%): (note that the position is a constant, not an
+aesthetic mapping, so it goes outside the `aes` argument)
 
 ``` r
-ggplot(gop2) + 
-  geom_bar(aes(x=state, y=votes, fill=candidate), 
-           stat='identity', 
-           position='dodge')
-ggplot(gop2) + 
-  geom_bar(aes(x=state, y=votes, fill=candidate), 
-           stat='identity', 
-           position='fill')
+ggplot(gop2) + geom_col(aes(x=state, y=votes, fill=candidate), position='dodge')
+ggplot(gop2) + geom_col(aes(x=state, y=votes, fill=candidate), position='fill')
 ```
 
-You can also make the grouped bars add up to 100% by computing the
-proportion manually.
+Of course, you can also make the grouped bars add up to 100% by
+computing the proportion manually, which can give you a bit more control
+over the process.
+
+Note that the example below pipes the preprocessing output directly into
+the `ggplot` command, that is, it doesn’t create a new temporary data
+set like `gop2` above. This is entirely a stylistic choice, but can be
+useful for operations that are only intended for a single visualization.
 
 ``` r
-gop2 <- gop2 %>% 
+gop2 %>% 
   group_by(state) %>% 
-  mutate(vote_prop=votes/sum(votes))
-
-ggplot(gop2) + 
-  geom_bar(aes(x=state, y=vote_prop, fill=candidate), 
-           stat='identity', 
-           position='dodge') + 
-  ylab("Votes (%)")
+  mutate(vote_prop=votes/sum(votes)) %>%
+  ggplot() + 
+    geom_col(aes(x=state, y=vote_prop, fill=candidate), position='dodge') + 
+    ylab("Votes (%)")
 ```
 
 Note that where `group_by %>% summarize` replaces the data frame by a
 summarization, `group_by %>% mutate` adds a column to the existing data
-frame, using the grouped values for e.g. sums.
+frame, using the grouped values for e.g. sums. See our tutorial on [Data
+Summarization](R-tidy-5b-groupby.md) for more details.
 
 # Line plots
 
@@ -351,13 +354,14 @@ time. First, we combine the results per state with the primary schedule:
 (see the tutorial on [Joining data](R-tidy-13a-joining.md))
 
 ``` r
-# dataset 1
-schedule  <- read_csv(paste(csv_folder_url, "primary_schedule.csv", sep="/"))
+# dataset 1: dates for each primary
+url2 <- "https://raw.githubusercontent.com/houstondatavis/data-jam-august-2016/master/csv/primary_schedule.csv"
+schedule  <- read_csv(url2)
 schedule <- schedule %>% 
   mutate(date = as.Date(date, format="%m/%d/%y"))
 schedule
 
-# dataset 2
+# dataset 2: vote share for trump for each state
 trump = results_state %>% 
   group_by(state, party) %>% 
   mutate(vote_prop=votes/sum(votes)) %>% 
@@ -377,8 +381,7 @@ line, and trace back how that output is computed based on the input
 data.
 
 ``` r
-ggplot(trump) + 
-  geom_line(aes(x = date, y = vote_prop))
+ggplot(trump) + geom_line(aes(x = date, y = vote_prop))
 ```
 
 We can do the same for multiple candidates as well, for example for the
@@ -420,8 +423,8 @@ ggplot(super) +
   coord_flip()
 ```
 
-Note <sub>facet\_wrap</sub> wraps around a single facet. You can also
-use \~facet\_grid() to specify separate variables for rows and columns
+Note <sub>facet_wrap</sub> wraps around a single facet. You can also use
+\~facet_grid() to specify separate variables for rows and columns
 
 # Themes
 
@@ -437,6 +440,16 @@ library(ggthemes)
 ggplot(trump) + 
   geom_line(aes(x = date, y = vote_prop)) + 
   theme_economist()
+```
+
+You can also modify any of the theming elements yourself (check the help
+for `theme()` for more information):
+
+``` r
+ggplot(trump) + 
+  geom_line(aes(x = date, y = vote_prop)) + 
+  theme_economist() +
+  theme(panel.grid.major.y = element_line(colour="lightblue"))
 ```
 
 Some links for learning more about themes:
@@ -478,7 +491,7 @@ ggplot(data = states) +
   geom_polygon(aes(x = long, y = lat, fill = region, group = group), 
                color = "white") + 
   coord_fixed(1.3) + 
-  guides(fill=FALSE)  
+  guides(fill="none")  
 ```
 
 Note: the last line fixes the aspect ratio to 1.3 and prevents a
