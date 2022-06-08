@@ -1,0 +1,223 @@
+---
+title: 'Mediation Analyses'
+author: "Philipp Masur"
+date: "2022-04"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(printr)
+```
+
+# Introduction
+
+In this tutorial, I am going to provide a very brief introduction on how to conduct simple mediation analyses in R. As a mediation analysis is technically just running several, yet specifically defined regression analyses, I am going to do so by showing three alternative ways to reach the desired results. 
+
+1. Simple regression analyses
+2. Path modeling
+3. Using the package `mediation`
+
+The more interesting question then becomes, how we can compute the indirect effect and test its significance. Here again, we can choose between different methods: 
+
+1. Bootstrapping to gain robust 95% confidence intervals
+2. Monte-Carlo Simulations to gain 95% confidence intervals
+
+## What is a "mediation"?
+
+We are often interested in explaining a relationship or causal effect between two variables (e.g., `X` and `Y`). Many theories suggest that `X` does not necessarily *directly* influence `Y`, but that this effect is *mediated* by a third variable (e.g., `M`). We can visualize this interplay between the three variables like so:
+
+
+![](../tutorials/img/mediation.png)
+
+A mediation thereby represent the following: The total effect between `X` and `Y` (*c*) is split into a *direct* (*c'*) and *indirect* (*a x b*) effect. We assume that a mediation is present, if the indirect effect is significant. Technically, it is possible that the effect of `X` and `Y` is completely mediated by `M`. In this case (also known as "full mediation"), the direct effect (*c'*) is non-significant. In most cases, however, we will probably find a "partial mediation", suggesting that X both directly *and* indirectly influences `Y`.
+
+**Note of caution:** Theoretically, mediation models almost always suggest some sort of "causal chain". Yet, the analysis itself cannot prove causality, if the underlying data are observational (e.g., stem from a cross-sectional survey)!
+
+## Packages and simulating some data
+
+To run mediation analysis, we technically do not need any additional packages. We only need the function `lm()`, which is part of base R. However, as we will explore different ways to run such analyses, we will also engage with the package `boot` (to create bootstrapping samples), `lavaan` (to engage in path modeling) and `mediation` (which provides a streamlined solution for mediation analyses). 
+
+```{r}
+library(tidyverse)
+library(boot)
+library(lavaan)
+library(mediation)
+```
+
+For this tutorial we are going to simulate some data that align with the Figure presented above. We are setting a seed to make our simulation reproducible. We then create a data set with 500 observations and 3 variables. 
+
+```{r}
+set.seed(42)
+n <- 500
+x <- rnorm(n, 3, 1)
+m <- 0.5 + 2*x + rnorm(n, 0, 1)
+y <- 0.5 + 2*m + 0.5*x + rnorm(n, 0, 1)
+
+d <- tibble(x,m,y)
+head(d)
+```
+
+
+# Alternative 1: Simple regression analyses
+
+## Running linear models
+
+The simplest way to conduct mediation analyses is to run a simple regression for each endogeneous variable in our model. For this simple mediation model, we thus have to create one the estimates the path *a* and one that estiamtes *b* and *c'* simultaneously. To be comprehensive, we are also creating one that estiamtes the total effect *c*. 
+
+
+```{r}
+# Total effect of x on y
+m_total <- lm(y ~ x, d)
+summary(m_total)
+
+# Effect a, x on m
+m_a <- lm(m ~ x, d)
+summary(m_a)
+
+# Effects b and c', x and m on y
+m_bc <- lm(y ~ m + x, d)
+summary(m_bc)
+```
+
+We can see that all paths are significant, suggesting that there is both a direct and indirect effect of `X` on `Y`. The indirect effect can simply be computed by multiply the estimate of path *a* with the estimate of path *b*.
+
+```{r}
+a <- summary(m_a)$coef[2,1]  # 2.08
+b <- summary(m_bc)$coef[2,1]  # 1.88
+
+(indirect <- a*b)
+```
+
+## Testing the indirect effect for significance
+
+If both *a* and *b* are significant, there is a good chance that the indirect effect is significant as well. Yet, we can explicitly test the significance of this indirect effect. However, as the theoretical distribution of the product-of-coefficients does not necessarily follow a normal distribution, we have to rely on alternative methods to test its significance. The first and probably most used alternative is using bootstrapping to gain 95% confidence intervals for the indirect effect. Here, we rerun the analyses on e.g., 1000 bootstrap samples and then check the resulting distribution of coefficients. 
+
+For this, we are going to use the package `boot`. The procedure is always the same, we create a function that runs the relevant analyses (in this case the two linear regression models) and extracts the relevant coefficients and creates the product of path `a` and `b`. We then pass this function to `boot()`, which further requires the exact model formulas, the data, and the number of bootstrap samples you want to create (Attention: You should at least run > 1000, but the more, the longer the computation!). As a final step, we use the function `quantile()` to get the 95% confidence intervals from the resulting distribution of coefficients. 
+
+
+```{r}
+# Create a function that repeats the same procedure across bootstrap samples
+bootreg <- function(formula_a, formula_b, data, i){ 
+  a <- coef(lm(formula_a, data[i,]))[2] # extracting a path
+  b <- coef(lm(formula_b, data[i,]))[3] # extracting b path
+  a*b
+}
+
+# Run the bootstrapping procedures
+boot_results <- boot(statistic = bootreg, 
+                     formula_a = m ~ x, 
+                     formula_b = y ~ x + m, 
+                     data = d, R = 1000)
+
+# Resulting distribution of indirect effects
+boot_results$t %>% 
+  as_vector %>% 
+  qplot()
+
+# Extract 2.5 and 97.5 quantiles (95% CIs)
+(boot_ci <- boot_results$t %>% 
+  as_vector %>%
+  quantile(c(.025, .975)))
+```
+
+The confidence intervals do not include zero, the indirect effect of b = `r indirect` is thus significant. 
+
+An alternative to bootstrapping (which is often computationally demanding) is taking the path coefficients and their standard errors to simulate their theoretical distribution using Monte-Carlo draws. We can do so by using the function `rnorm()`, which requires the number of observations, the mean of the normal distribution (our path estimates) and the standard deviation (the standard errors). Once we have simulate the theoretical (normal) distributions for both *a* and *b*, we can multiply both distributions to get the theoretical distribution of the indirect effect. We can then again use the `quantile()` function to extract 95% confidence intervals. The computation is much faster and somewhat more elegant. 
+
+```{r}
+# Simulate normal distributions of the found effects
+n <- 10000
+sim_a <- rnorm(n, summary(m_a)$coef[2,1], summary(m_a)$coef[2,2])
+sim_b <- rnorm(n, summary(m_bc)$coef[2,1], summary(m_bc)$coef[2,2])
+sim_ind <- sim_a*sim_b
+
+# Extract 2.5 and 97.5 quantiles (95% CIs 
+(mc_ci <- quantile(sim_ind, c(.025, .975)) %>%
+  round(2))
+```
+
+Again, the confidence intervalls do not include zero. We conclude that the indirect effect is significant. If we now compare the results from the bootstrapping and the Monte-Carlo Somulation, we find that both methods lead to almost the same results. 
+
+```{r}
+# Comparing bootstrap and Monte Carlo CIs
+bind_rows(boot_ci, mc_ci) %>%
+  mutate(type = c("bootrapping", "monte carlo"),
+         effect = c(indirect, indirect)) %>%
+  dplyr::select(type, effect, everything())
+```
+
+
+# Alternative 2: Path modeling using `lavaan`
+
+The package `lavaan`, developed for path and structural equation modeling, provides another alternative for running mediation models. Here, we can specifiy all regression equations and so-called pseudo parameter (e.g. indirect effects) as a string, which we then simply pass to the function `sem()`. This way, we can estimate all paths and effects in one step. Additionally, we also automatically get standardized effect estiamtes. 
+
+In contrast to standard path modelling, we need to "label" our paths. We can do so by simply multiply our variables with a label (e.g., `a*x`). We can then use these labels to compute pseudo parameters (e.g., the indirect effect via `ind := a*b`).
+
+```{r}
+# Define path model including pseudo parameters (indirect and total effect)
+model <- "
+
+  # Paths
+  m ~ a*x
+  y ~ c*x + b*m
+  
+  # Pseudo parameter
+  ind := a*b
+  total := ind + c
+"
+
+# Fit model
+fit <- sem(model, d)
+summary(fit, std = T)
+```
+
+Using the summary function, the output shows all path coefficients and the pseudo-parameters. Although it looks like the indirect and total effect were already tested for significance, this test is based on the Sobel test, which is not appropriate for these type of effects. Again, we could run the same analyses on bootstrap samples, or we could use the Monte-Carlo simulation procedure. Below, I exemplify the bootstrapping procedure using the the function `lavaan::boostrapLavaan()`. It works somewhat similar to the `boot()` function, outlined earlier. 
+
+
+```{r}
+# Define funtion that extracts indirect effect estimate
+boot_sem<- function(x) {
+  parameterestimates(x) %>%
+  filter(label == "ind") %>%
+  dplyr::select(est) %>%
+  as_vector
+}
+
+# Run bootstrapp procedure
+sem_boot <- bootstrapLavaan(fit, R = 100, FUN = boot_sem) # only 100 to save time, should be above 1000 or even 10000
+
+# Extract 2.5 and 97.5 quantiles (95% CIs)
+quantile(sem_boot, c(.025, .975)) %>%
+  round(2)
+
+```
+
+Again, we of course find that the indirect effect is significant. 
+
+# Alternative 3: Using the `mediation` package
+
+Last, but not least, we can also use the mediation package which does some of these steps automatically. Here, we again have to estimate the separate regression models (like in step 1). Then, we can simply pass them to the function `mediate()`, and define what type of confidence interval we want to estimate. 
+
+```{r}
+# Use models estimated in Alternative 1 and pass to the function mediate
+results <- mediate(m_a, m_bc, treat = 'x', mediator = 'm', boot = T)
+
+# Summarize results
+summary(results)
+```
+
+The results again align with the other methods. The 95% confidence intervals of the indirect effect (here labelled ACME) do not include zero. The effect is thus significant. 
+
+
+# Where to go next?
+
+This tutorial only exemplified simple mediation models. The framework can be extended to more complex models such as parallel mediation models, serial mediation models, or even moderated mediation models. For further information on such models, consider checking out the following books and resources:
+
+- Hayes, A. (2022). Introduction to Mediation, Moderation, and Conditional Process Analysis. A Regression-Based Approach. Guilford Press. 
+
+
