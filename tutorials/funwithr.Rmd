@@ -57,11 +57,18 @@ Note that you only need to do this once on your computer, so next time you can s
 
 # Scraping twitter
 
-To scrape twitter, we use the `search_tweets` command from the rtweet library:
+To scrape twitter, we first activate the package we installed earlier, and then setup the authentication:
+(you need a twitter account for this, see below if you don't have or want one)
 
 ```{r rtweet, cache=T}
 library(rtweet)
-tweets = search_tweets("texas", n = 1000, include_rts = FALSE)
+auth_setup_default()
+```
+
+Now, we can use the `search_tweets` command from the rtweet library:
+
+```{r searchtweet, cache=T}
+raw_tweets = search_tweets("ukraine", n = 1000, include_rts = FALSE)
 ```
 
 Note that the first time this will open a browser window in which you need to login to your twitter account and authenticate it. 
@@ -73,18 +80,21 @@ After running the command above, there should be a new object "tweets" in your E
 consisting of 1000 rows 
 In fact, the `search_tweet` commands includes a *lot* of information on each tweet
 (click on the 'tweets' object in the Environment pane to inspect it).
-To make it a little bit more manageable, we use the *tidyverse* select command to only keep a subset of columns:
+To make it a little bit more manageable, we use the *tidyverse* select command to only keep a subset of columns.
+Note that I 
 
 ```{r}
 library(tidyverse)
-tweets = select(tweets, status_id, created_at, screen_name, lang, location, retweet_count, text)
+tweets = select(raw_tweets, doc_id=id_str, date=created_at, lang, retweet_count, text=full_text)
 tweets
 ```
 
-If for some reason this does not work, you can download a cached set of tweets on COVID using the command below:
+If for some reason this does not work, you can download a cached set of tweets on COVID using the command below.
+(Note that the col_types is usually not needed, but if we don't specify them the IDs will be parsed as numbers,
+but they are too long to be stored correctly so we read them as character (text) data)
 
-```{r, eval=F}
-tweets = read_csv("https://cssbook.net/d/covid.csv")
+```{r}
+tweets = read_csv("https://i.amcat.nl/ukraine_tweets.csv", col_types = "cTcnc")
 ```
 
 Note that, of course, twitter research ('twitterology') has various drawbacks:
@@ -104,7 +114,7 @@ ggplot(tweets) + geom_bar(aes(x=lang))
 What date and time are they posted?
 
 ```{r}
-ggplot(tweets) + geom_density(aes(x=created_at))
+ggplot(tweets) + geom_density(aes(x=date))
 ```
 
 # Analysing text with Quanteda 
@@ -115,9 +125,9 @@ The code below uses the `quanteda` package to create a corpus, tokenize it, and 
 ```{r}
 library(quanteda)
 library(quanteda.textplots)
-dfm_tweets = tweets %>% 
-  corpus() %>% 
-  tokens() %>% 
+dfm_tweets = tweets |> 
+  corpus() |>
+  tokens() |> 
   dfm() 
 textplot_wordcloud(dfm_tweets, max_words=100)
 ```
@@ -131,9 +141,9 @@ Let's change this:
 ```{r}
 library(RColorBrewer)
 dfm_tweets %>% 
-  dfm_remove(min_nchar=2) %>%
-  dfm_remove("texas") %>%
-  dfm_remove(stopwords()) %>%
+  dfm_remove(min_nchar=2) |>
+  dfm_remove("ukraine") |>
+  dfm_remove(stopwords()) |>
   textplot_wordcloud(max_words=200, color=brewer.pal(8, "Dark2"),
                      random_color=TRUE, random_order = TRUE)
 ```
@@ -153,7 +163,7 @@ Let's see if we can make a tag cloud?
 library(RColorBrewer)
 dfm_tweets %>% 
   dfm_keep("#*") %>%
-  dfm_remove("#texas") %>%
+  dfm_remove("#ukraine") %>%
   textplot_wordcloud(max_words=200, color=brewer.pal(8, "Dark2"),
                      random_color=TRUE, random_order = TRUE)
 ```
@@ -176,19 +186,23 @@ As a final exercise, let's compare words used in tweets mentioning 'texas' to th
 First, we obtain the second set of tweets:
 
 ```{r tweets_florida, cache=T}
-tweets_florida = search_tweets("florida", n=1000)
-tweets_florida = select(tweets_florida, status_id, created_at, screen_name, lang, location, retweet_count, text)
+tweets_russia = search_tweets("russia", n=1000) |>
+  select(doc_id=id_str, date=created_at, lang, retweet_count, text=full_text) |>
+  filter(lang=='en') |>
+  anti_join(tweets, by="doc_id")
 ```
 
 We can now combine the two sets into a single dfm, and then use the 
 
 ```{r}
 library(quanteda.textstats)
-keyness = bind_rows(tweets_florida, tweets) %>% 
-  corpus() %>% 
-  tokens(remove_punct=TRUE) %>% 
-  dfm() %>%
-  textstat_keyness(target=1:nrow(tweets_florida)) 
+keyness = bind_rows(tweets_russia, tweets) |> 
+  corpus() |>
+  tokens(remove_punct=TRUE) |>
+  dfm() |>
+  dfm_remove(min_nchar=4) |>
+  dfm_remove(stopwords()) |>
+  textstat_keyness(target=1:nrow(tweets_russia)) 
 head(keyness)
 tail(keyness)
 ```
