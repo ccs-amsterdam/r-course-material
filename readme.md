@@ -15,18 +15,25 @@ Below we list the relevant handouts/tutorials. Each links to the md file, see th
 # Data mangling in the tidyverse
 
 This is a set of tutorials designed to teach using the tidyverse functions for data cleaning, reshaping, visualizing etc.
-The chapter numbers are relevant chapters from the excellent (and freely available) book ["R for Data Scientists" (R4DS)](http://r4ds.had.co.nz/)
+This includes handouts, which are documents that explain the most relevant commands, and also video tutorials that discuss the same material 
+(note that it is  possible that the video tutorial is a bit older than the handout). 
+The table also lists chapters from [Computational Analysis of Communication (CAC)](https://cssbook.net) and [R for Data Science (R4DS)](https://r4ds.had.co.nz/), two 100% free and open access books that discuss the material. 
+Finally, it links to relevant RStudio cheat sheets, which are great resources to get an overview of the most relevant commands in a package.
 
-| Handout | Video Tutorial | R4DS ch. | Core packages / functions |
-|----|---|---| --- |
-| Fun with R | [Fun with R](https://www.youtube.com/watch?v=eYCV8kIsgGs&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=2) | 3 | tidyverse,ggplot2,igraph |
-| [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) | 4 | (base R functions) |
-| [Transforming Data](tutorials/R-tidy-5-transformation.md) | [Importing and Cleaning](https://www.youtube.com/watch?v=CATqkFiZljU&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=3) |  5 | dplyr: filter, select, arrange, mutate | 
-| [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | [Grouping and Summarizing](https://www.youtube.com/watch?v=lde7wLORQpo&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=4) | 5 | dplyr: group_by, summarize |
-| [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | [ggplot 1](https://www.youtube.com/watch?v=wO5mrVaCB28&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=7) |7 | ggplot2  |
-| [Reshaping data](tutorials/r-tidy-12-reshaping.md) | [Reshaping](https://www.youtube.com/watch?v=j4lZWJ3Osr8&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=5) |12 | tidyr: spread, gather |
-| [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | [Joining](https://www.youtube.com/watch?v=gg87Nv98VhQ&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=6) |13 | dplyr: inner_join, left_join, etc. | 
-| [Basic string (text) handling](tutorials/R-tidy-14-strings.md) |  |14 | readr: str_detect, str_extract etc., iconv |
+Note that CAC has R and Python examples side by side, so that might be an interesting source. 
+Als note that CAC is co-authored by two CCS.Amsterdam members, so all feedback is welcome!
+
+
+| Handout | Video Tutorial | CAC ch. | R4DS ch. | Core packages / functions |
+|----|---|---| --- |---|
+| Fun with R | [Fun with R](https://www.youtube.com/watch?v=eYCV8kIsgGs&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=2) | [2](https://cssbook.net/chapter02.html) | [3](https://r4ds.had.co.nz/data-visualisation.html) | tidyverse,ggplot2,igraph |
+| [R Basics](tutorials/R-tidy-4-basics.md) | [Intro to R](https://www.youtube.com/watch?v=PVhZD5MINYM&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=1) |  [3](https://cssbook.net/chapter03.html) | [4](https://r4ds.had.co.nz/workflow-basics.html) | (base R functions) |
+| [Transforming Data](tutorials/R-tidy-5-transformation.md) | [Importing and Cleaning](https://www.youtube.com/watch?v=CATqkFiZljU&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=3) | [6](https://cssbook.net/chapter06.html) | [5](https://r4ds.had.co.nz/transform.html) | dplyr: filter, select, arrange, mutate | 
+| [Summarizing Data](tutorials/R-tidy-5b-groupby.md) | [Grouping and Summarizing](https://www.youtube.com/watch?v=lde7wLORQpo&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=4) | [6.3](https://cssbook.net/chapter06.html#6_3) | [5](https://r4ds.had.co.nz/transform.html) | dplyr: group_by, summarize |
+| [Visualizing Data](tutorials/r-tidy-3_7-visualization.md) | [ggplot 1](https://www.youtube.com/watch?v=wO5mrVaCB28&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=7) | [7](https://cssbook.net/chapter07.html) | [7](https://r4ds.had.co.nz/exploratory-data-analysis.html) | ggplot2  |
+| [Reshaping data](tutorials/r-tidy-12-reshaping.md) | [Reshaping](https://www.youtube.com/watch?v=j4lZWJ3Osr8&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=5) | [6.5](https://cssbook.net/chapter06.html#6_5) | [12](https://r4ds.had.co.nz/tidy-data.html) | tidyr: spread, gather |
+| [Combining (merging) Data](tutorials/R-tidy-13a-joining.md) | [Joining](https://www.youtube.com/watch?v=gg87Nv98VhQ&list=PLjXODJ_lGN_V2ntvV2CN_GvzZ6Qm5km9L&index=6) | [6.4](https://cssbook.net/chapter06.html#6_4) | [13](https://r4ds.had.co.nz/relational-data.html) | dplyr: inner_join, left_join, etc. | 
+| [Basic string (text) handling](tutorials/R-tidy-14-strings.md) | | [9](https://cssbook.net/chapter09.html) | [14](https://r4ds.had.co.nz/strings.html) | readr: str_detect, str_extract etc., iconv |
 
 # Statistical Analysis
 
