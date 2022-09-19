@@ -227,3 +227,50 @@ cbs_get_data("85275NED", Geslacht = eq("3000   ") | eq("4000   "))
 
 NB: We zetten hier `m$Geslacht` om in een tibble zodat we de spaties goed kunnen zien. 
 Daarnaast gebruiken we `eq` en de `|` om meerdere waardes te mogen opgeven. 
+
+# Visualiseren van informatie per gemeente
+
+Een aantal tabellen van CBS bevatten informatie per provincie, gemeente, of zelfs wijk en buurt.
+Het is vaak mooi en inzichtelijk om deze informatie op een kaart weer te geven.
+
+We kunnen kaartgegevens direct ophalen van [nationaalgeoregister.nl](https://nationaalgeoregister.nl).
+
+Noot: Als je `sf` nog niet hebt geinstalleerd, kan je deze installeren met `install.packages`:
+
+```{r kaart}
+library(sf)
+map = st_read("https://geodata.nationaalgeoregister.nl/cbsgebiedsindelingen/wfs?request=GetFeature&service=WFS&version=2.0.0&typeName=cbs_gemeente_2020_gegeneraliseerd&outputFormat=json")
+head(map)
+```
+
+Zoals je kan zien is dit een bijzonder soort dataframe, met enkele metagegevens en daarna een dataframe
+met per gemeente de `geometry`, ofwel de vorm van de gemeente. 
+
+Deze kunnen we plotten met `geom_sf`:
+
+```{r kaartplot}
+ggplot(map) + geom_sf() + theme_minimal()
+```
+
+Nu is het uiteraard pas interessant als we hier ook relevate gegevens in kunnen zetten.
+We zouden bijvoorbeeld een kaart kunnen maken van gemiddeld inkomen per gemeente. 
+
+We halen eerst de relevante kerncijfers per gemeente op bij CBS,
+en selecteren de regio en inkomensgegevens. 
+We hernoemen ook de regioS code naar `statcode` omdat die in `map` ook zo heet.
+
+Noot: we filteren hier bij het ophalen al op periode en regio, dat scheelt een hoop wachten!
+
+```{r}
+inkomen = cbs_get_data("70072ned", RegioS=has_substring("GM"), Perioden="2020JJ00") |>
+  select(statcode=RegioS, inkomen=ParticuliereHuishoudensExclStudenten_122)
+```
+
+Nu kunnen we de kaart en inkomensgegevens koppelen en plotten:
+
+```{r cbsmap, fig.keep='all', fig.path='img/'}
+inner_join(map, inkomen) |>
+  ggplot() + geom_sf(aes(fill=inkomen)) + theme_minimal()
+```
+
+
