@@ -1,5 +1,5 @@
 ---
-title: 'R String Basic'
+title: 'Working with textual data: stringr'
 author: "Kasper Welbers & Wouter van Atteveldt"
 date: "2022-01"
 output: 
@@ -26,53 +26,13 @@ See also chapter 14 of [R for Data Science](http://r4ds.had.co.nz/) and the [str
 Note that 'string' is not an official word in R (which uses `character` to denote textual data), 
 but since it's the word used in most documentations I will also use `strings` to refer to objects containing textual data. (AFAIK, the name originates from seeing a text as a `string` or sequence of characters)
 
-# A note on characters and factors
-
-In R, every vector (column) has a data type, which you can inspect using `class(x)`.
-Two relevant data types are `character` for actual texts,
-and `factor` for labeled nominal values (groups). 
-
-In most cases, you want you texts to be stored as `character`, but many default functions (like `data.frame` and `read.csv`) store text colunms as `factor` -- while the tidyverse equivalents of `tibble` and `read_csv` use `character` by default. 
-
-In most cases, in R you can convert object types using `as.character`:
-
-```{r}
-df = data.frame(name=c("john", "mary"))
-class(df$name)
-library(tidyverse)
-tib = tibble(name=c("john", "mary"))
-class(tib$name)
-```
-
-Before R version 4.0, textual columns in data frames were automatically converted to a `factor`. A `factor` looks like a `character` column, but it is intended for groups or nominal values. Internally it is stored as a number, with a label attached to each possible value. 
-
-This makes storing large amounts of data more efficient (numbers are smaller than texts), but sometimes, you get unexpected results when you apply a text-based function to a factor. For example, normally `as.numeric` can be used to convert strings to numbers, setting non-numeric strings to NA:
-
-```{r}
-as.numeric(c("22", "16", "x"))
-```
-
-However, if we have this data encoded as a factor, it gives a completely different result:
-
-```{r}
-survey = data.frame(age=c("22", "16", "1"), stringsAsFactors = TRUE)
-as.numeric(survey$age)
-```
-
-What happened here? 
-The trick is to remember that factors are intended as labeled groups, and internally R stores the group index and has a separate list of labels (by default sorted alphabetically). Thus, "22" was the second element in the labels, "16" the first, etc. To convert the labels into numbers, convert to character first (which uses the labels) before converting to numeric:
-
-```{r}
-as.numeric(as.character(survey$age))
-```
-
-Since R version 4.0, these problems are much less common, but it's good to be aware of the difference between factors and strings. Also, when using `ggplot` it's important to set factor data types and levels correctly for nominal values as they control the ordering and visualization of nominal data. For more information on dealing with factors, see the [forcats package](https://forcats.tidyverse.org/) and [cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/factors.pdf)
 
 # String basics
 
 The package `stringr` has a number of functions for dealing with strings. For example, `str_length` gives the length of the string:
 
 ```{r}
+library(tidyverse)
 str_length("john")
 ```
 
@@ -80,7 +40,10 @@ As usual, these functions can be applied to a vector or column of strings direct
 
 ```{r}
 str_length(c("john", "mary"))
+
+df = data.frame(name=c("john", "mary"))
 str_length(df$name)
+
 mutate(df, len=str_length(name))
 ```
 
@@ -136,8 +99,10 @@ text patterns. Although a full overview of regular expressions is beyond the sco
 (there's full books written on the subject!), below are some examples of what you can do.
 
 Note: To find a regular expression in a text, I use the `str_view` command, which is quite useful for designing/debugging expressions:
+(You miught have to install the htmlwidgets package for this to work)
 
 ```{r, results=F}
+# if needed: install.packages("htmlwidgets")
 txt = c("Hi, I'm Bob", "my email address  is  Bob@example.com", "A #hashtag for the #millenials")
 str_view(txt, "my") # literal text
 str_view(txt, "m.") # . matches any character 
@@ -192,13 +157,13 @@ For example, if we had a data frame containing the earlier texts, we can filter 
 ```{r}
 t = tibble(id=1:3, text=txt)
 t
-t %>% filter(str_detect(text, regex_email))
+t |> filter(str_detect(text, regex_email))
 ```
 
 You can also `str_count` to count how many matches of a pattern are found in each text:
 
 ```{r}
-t %>% mutate(n_hashtags = str_count(text, "#\\w+"))
+t |> mutate(n_hashtags = str_count(text, "#\\w+"))
 ```
 
 ## Replacing patterns
@@ -207,7 +172,7 @@ You can also use regular expressions to do find-an-replace.
 For example, you can remove all punctionation, normalize whitespace, or redact email addresses:
 
 ```{r}
-t %>% mutate(nopunct = str_replace_all(text, "[^\\w ]", ""),
+t |> mutate(nopunct = str_replace_all(text, "[^\\w ]", ""),
              normalized = str_replace_all(text, "\\s+", " "),
              redacted = str_replace_all(text, "\\w+@", "****@"),
              text = NULL)
@@ -221,7 +186,8 @@ In `textr`, most functions have a `_all` variant which replaces/finds/extracts a
 Besides replacing patterns, it can also be useful to extract elements from a string, for example the email or hashtag:
 
 ```{r}
-t %>% mutate(email = str_extract(text, regex_email),
+regex_email = regex("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
+t |> mutate(email = str_extract(text, regex_email),
              hashtag = str_extract(text, "#\\w+"))
 ```
 
@@ -232,21 +198,70 @@ but since it can match zero, once, or more often per text, it returns a list con
 str_extract_all(t$text, "#\\w+")
 ```
 
-The best way to deal with this output might be to turn it into 'tidy' data,
-by using `simplify=T` (which turns the matches into columns), converting to a tibble, adding the identifier, and gathering and filtering the results:
+The best way to deal with this in the context of a data frame is to use `unnest_longer` to turn the list into a long format.
+First, use mutate to create a column containing the lists (so this is a column which itself contains complex data)
+
 
 ```{r} 
-matches =str_extract_all(t$text, "#\\w+", simplify = T)
-matches = matches %>% as_tibble %>% mutate(id = t$id) %>%
-  gather(var, hashtag, -id) %>% filter(hashtag != "") %>% select(-var)
-matches 
+hashtags = mutate(t, tags = str_extract_all(t$text, "#\\w+"))
+hashtags
 ```
 
-(if you know a more elegant way, let me know ~:-)~)
+As you can see, the tags column has 'list' as its type, with the last row containing two elements. 
+To turn this into a more usable dataframe, we 'unnest' it into a 'long' format using `unnest_longer`:
 
-# Encoding
+```{r}
+hashtags |> unnest_longer("tags")
+```
 
-*NOTE*: this code is not tested on non-western/non-linux computers, so I'm really curious if/how it will work on other computers! 
+As you can see, this creates a new data frame with one row per hash tag.
+
+# Splitting text
+
+Sometimes, a single column contains multiple data points, e.g. separated with a comma. For example, suppose we have this data:
+
+```{r}
+d = tibble(person=c("Liam Jones", "Olivia Smith"), books=c("The great Gatsby, To kill a Mockingbird", "Pride and Prejudice, 1984, Moby Dick"))
+d
+```
+
+If we want to split a column, in this case books, there are two good options. 
+
+## Using separate
+
+First, if the number of elements is known and you can use multiple you can use `separate` to separate the column into seperate columns:
+
+```{r}
+d |> separate(person, into=c("firstname", "lastname"), sep=" ")
+```
+
+As said, this is mostly useful if a column always contains a fixed number of data points that each have a distinct meaning, e.g. first and last name or city and state. 
+
+##  Using str_split
+
+If there is variable number of data points such as the list of books in the data set above, you can use str_split, which takes a regular expression argument to split the column:
+
+```{r}
+d |> mutate(books = str_split(books, pattern=","))
+```
+
+Just like above, this produces a column of type 'list' which contains multiple values per row. To normalize this, use `unnest_longer` as above:
+
+```{r}
+d |> mutate(books = str_split(books, pattern=",")) |> unnest_longer(books)
+```
+
+As you can also see, the spaces around the book titles are not removed. You can fix this in two ways, either by changing the pattern to incluide optional whitespace (`\\w` is white space, `*` means the preceding element is optional and can be repeated); or by adding a `trimws` call afterwards:
+
+```{r}
+d |> mutate(books = str_split(books, pattern="\\s*,\\s*")) |> unnest_longer(books)
+d |> mutate(books = str_split(books, pattern=",")) |> unnest_longer(books) |> mutate(books=trimws(books))
+```
+
+
+# A note on Unicode, UTF-8 and Encoding
+
+*NOTE*: this code is not tested on non-western/non-linux computers, so let me know if anything does not work
 
 Finally, a short note about unicode and character encodings.
 As with regular expressions, a full explanation of this topic is (well) beyond the scope of this tutorial.
@@ -316,3 +331,46 @@ If you don't know what encoding a text is in, you can try utf-8 and the most com
 ```{r, eval=F}
 guess_encoding("file.txt")
 ```
+
+# A note on characters and factors
+
+In R, every vector (column) has a data type, which you can inspect using `class(x)`.
+Two relevant data types are `character` for actual texts,
+and `factor` for labeled nominal values (groups). 
+
+In most cases, you want you texts to be stored as `character`, but many default functions (like `data.frame` and `read.csv`) store text colunms as `factor` -- while the tidyverse equivalents of `tibble` and `read_csv` use `character` by default. 
+
+In most cases, in R you can convert object types using `as.character`:
+
+```{r}
+df = data.frame(name=c("john", "mary"))
+class(df$name)
+library(tidyverse)
+tib = tibble(name=c("john", "mary"))
+class(tib$name)
+```
+
+Before R version 4.0, textual columns in data frames were automatically converted to a `factor`. A `factor` looks like a `character` column, but it is intended for groups or nominal values. Internally it is stored as a number, with a label attached to each possible value. 
+
+This makes storing large amounts of data more efficient (numbers are smaller than texts), but sometimes, you get unexpected results when you apply a text-based function to a factor. For example, normally `as.numeric` can be used to convert strings to numbers, setting non-numeric strings to NA:
+
+```{r}
+as.numeric(c("22", "16", "x"))
+```
+
+However, if we have this data encoded as a factor, it gives a completely different result:
+
+```{r}
+survey = data.frame(age=c("22", "16", "1"), stringsAsFactors = TRUE)
+as.numeric(survey$age)
+```
+
+What happened here? 
+The trick is to remember that factors are intended as labeled groups, and internally R stores the group index and has a separate list of labels (by default sorted alphabetically). Thus, "22" was the second element in the labels, "16" the first, etc. To convert the labels into numbers, convert to character first (which uses the labels) before converting to numeric:
+
+```{r}
+as.numeric(as.character(survey$age))
+```
+
+Since R version 4.0, these problems are much less common, but it's good to be aware of the difference between factors and strings. Also, when using `ggplot` it's important to set factor data types and levels correctly for nominal values as they control the ordering and visualization of nominal data. For more information on dealing with factors, see the [forcats package](https://forcats.tidyverse.org/) and [cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/factors.pdf)
+
