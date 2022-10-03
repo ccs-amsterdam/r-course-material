@@ -37,7 +37,7 @@ Als note that CAC is co-authored by two CCS.Amsterdam members, so all feedback i
 
 # Statistical Analysis
 
-This is a set of tutorials designed to teach basic statistical modeling and analysis. The first tutorial includes examples for standard regression analysis as well as analysis of variance. Later tutorials exemplify the use of more advanced statistical modelling approaches including the generalized linear model and multilevel models. 
+This is a set of tutorials designed to teach basic (Frequentist) statistical modeling and analysis. The first tutorial includes examples for standard regression analysis as well as analysis of variance. Later tutorials exemplify the use of more advanced statistical modelling approaches including the generalized linear model and multilevel models. 
 
 | Tutorial | Video tutorial | Core packages / functions |
 |----|---|---|
@@ -47,6 +47,15 @@ This is a set of tutorials designed to teach basic statistical modeling and anal
 | [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | [Multilevel](https://www.youtube.com/watch?v=1Tw1eIfSyEQ&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=4) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
 | [Structural Equation Modeling](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_sem_1_lavaan.md) | | lavaan: sem, fitMeasures, parameterEstimates |
 | [Simple Mediation Analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/mediation_analysis.md) | | boot: boot, lavaan: sem, mediation: mediate |
+
+# Bayesian Statistical Analysis
+
+This set of tutorials introduces the basics of Bayesian Statistics. 
+
+| Tutorial | Video tutorial | Core packages / functions |
+|----|---|---|
+| [Basics of Bayesian Statistics](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_01.md) | | None |
+| [Bayesian Regression Analysis](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_03.md) | | brms: brm, as_draw_df; bayestestR: various |
 
 # Test theory and factor analysis
 
