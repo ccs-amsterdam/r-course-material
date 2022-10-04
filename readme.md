@@ -47,6 +47,7 @@ This is a set of tutorials designed to teach basic (Frequentist) statistical mod
 | [Multilevel Models](https://htmlpreview.github.io/?https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/multilevel_models.html) | [Multilevel](https://www.youtube.com/watch?v=1Tw1eIfSyEQ&list=PL-i7GM-A1wBarcTV3wN2f-AAuEK3j76M0&index=4) | lme4: lmer, glmer, sjPlot: tab_model, plot_model |
 | [Structural Equation Modeling](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_sem_1_lavaan.md) | | lavaan: sem, fitMeasures, parameterEstimates |
 | [Simple Mediation Analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/mediation_analysis.md) | | boot: boot, lavaan: sem, mediation: mediate |
+| [Specification Curve Analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_spec-curve-analysis.md) | | specr: setup_specs, run_specs, plot_specs... |
 
 # Bayesian Statistical Analysis
 
