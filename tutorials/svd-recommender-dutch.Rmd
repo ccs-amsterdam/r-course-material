@@ -132,6 +132,42 @@ en de projectie op de latente factor in zwart.
 Voor de eerste (willekeurige) 20 punten zijn de bij elkaar horende punten gekleurd en is de projectielijn
 in het grijs weergegeven. Zoals je kan zien is elk punt loodrecht op de factor geprojecteerd. 
 
+# Een makkelijkere functie voor SVD
+
+Zoals je in bovenstaande code kan zien, werkt `svd` met matrices in plaats van data frames (of tibbles).
+Om het wat makkelijker te maken hiermee te werken staat hieronder een functie die de output van
+`svd` wat opschoont en omzet naar tibbles:
+
+```{r}
+run_svd = function(ratingsmatrix, ndimensions=10) {
+  # Run SVD and set rownames on the resulting matrices
+  udv = svd(ratingsmatrix, ndimensions, ndimensions)
+  rownames(udv$u) = rownames(ratingsmatrix)
+  rownames(udv$v) = colnames(ratingsmatrix)
+  
+  # Convert the u and v matrices to long-format tibbles
+  udv$item_values = as_tibble(udv$v, rownames='item') |> 
+      pivot_longer(-item, names_to="dimension", values_to="item_value")
+  udv$user_values = as_tibble(udv$u, rownames='user') |> 
+    pivot_longer(-user, names_to="dimension", values_to="user_value")
+    
+  # Compute the predictions by re-multiplying the result of the decomposition 
+  # and convert to long-format tibble
+  udv$d = udv$d[1:ndimensions]
+  p = (udv$u %*% diag(udv$d) %*% t(udv$v)) 
+  udv$predictions = as_tibble(p, rownames='user') |>
+    pivot_longer(-user, names_to="item", values_to="prediction")
+    
+  return(udv)
+}
+```
+
+Deze functie staat ook online op [Github](https://gist.github.com/vanatteveldt/a8ad49918036937ea60166b923e4c041) en je kan het direct in R inladen met:
+
+```{r}
+source("https://gist.github.com/vanatteveldt/a8ad49918036937ea60166b923e4c041/raw")
+```
+
 # Collaborative filtering
 
 Zoals in het begin gezegd kunnen we deze techniek gebruiken om aanbevelingen te doen:
@@ -144,8 +180,8 @@ gebruikers vinden de items op een factor vaak allemaal leuk of juist niet.
 Om te kijken hoe dit werkt gebruiken we een triviale dataset met 8 films en 10 gebruikers:
 
 ```{r}
-m = read_csv("https://raw.githubusercontent.com/ccs-amsterdam/r-course-material/master/data/reviews.csv") 
-m
+reviews = read_csv("https://raw.githubusercontent.com/ccs-amsterdam/r-course-material/master/data/reviews.csv") 
+reviews
 ```
 
 Olivia houdt erg van F1 en Home Game, maar niet van House of Cards of Bridge. 
@@ -153,32 +189,31 @@ De eerste stap is om dit om te zetten naar een matrix met de series in de kolomm
 Hiervoor gebruiken we de `pivot_wider` functie:
 
 ```{r}
-m = pivot_wider(m, names_from=series, values_from=rating, values_fill=0)
-m
+reviews_wide = pivot_wider(reviews, names_from=series, values_from=rating, values_fill=0)
+reviews_wide
 ```
 
 Nu kunnen we de de `user` kolom in rijnamen veranderen en er een matrix van maken:
 
 ```{r}
-m = m |> 
+reviews_matrix = reviews_wide |> 
   column_to_rownames(var="user") |>
   as.matrix()
-m
+reviews_matrix
 ```
 
 ## SVD
 
+We gebruiken nu de nieuwe functie om de svd uit te voeren:
+
 ```{r}
-udv = svd(m)
-u = udv$u
-d = udv$d
-v = udv$v
+m = run_svd(reviews_matrix, ndimensions=8)
 ```
 
 Als we kijken naar de singular values dan zien we dat er een soort knik zit bij n=3 of n=4:
 
 ```{r}
-tibble(n=1:8, value=d) |> 
+tibble(n=1:8, value=m$d) |> 
   ggplot(aes(x=n, y=value)) + 
   geom_line() + 
   theme_minimal()
@@ -188,11 +223,21 @@ Gezien het kleine aantal datapunten gaan we uit van 3 factoren.
 We gebruiken dezelfde code als eerste om onze 'voorspellingen' van de ratings te doen:
 
 ```{r}
-d[4:length(d)] = 0
-data2 = u %*% diag(d) %*% t(v)
-colnames(data2) = colnames(m)
-rownames(data2) = rownames(m)
-round(data2, 1)
+m = run_svd(reviews_matrix, ndimensions=3)
+```
+
+Nu kunnen we gemakkelijk kijken naar hoe de films in deze dimensies passen door de item-values te bekijken:
+```{r}
+m$item_values
+m$item_values |> pivot_wider(names_from=dimension, values_from=item_value)
+```
+
+Hetzelfde kunnen we doen met de voorspellingen.
+We kunnen de voorspelde user-review matrix bekijken door de voorpellingen naar een wide formaat te pivoten:
+
+```{r}
+m$predictions
+m$predictions |> pivot_wider(names_from=item, values_from=prediction)
 ```
 
 Wat we nu zien is dat alle waardes ingevuld zijn: met andere woorden we hebben een inschatting of voorspelling van de rating van een serie, ook als deze nog niet door die persoon was gekeken.
