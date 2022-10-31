@@ -207,7 +207,7 @@ reviews_matrix
 We gebruiken nu de nieuwe functie om de svd uit te voeren:
 
 ```{r}
-m = run_svd(reviews_matrix, ndimensions=8)
+m = run_svd(reviews_matrix, ndimensions=4)
 ```
 
 Als we kijken naar de singular values dan zien we dat er een soort knik zit bij n=3 of n=4:
