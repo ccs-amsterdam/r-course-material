@@ -17,6 +17,7 @@ Wouter van Atteveldt
     -   [Word frequencies and word
         clouds](#word-frequencies-and-word-clouds)
     -   [Corpus comparison](#corpus-comparison)
+-   [Where next?](#where-next)
 
 # Introduction: A Tidy Text Format
 
@@ -363,3 +364,14 @@ bind_rows(slice_max(comparison, diff, n=50),
   scale_size_continuous(range = c(2,10)) +
   theme_void()
 ```
+
+# Where next?
+
+To learn more about text processing in R, see also our other tutorials:
+
+-   [Topic modeling with
+    Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-topicmodel.md)
+-   [Dictionary analysis with
+    Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-dictionary.md)
+-   [Lingusitic preprocessing with Spacy(r) and
+    UDPipe](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/r_text_nlp.md)

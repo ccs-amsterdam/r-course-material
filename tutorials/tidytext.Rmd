@@ -329,3 +329,10 @@ bind_rows(slice_max(comparison, diff, n=50),
   theme_void()
 ```
 
+# Where next?
+
+To learn more about text processing in R, see also our other tutorials:
+
+ - [Topic modeling with Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-topicmodel.md)
+ - [Dictionary analysis with Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-dictionary.md)
+ - [Lingusitic preprocessing with Spacy(r) and UDPipe]
