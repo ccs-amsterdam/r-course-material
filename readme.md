@@ -56,8 +56,8 @@ This is a set of tutorials designed to teach basic (Frequentist) statistical mod
 | Tutorial | Video tutorial | Core packages / functions |
 |----|---|---|
 | [Power analyses for bivariate regression analysis](tutorials/r-power-bivariate-regression.md) |  | stats: rnorm; pwr: pwr.r.test; tidyverse: various |
-| [Power analyses for t-tests](tutorials/r-power-t-tests.md) |  | stats: rnorm; pwr: pwr.t.test; tidyverse: various |
-| [Power analyses for exprimental designs (e.g., 2x2 between-subject)](tutorials/r-power-2x2-design.md) |  | stats: rnorm;tidyverse: various; MonteCarlo: MonteCarlo|
+| [Power analyses for t-tests](tutorials/r-power_t-tests.md) |  | stats: rnorm; pwr: pwr.t.test; tidyverse: various |
+| [Power analyses for exprimental designs (e.g., 2x2 between-subject)](tutorials/r-power_2x2-design.md) |  | stats: rnorm;tidyverse: various; MonteCarlo: MonteCarlo|
 
 
 ## Test theory and factor analysis
