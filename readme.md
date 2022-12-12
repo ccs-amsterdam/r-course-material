@@ -71,7 +71,7 @@ The following tutorials can be used to teach basics of test theory and particula
 | [Item Response Theory: 3PL, 2PL, & 1PL/Rasch models](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt.md) |  | mirt: mirt; ggmirt: various |
 | [Item Response Theory: Graded Response Model](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt_graded.md) | | mirt: mirt; lavaan: cfa, standardizedsolution; ggmirt: various| 
 
-# Bayesian Statistics
+## Bayesian Statistics
 
 This set of tutorials introduces the basics of Bayesian Statistics. 
 
