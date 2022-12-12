@@ -37,6 +37,8 @@ Als note that CAC is co-authored by two CCS.Amsterdam members, so all feedback i
 
 # Statistical Analysis
 
+## Frequentist Statistics
+
 This is a set of tutorials designed to teach basic (Frequentist) statistical modeling and analysis. The first tutorial includes examples for standard regression analysis as well as analysis of variance. Later tutorials exemplify the use of more advanced statistical modelling approaches including the generalized linear model and multilevel models. 
 
 | Tutorial | Video tutorial | Core packages / functions |
@@ -49,16 +51,16 @@ This is a set of tutorials designed to teach basic (Frequentist) statistical mod
 | [Simple Mediation Analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/mediation_analysis.md) | | boot: boot, lavaan: sem, mediation: mediate |
 | [Specification Curve Analysis](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_spec-curve-analysis.md) | | specr: setup_specs, run_specs, plot_specs... |
 
-# Bayesian Statistical Analysis
-
-This set of tutorials introduces the basics of Bayesian Statistics. 
+## Power Analyses and Simulations
 
 | Tutorial | Video tutorial | Core packages / functions |
 |----|---|---|
-| [Basics of Bayesian Statistics](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_01.md) | | None |
-| [Bayesian Regression Analysis](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_03.md) | | brms: brm, as_draw_df; bayestestR: various |
+| [Power analyses for bivariate regression analysis](tutorials/r-power-bivariate-regression.md) |  | stats: rnorm; pwr: pwr.r.test; tidyverse: various |
+| [Power analyses for t-tests](tutorials/r-power-t-tests.md) |  | stats: rnorm; pwr: pwr.t.test; tidyverse: various |
+| [Power analyses for exprimental designs (e.g., 2x2 between-subject)](tutorials/r-power-2x2-design.md) |  | stats: rnorm;tidyverse: various; MonteCarlo: MonteCarlo|
 
-# Test theory and factor analysis
+
+## Test theory and factor analysis
 
 The following tutorials can be used to teach basics of test theory and particularly confirmatory and exploratory factor analysis approaches. 
 
@@ -68,6 +70,17 @@ The following tutorials can be used to teach basics of test theory and particula
 | [Classical Test Theory: Exploratory Factor Analysis](tutorials/R_test-theory_2_efa.md) | [EFA in R](https://youtu.be/AXaBMDA34YM) | [psych](http://personality-project.org/r/psych/psych-manual.pdf): describe, mardia, fa.parallel, nfactors, fa, fa.diagram, omega |
 | [Item Response Theory: 3PL, 2PL, & 1PL/Rasch models](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt.md) |  | mirt: mirt; ggmirt: various |
 | [Item Response Theory: Graded Response Model](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/R_test-theory_3_irt_graded.md) | | mirt: mirt; lavaan: cfa, standardizedsolution; ggmirt: various| 
+
+# Bayesian Statistics
+
+This set of tutorials introduces the basics of Bayesian Statistics. 
+
+| Tutorial | Video tutorial | Core packages / functions |
+|----|---|---|
+| [Basics of Bayesian Statistics](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_01.md) | | None |
+| [Bayesian Regression Analysis](https://github.com/masurp/workshop_bayes/blob/main/exercises/exercise_03.md) | | brms: brm, as_draw_df; bayestestR: various |
+
+
 
 
 # Text analysis 
