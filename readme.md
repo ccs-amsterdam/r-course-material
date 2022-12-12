@@ -74,6 +74,19 @@ The following tutorials can be used to teach basics of test theory and particula
 
 For a general introduction to text analysis (in R), see these videos on [preprocessing](https://www.youtube.com/watch?v=O6CGXnxPHok&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=1&t=482s) and different [analysis approaches](https://www.youtube.com/watch?v=bHa2CClBYFw&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=4)
 
+## TidyText-based
+
+See also the open access book, [Text Mining with R: A TidyText approach](https://www.tidytextmining.com) by TidyText creators Julia Silge and David Robinson.
+
+| Tutorial | Video tutorial |  Core packages / functions |
+|----|---|---|
+| [TidyText basics](tutorials/tidytext.md) ||  [tidytext](https://juliasilge.github.io/tidytext/reference/index.html), [tidyverse](https://www.tidyverse.org/)
+| [Dictionary analysis with TidyText](tutorials/tidytext-dictionary.md) ||  [tidytext](https://juliasilge.github.io/tidytext/reference/index.html), [tidyverse](https://www.tidyverse.org/), [tokenbrowser](https://github.com/kasperwelbers/tokenbrowser), [boolydict](https://github.com/kasperwelbers/boolydict)
+| [Topic Modeling with TidyText](tutorials/tidytext-topicmodel.md) ||  [tidytext](https://juliasilge.github.io/tidytext/reference/index.html), [tidyverse](https://www.tidyverse.org/), [topicmodels](https://cran.r-project.org/web/packages/topicmodels/vignettes/topicmodels.pdf)
+
+
+## (Mostly) Quanteda-based
+
 | Tutorial | Video tutorial |  Core packages / functions |
 |----|---|---|
 | [Text analysis](tutorials/R_text_3_quanteda.md) | [corpus stats](https://www.youtube.com/watch?v=7z7U7ORFWQM&list=PL-i7GM-A1wBZYRYTpem7hNVHK3hSV_1It&index=3) |  [quanteda](https://quanteda.io/) |

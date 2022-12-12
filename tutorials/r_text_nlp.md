@@ -3,6 +3,22 @@ NLP Processing in R
 Wouter van Atteveldt & Kasper Welbers
 2019-04
 
+-   [Spacyr](#spacyr)
+    -   [Installing spacy(r)](#installing-spacyr)
+    -   [Using spacyr](#using-spacyr)
+    -   [Usage with tidytext / as data
+        frame](#usage-with-tidytext--as-data-frame)
+    -   [Using spacy output in
+        quanteda](#using-spacy-output-in-quanteda)
+    -   [Finalizing spacy](#finalizing-spacy)
+    -   [Loading and using other
+        languages](#loading-and-using-other-languages)
+-   [UDPipe](#udpipe)
+    -   [Using udpipe on a data frame / in
+        TidyText](#using-udpipe-on-a-data-frame--in-tidytext)
+    -   [Using udpipe output in
+        quanteda](#using-udpipe-output-in-quanteda)
+
 For text analysis it is often useful to POS tag and lemmatize your text,
 especially with non-English data. Lemmatizing generally works much
 better than stemming, especially for a richly inflected language such as
@@ -75,17 +91,38 @@ As a slightly bigger example, this lists all the most common adjectives
 in the two inaugural speeches of Obama:
 
 ``` r
-library(quanteda)
+library(sotu)
 library(tidyverse)
-docvars(data_corpus_inaugural)
-speeches = data_corpus_inaugural %>% convert(to="data.frame") %>% filter(President == "Obama") %>% pull(text)
-tokens = spacy_parse(speeches) 
-tokens %>% filter(pos == "ADJ") %>% group_by(lemma) %>% summarize(n=n()) %>% arrange(desc(n)) %>% head()
+
+speeches_obama = add_column(sotu_meta, text=sotu_text) |> 
+  as_tibble() |>
+  rename(doc_id=X) |>
+  filter(president == 'Barack Obama') 
+
+tokens = spacy_parse(speeches_obama)
+head(tokens)
 ```
 
-As the tokens are just a data frame, it is quite easy to use tidyverse
-to inspect and manipulate the outcome. There are also some built-in
-functions to help deal with multi-word entities or noun phrases:
+## Usage with tidytext / as data frame
+
+As the tokens are just a data frame with one row per token (word), they
+are already in the format required for tidytext and we can use regular
+tidyverse functions to inspect and manipulate the outcome.
+
+For example, to list the nouns used by Obama:
+
+``` r
+tokens |>
+  as_tibble() |>
+  filter(pos == "NOUN") |> 
+  group_by(lemma) |>
+  summarize(n=n()) |> 
+  arrange(desc(n)) |>
+  head()
+```
+
+There are also some built-in functions to help deal with multi-word
+entities or noun phrases:
 
 ``` r
 entities = entity_extract(tokens)
@@ -97,9 +134,14 @@ As you can see, this ‘merges’ words that form a name together such as
 tokens are replaced by the new merged token:
 
 ``` r
-tokens %>% filter(str_detect(token, "Justice|Roberts"))
 tokens2 = entity_consolidate(tokens)
-tokens2 %>% filter(str_detect(token, "Justice|Roberts"))
+tokens2 |>
+  as_tibble() |>
+  filter(entity_type == "LOC") |> 
+  group_by(lemma) |>
+  summarize(n=n()) |> 
+  arrange(desc(n)) |>
+  head()
 ```
 
 A similar function pair exists to deal with noun phrases, but this
@@ -108,8 +150,8 @@ requires you to enable noun phrase parsing in the original parse call:
 `dependency=T`)
 
 ``` r
-tokens = spacy_parse(speeches, nounphrase = T) 
-nps = nounphrase_extract(tokens)
+nptokens = spacy_parse(speeches_obama, nounphrase = T) 
+nps = nounphrase_extract(nptokens)
 head(nps)
 ```
 
@@ -122,10 +164,11 @@ Spacyr was developed by the same people that made quanteda, so as you
 can guess they collaborate quite well. In fact, the data frame returned
 by spacyr can be directly used in most quanteda functions. Note that the
 `dfm` function itself does not accept a tokens data frame, but there is
-an as.tokens function that
-does:
+an as.tokens function that does:
 
 ``` r
+library(quanteda)
+library(quanteda.textplots)
 tokens %>% as.tokens(include_pos="pos", use_lemma=TRUE) %>% dfm() %>% textplot_wordcloud()
 ```
 
@@ -187,8 +230,7 @@ tokens = udpipe(txt, "english", parser="none") %>% as_tibble()
 tokens %>% select(doc_id, token_id:xpos)
 ```
 
-Or with german
-text:
+Or with german text:
 
 ``` r
 udpipe("Ich bin ein Berliner", "german", parser="none") %>%  select(doc_id, token_id:xpos)
@@ -202,13 +244,36 @@ part-of-speech) will be the same for all languages.
 Note that we specified `parser="none"` to disable dependency parsing,
 which would make it quite a lot slower.
 
+## Using udpipe on a data frame / in TidyText
+
+Similar to spacy, the output of `udpipe` is a data frame with a word per
+row, so it can be directly used in tidytext.
+
+To preserve document identifiers (so results can be merged back with
+metadata), it is best to call udpipe on a data frame rather than on a
+character vector. Again similar to spacy, this assumes that the data
+frame contains rows called `doc_id` and `text`:
+
+``` r
+speeches_obama = add_column(sotu_meta, text=sotu_text) |> 
+  as_tibble() |>
+  rename(doc_id=X) |>
+  filter(president == 'Barack Obama') 
+
+tokens = udpipe(speeches_obama, "english", parser="none")
+tokens = tokens |> 
+  as_tibble() |> 
+  select(doc_id, paragraph_id, sentence_id, token, lemma, upos) 
+head(tokens)
+```
+
 ## Using udpipe output in quanteda
 
 To use udpipe output in quanteda, you need to first convert it into a
 list of tokens per document:
 
 ``` r
-tokens = udpipe(speeches, "english", parser="none")
+tokens = udpipe(speeches_obama, "english", parser="none")
 tokenlist = split(tokens$lemma, tokens$doc_id)
 names(tokenlist)
 head(tokenlist$doc1)
@@ -221,8 +286,7 @@ tokenlist %>% as.tokens() %>% dfm() %>% textplot_wordcloud()
 ```
 
 Note that we used the lemma above. We can also add the POS tags to the
-text so we get the same output as
-quanteda:
+text so we get the same output as quanteda:
 
 ``` r
 split(str_c(tokens$lemma, tokens$upos, sep = "/"), tokens$doc_id) %>% as.tokens() %>% tokens_select("*/NOUN") %>% dfm() %>% textplot_wordcloud()

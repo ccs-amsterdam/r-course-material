@@ -12,3 +12,4 @@ tutorials/*.rda
 model.html
 */RMarkdown_parameters_cache/*
 *.DS_Store
+*/*_cache
