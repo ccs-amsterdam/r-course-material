@@ -1,0 +1,198 @@
+Power Analysis & Simulations: T-Test
+================
+Philipp Masur
+2022-12
+
+-   <a href="#introduction" id="toc-introduction">Introduction</a>
+-   <a href="#calculating-sample-size-using-pwr"
+    id="toc-calculating-sample-size-using-pwr">Calculating sample size using
+    <code>pwr</code></a>
+-   <a href="#estimating-sample-size-using-monte-carlo-simulations"
+    id="toc-estimating-sample-size-using-monte-carlo-simulations">Estimating
+    sample size using Monte Carlo Simulations</a>
+    -   <a href="#simulating-mean-differences"
+        id="toc-simulating-mean-differences">Simulating mean differences</a>
+    -   <a href="#power-simulations" id="toc-power-simulations">Power
+        simulations</a>
+
+# Introduction
+
+This tutorial outlines power analyses for simple t-tests (mean
+differences). It is the second part of an on-going series about power
+analyses. The first part on conducting power analyses for bivariate
+regression analyses can be found
+[here](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/r-power-bivariate-regression.md).
+We recommend to go through this first tutorial before working on this
+one.
+
+This tutorial is going to be comparatively short. It shows that Monte
+Carlo simulations can be used to explore mean differences a bit more in
+detail, particularly if one has no idea about the standardized effect
+sizes of a mean difference.
+
+# Calculating sample size using `pwr`
+
+First, let’s assume we have an idea about the strength of the mean
+difference of interest in terms of Cohen’s *d*. In this case, we can
+simply calculate the necessary sample size like so:
+
+``` r
+# Load package
+library(pwr)
+
+# Compute necessary sample size
+pwr.t.test(d = .2, 
+           sig.level = .05,
+           power = .80,
+           alternative = "two.sided")
+```
+
+    ## 
+    ##      Two-sample t test power calculation 
+    ## 
+    ##               n = 393.4057
+    ##               d = 0.2
+    ##       sig.level = 0.05
+    ##           power = 0.8
+    ##     alternative = two.sided
+    ## 
+    ## NOTE: n is number in *each* group
+
+In this scenario, we would need overall n = 786 participants for our
+study.
+
+# Estimating sample size using Monte Carlo Simulations
+
+When we do not have a clear assumptions about the standardized effect
+size, we can use simulations to produce data that corresponds to our
+assumptions about the variables distributions.
+
+## Simulating mean differences
+
+Let’s assume we have a simple experiment in which particpants are either
+exposed to a stimulus or not. We call the groups control and treatment
+respectively. Using the function `rnorm()`, we can create two normally
+distributed vectors. Here, we assume the the control group on average
+scores 3 on the outcome variable and the treatment group on average 4.
+We further assume that both variables have a standard deviation of 1.
+
+We can plot these differences quickly and also run a t-test to check
+whether such an effect becomes significant with 100 people (per group!).
+
+``` r
+library(tidyverse)
+
+# To ensure reproducibility
+set.seed(42)
+
+# Simulate data
+n <- 100
+control   <- rnorm(n = n, mean = 3, sd = 1)
+treatment <- rnorm(n = n, mean = 4, sd = 1)
+
+# Plot differences
+ggplot(NULL) +
+  geom_density(aes(x = control), alpha = .4, fill = "blue")+
+  geom_density(aes(x = treatment), alpha = .4, fill = "red") +
+  theme_classic() +
+  labs(x = "Distributions of control vs. treatment")
+```
+
+![](r-power_t-tests_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+# Combine into data set
+d <- tibble(group = rep(c("control", "treatment"), each = n),
+            outcome = c(control, treatment))
+# test
+t.test(outcome ~ group, d)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  outcome by group
+    ## t = -6.3809, df = 194.18, p-value = 1.263e-09
+    ## alternative hypothesis: true difference in means between group control and group treatment is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -1.1519980 -0.6080049
+    ## sample estimates:
+    ##   mean in group control mean in group treatment 
+    ##                3.032515                3.912516
+
+Indeed, a sample of 200 would be enough to test this effect. However,
+what is the power in this case?
+
+## Power simulations
+
+We can wrap the simulation code in a function that allows us to vary all
+parameters of interest (includin the sample size, the means, and the
+standard deviations). It automatically extracts the p-value from the
+t-test as well. This, we “map” over the grid of possible combinations.
+The function sim_ttest, which we created, thereby takes the respective
+columns as input. The number of simulations will be 1000 in this case,
+but should be higher to arrive a stable solutions (\> 10,000).
+
+``` r
+sim_ttest <- function(n = 100, control = 3, treatment = 4, sd1 = 1, sd2 = NULL) {
+  
+  if(is.null(sd2)) {
+    sd2 <- sd1
+  }
+  
+  control   <- rnorm(n = n, mean = control,   sd = sd1)
+  treatment <- rnorm(n = n, mean = treatment, sd = sd2)
+
+  d <- tibble(group = rep(c("control", "treatment"), each = n),
+              outcome = c(control, treatment))
+  
+  value <- t.test(outcome ~ group, d)$p.value
+  names(value) <- "value"
+  return(value)
+}
+
+
+results <- expand.grid(n = seq(20, 400, by = 20),   # sample sizes
+                       control = 3,                 # Mean of the control group (baseline)
+                       treatment = c(3.5, 4, 4.5),  # investigated means of the treatment group
+                       sd1 = c(1, 1.5, 2),          # standard deviations for both variables
+                       times = 1:1000) %>%          # Number of simulations per combinations
+  dplyr::select(-times) %>%
+  mutate(pmap_df(., sim_ttest))
+head(results)
+```
+
+|   n | control | treatment | sd1 |     value |
+|----:|--------:|----------:|----:|----------:|
+|  20 |       3 |       3.5 |   1 | 0.0796459 |
+|  40 |       3 |       3.5 |   1 | 0.1209476 |
+|  60 |       3 |       3.5 |   1 | 0.0040551 |
+|  80 |       3 |       3.5 |   1 | 0.0035720 |
+| 100 |       3 |       3.5 |   1 | 0.0017552 |
+| 120 |       3 |       3.5 |   1 | 0.0006338 |
+
+As we can see, the code above produce a result table that includes the
+p-value per combination (18,000 combinations!). We can now summarize by
+counting the number of times a pvalue is below .05 per combination and
+plot this as curve.
+
+``` r
+results %>%
+  mutate(sig = ifelse(value < .05, TRUE, FALSE)) %>%
+  group_by(n, treatment, sd1) %>%
+  summarize(power = (sum(sig)/length(sig))*100) %>%
+  ggplot(aes(x = n, y = power, color = factor(sd1))) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~treatment) +
+  geom_hline(yintercept = 80, linetype = "dotted", color = "red") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw() +
+  labs(x = "Sample size (n)", y = "Power (1 - beta)", 
+       color = "Standard deviations")
+```
+
+![](r-power_t-tests_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+As we can see, we need many more participants if a) the mean difference
+is small (.5 vs. 1 vs. 1.5) and when the standard deviations are larger!
