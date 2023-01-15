@@ -83,7 +83,7 @@ We can now fit the topic model from the dtm using the `LDA` function in the topi
 Note that we use `set.seed` to create a reproducible setup since topic modeling is deterministic.
 Note also that we set a relatively low alpha parameter, see our [understanding alpha](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/understanding_alpha.md) handout for more information.
 
-```{r, cache=TRUE}
+```{r}
 library(topicmodels)
 set.seed(123)
 m = LDA(dtm, method = "Gibbs", k = 10,  control = list(alpha = 0.1))

@@ -335,4 +335,4 @@ To learn more about text processing in R, see also our other tutorials:
 
  - [Topic modeling with Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-topicmodel.md)
  - [Dictionary analysis with Tidytext](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/tidytext-dictionary.md)
- - [Lingusitic preprocessing with Spacy(r) and UDPipe]
+ - [Lingusitic preprocessing with Spacy(r) and UDPipe](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/r_text_nlp.md)
