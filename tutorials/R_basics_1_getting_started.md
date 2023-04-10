@@ -1,28 +1,41 @@
 R basics: Getting started
 ================
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
-2021-10
+2023-04
 
--   [Introduction](#introduction)
-    -   [What is R and why should you learn
-        it?](#what-is-r-and-why-should-you-learn-it)
-    -   [Purpose of this tutorial](#purpose-of-this-tutorial)
--   [Getting started with R](#getting-started-with-r)
-    -   [Installing R](#installing-r)
-    -   [Installing RStudio](#installing-rstudio)
-    -   [Using RStudio](#using-rstudio)
-    -   [Running code from the R
-        script](#running-code-from-the-r-script)
-    -   [Assigning values to names](#assigning-values-to-names)
-    -   [Using RStudio projects](#using-rstudio-projects)
--   [Text Analysis in R](#text-analysis-in-r)
-    -   [Installing and loading the quanteda
-        package](#installing-and-loading-the-quanteda-package)
-    -   [The inaugral speeches Corpus](#the-inaugral-speeches-corpus)
-    -   [The Document-term Matrix](#the-document-term-matrix)
-    -   [Word clouds](#word-clouds)
-    -   [Keyword in context](#keyword-in-context)
-    -   [Corpus comparison](#corpus-comparison)
+-   <a href="#introduction" id="toc-introduction">Introduction</a>
+    -   <a href="#what-is-r-and-why-should-you-learn-it"
+        id="toc-what-is-r-and-why-should-you-learn-it">What is R and why should
+        you learn it?</a>
+    -   <a href="#purpose-of-this-tutorial"
+        id="toc-purpose-of-this-tutorial">Purpose of this tutorial</a>
+-   <a href="#getting-started-with-r"
+    id="toc-getting-started-with-r">Getting started with R</a>
+    -   <a href="#installing-r" id="toc-installing-r">Installing R</a>
+    -   <a href="#installing-rstudio" id="toc-installing-rstudio">Installing
+        RStudio</a>
+    -   <a href="#using-rstudio" id="toc-using-rstudio">Using RStudio</a>
+    -   <a href="#running-code-from-the-r-script"
+        id="toc-running-code-from-the-r-script">Running code from the R
+        script</a>
+    -   <a href="#assigning-values-to-names"
+        id="toc-assigning-values-to-names">Assigning values to names</a>
+    -   <a href="#using-rstudio-projects" id="toc-using-rstudio-projects">Using
+        RStudio projects</a>
+-   <a href="#text-analysis-in-r" id="toc-text-analysis-in-r">Text Analysis
+    in R</a>
+    -   <a href="#installing-and-loading-the-quanteda-package"
+        id="toc-installing-and-loading-the-quanteda-package">Installing and
+        loading the quanteda package</a>
+    -   <a href="#the-inaugral-speeches-corpus"
+        id="toc-the-inaugral-speeches-corpus">The inaugral speeches Corpus</a>
+    -   <a href="#the-document-term-matrix"
+        id="toc-the-document-term-matrix">The Document-term Matrix</a>
+    -   <a href="#word-clouds" id="toc-word-clouds">Word clouds</a>
+    -   <a href="#keyword-in-context" id="toc-keyword-in-context">Keyword in
+        context</a>
+    -   <a href="#corpus-comparison" id="toc-corpus-comparison">Corpus
+        comparison</a>
 
 # Introduction
 
@@ -103,8 +116,7 @@ automatically launch R as well.
 
 The first time you open RStudio, you will likely see three separate
 windows. The first thing you want to do is open an R Script to work in.
-To do so, go to the toolbar and select File -&gt; New File -&gt; R
-Script.
+To do so, go to the toolbar and select File -\> New File -\> R Script.
 
 You will now see four windows split evenly over the four corners of your
 screen:
@@ -165,7 +177,7 @@ more thing that you need to know about the R syntax is how values can be
 In plain terms, **assignment** is how you make R remember things by
 assigning them to a name. This works the same way for all sorts of
 values, from single numbers to entire datasets. You can choose whether
-you prefer the equal sign (=) or the arrow (&lt;-) for assignment.
+you prefer the equal sign (=) or the arrow (\<-) for assignment.
 
 ``` r
 x = 2
@@ -202,9 +214,9 @@ window. Look for the button labeled **Project: (None)**. Click on this
 button, and select New Project. Follow the instructions to create a new
 directory with a new project. Name the project “R introduction”.
 
-Now, open a new R script and immediately save it (select File -&gt; Save
+Now, open a new R script and immediately save it (select File -\> Save
 in the toolbar, or press ctrl-s). Name the file
-**my\_first\_r\_script.r**. In the bottom-right corner, under the
+**my_first_r\_script.r**. In the bottom-right corner, under the
 **Files** tab, you’ll now see the file added to the project. The
 extension **.r** indicates that the file is an R script.
 
@@ -284,7 +296,7 @@ library(quanteda.textstats)
 In text analysis, the term **corpus** is often used to refer to a
 collection of texts. For this tutorial, we’ll use a demo corpus that is
 included in the **quanteda**. The corpus is called
-**data\_corpus\_inaugural**, and contains the inaugural speeches of US
+**data_corpus_inaugural**, and contains the inaugural speeches of US
 presidents. For convenience, we’ll assign the corpus to the name
 **corp**
 
@@ -367,7 +379,7 @@ words. Next, we create the DTM, using the `dfm` function from the
 quanteda package. DFM stands for document-feature matrix, which is a
 more general form of a document-term matrix (a feature can be a term,
 but also other things). In our case, the DFM is a DTM. Finally, we use
-dfm\_remove to remove the stopwords.
+dfm_remove to remove the stopwords.
 
 ``` r
 tok <- tokens(corp, remove_punct=TRUE)
@@ -414,10 +426,10 @@ Washington, and once in the 1797 speech of John Adams.
 ## Word clouds
 
 To get a basic idea of what presidents talk about, we can create a
-wordcloud with quanteda’s **textplot\_wordcloud()** function. The main
+wordcloud with quanteda’s **textplot_wordcloud()** function. The main
 input for this function is the DTM that you created in the previous
-step. As an additional argument we set min\_count (the minimum
-wordcount) to 50 to ignore all words that occured less than 50 times.
+step. As an additional argument we set min_count (the minimum wordcount)
+to 50 to ignore all words that occured less than 50 times.
 
 ``` r
 textplot_wordcloud(m, min_count = 50)
@@ -506,7 +518,7 @@ kwic(tok, 'terror*')
 Note that KWIC uses the tokens (`tok`) rather than the DTM, as the DTM
 no longer has word order information (so it can’t display context).
 Thus, to get a KWIC list for a subset of documents, e.g. only Obama’s
-speeches, you need to use `tok_subset` rather than `dfm_subset`:
+speeches, you need to use `tokens_subset` rather than `dfm_subset`:
 
 ``` r
 tok_obama <- tokens_subset(tok, President == "Obama")

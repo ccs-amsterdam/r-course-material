@@ -1,7 +1,7 @@
 ---
 title: 'R basics: Getting started'
 author: "Kasper Welbers, Wouter van Atteveldt & Philipp Masur"
-date: "2021-10"
+date: "2023-04"
 output:
   github_document:
     toc: yes
@@ -254,7 +254,7 @@ kwic(tok, 'terror*')
 ```
 
 Note that KWIC uses the tokens (`tok`) rather than the DTM, as the DTM no longer has word order information (so it can't display context).
-Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `tok_subset` rather than `dfm_subset`:
+Thus, to get a KWIC list for a subset of documents, e.g. only Obama's speeches, you need to use `tokens_subset` rather than `dfm_subset`:
 
 ```{r, eval=F}
 tok_obama <- tokens_subset(tok, President == "Obama")
