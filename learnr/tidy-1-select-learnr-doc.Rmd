@@ -1,0 +1,258 @@
+---
+title: "Tidyverse I: tidy data"
+output:
+  github_document:
+    toc: yes
+editor_options:
+  chunk_output_type: console
+---
+
+```{r opts, echo = FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.path = "img/")
+#library(printr)
+```
+
+
+## Introduction to Tidyverse 
+
+The goal of this tutorial is to get you acquainted with the
+[Tidyverse](https://www.tidyverse.org/). Tidyverse is a collection of
+packages that have been designed around a singular and clearly defined
+set of principles about what data should look like and how we should
+work with it. It comes with a nice introduction in the [R for Data
+Science](http://r4ds.had.co.nz/) book, for which the digital version is
+available for free. This tutorial deals with most of the material in
+chapter 5 of that book.
+
+In this part of the tutorial, we’ll focus on working with data using the
+`tidyverse` package. This package includes the `dplyr` (data-pliers)
+packages, which contains most of the tools we’re using below, but it
+also contains functions for reading, analysing and visualising data that
+will be explained later.
+
+### Installing tidyverse
+
+As before, `install.packages()` is used to download and install the
+package (you only need to do this once on your computer) and `library()`
+is used to make the functions from this package available for use
+(required each session that you use the package).
+
+```{r, eval=F}
+install.packages('tidyverse') # only needed once
+```
+
+```{r}
+library(tidyverse)
+```
+
+Note: don't be scared if you see a red message after calling `library`. RStudio doesn't see the difference between messages, warnings, and errors, so it displays all three in red. You need to read the message, and it will contain the word 'error' if there is an error, such as a misspelled package.
+
+As a fairly trivial example, try running the (error) code below, have a look at the error message, and fix the problem:
+
+```{r error, eval=FALSE}
+library(tidyvers) 
+```
+
+
+
+
+## Reading Data
+
+
+[Note: Please review [R Basics Tutorial](R-tidy-4-basics.md) if you are uncertain about objects, values, and functions.]
+
+As in most packages, the functionality in dplyr is offered through functions. 
+In general, a function can be seen as a command or instruction to the computer to do something and (generally) return the result. 
+
+In the tidverse packages, almost all `functions` primarily operate on data sets, for example for filtering and sorting data. 
+
+With a data set we mean a rectangular data frame consisting of rows (often items or respondents) and columns (often measurements of or data about these items). 
+These data sets can be R `data.frames`, but tidyverse has its own version of data frames called `tibble`,
+which is mostly the same as a data frame but is more efficient and somewhat easier to use. 
+
+### Creating a tibble
+
+As a very simply example, the following code creates a tibble containing respondents with a second column listing their gender:
+
+```{r tibble, eval=F}
+respondents <- tibble(resp_id = c(1,2,3), 
+                      gender = c("M","M","F"))
+```
+
+Let's say our respondents are 24, 32 and 27 years old. 
+Can you add a column called 'age' that specifies this age for the respondents?
+
+```{r tibbleage}
+respondents <- tibble(resp_id = c(1,2,3), 
+                      gender = c("M","M","F"))
+respondents
+```
+
+ 
+
+### A note on functions and assignment
+
+In the exercise above, you used the `tibble` function to create a new data frame,
+which you then *assigned* to the respondents object. 
+If you would not have assigned it to an object, R would simply print the result of the function on the screen and then forget all about it. 
+So, whenever you want R to remember the result of a function, you need to assign it to an object and give it a name.
+You can also re-use an existing name, in which case the object will be over-written by the new result. 
+
+When writing R code, 90% of your lines will follow this pattern of calling a function on some arguments (e.g. the data), and assigning it to an object:
+
+```{r, eval=F}
+my_object <- some_function(arguments)
+```
+
+### Reading data with `read_csv`
+
+The example above manually created a data set, but in most cases you will start with data that you get from elsewhere,
+such as a csv file (e.g. downloaded from an online dataset or exported from excel) or an SPSS or Stata data file.
+
+Tidyverse contains a function `read_csv` that allows you to read a csv file directly into a data frame.
+You specify the location of the file, either on your local drive or directly from the Internet!
+
+The example below downloads an overview of gun polls from the [data analytics site 538](https://fivethirtyeight.com/),
+and reads it into a tibble using the read_csv function:
+
+```{r loadgunpolls}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+gunpolls
+```
+
+(Note that you can safely ignore the (red) message, they simply tell you how each column was parsed)
+
+The shows the first ten rows of the data set, and for each column the data type is also mentioned: `<dbl>` stands for double, which is a *numeric* value; `<chr>` is textual or *character* data. 
+
+Note that on your own computer, R will print a message if not all rows or columns could be printed.  If you want to browse through your data, you can also click on the name of the data.frame (gunpolls) in the top-right window "Environment" tab 
+or call `View(d)`. 
+
+### Exercise: downloading data
+
+A csv file of the political polls just after the fall of the Dutch cabinet Rutte IV can be found at [https://i.amcat.nl/peiling.csv](https://i.amcat.nl/peiling.csv).
+Can you download that file and assign it to an object called `polls`?
+
+```{r loadpolls2, eval=FALSE}
+polls <- ____
+polls
+```
+
+ 
+
+## Selecting, renaming and filtering data
+
+In the previous section, you managed to download data from the Internet. 
+Often, this data needs to be cleaned before we can use it for analysis. 
+
+R Tidyverse has a number of functions that can be used for data cleaning. 
+As a first step, let's learn how to use `select` and `rename`
+to change the *columns* of a data frame.
+
+### Cleaning columns with `select` and `rename`
+
+Let's continue with the gun polls data we used above:
+
+```{r setupgun}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+gunpolls
+```
+
+```{r}
+gunpolls
+```
+
+This contains a number of columns that we might not be interested in. 
+Using `select`, we can select only the columns we are interested in:
+
+```{r select, exercise.setup='setupgun'}
+select(gunpolls, Population, Support, Pollster)
+```
+
+You can also specify a range of columns, for example all columns from Question to Support:
+
+```{r selectrange, exercise.setup='setupgun'}
+select(gunpolls, Question:Support)
+```
+
+Finally, it is also possible to drop columns by placing a minus sign in front of the column name.
+For example, this will drop the URL column and keep all other columns:
+
+```{r drop, exercise.setup='setupgun'}
+select(gunpolls, -URL)
+```
+
+
+### Renaming and non-standard names
+
+In R, it is easiest if a column name does not contain any spaces or other special characters. 
+To select such columns, you need to use 'backticks' around the name (`` `like this` ``).
+Because this is inconvenient, is is often better to rename such columns so they no longer contain a space. 
+Note that instead of a space, you can use an underscore (`_`) if desired.
+
+In R, you can use the `rename` function to change the name of one or more variables:
+
+```{r rename, exercise.setup='setupgun'}
+rename(gunpolls, rep = `Republican Support`, dem = `Democratic Support`)
+```
+
+Very often, a first step in data cleaning is renaming some columns and dropping others.
+This can be combined in a single step by renaming in the `select` function:
+
+```{r selectrename, exercise.setup='setupgun'}
+select(gunpolls, Question, rep = `Republican Support`, dem = `Democratic Support`)
+```
+
+Note the difference between the two functions: `rename` keeps all variables that are not mentioned,
+while `select` only keeps the variables that you selected. 
+
+### Assigning results to objects
+
+In the examples above, the result of the select or rename was not assigned to an object.
+This means that the results are printed on the screen, but not remembered. 
+In other words, the gunpolls object will contain the same data after running the command.
+
+To store the results of select or rename (or any other function), you need to *assign* it to an object and give it a name.
+This can be a new name, in which case a *copy* of the object will be made, so both objects can be used later.
+After running the code below, both the full `gunpolls` object (with all columns), and the `gunpolls_clean`
+object will be remembered by R, so you can choose to continue analysing either. 
+This is most useful if you want to do some analyses on the subset of the data, but also need to do other analyses on a different subset later. 
+
+```{r assign, exercise.setup='setupgun'}
+gunpolls_clean <- select(gunpolls, Question, rep = `Republican Support`, dem = `Democratic Support`)
+gunpolls_clean
+```
+
+If you assign it to the same name, it will overwrite the data:
+
+```{r overwrite, exercise.setup='setupgun'}
+gunpolls <- select(gunpolls, Question, rep = `Republican Support`, dem = `Democratic Support`)
+gunpolls
+```
+
+This is useful if you will not need to data you discarded. To summarize:
+
+```{r, eval=F}
+some_function(data)          # <-- print on screen and forget
+data2 <- some_function(data) # <-- create a new object and keep both
+data2 <- some_function(data) # <-- overwrite the old object
+```
+
+### Exercise
+
+Using the gun polls data from above, 
+rename the `Republican Support` and `Democratic Support` columns to `rep_support` and `dem_support`,
+and select only the Question, Pollster, and republicat/democratic support columns. 
+Assign the result to the `gunpolls` object
+
+
+```{r gunpollsex, eval=FALSE}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+___
+
+gunpolls  # prints the result on screen
+```
+
+
