@@ -56,7 +56,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     for file in args.files:
         out = file.replace("-learnr.Rmd", ".Rmd")
-        out = file.replace(".Rmd", "-doc.Rmd")
+        out = out.replace(".Rmd", "-doc.Rmd")
         convert(file, out)
         subprocess.check_call(["Rscript", "-e", f'library(rmarkdown); rmarkdown::render("{out}", rmarkdown::github_document(toc=T, html_preview=F))'])
 
