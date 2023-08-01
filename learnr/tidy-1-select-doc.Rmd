@@ -30,7 +30,7 @@ packages, which contains most of the tools we’re using below, but it
 also contains functions for reading, analysing and visualising data that
 will be explained later.
 
-### Installing tidyverse
+### Installing tidyverse {data-allow-skip=TRUE}
 
 As before, `install.packages()` is used to download and install the
 package (you only need to do this once on your computer) and `library()`
@@ -52,8 +52,6 @@ As a fairly trivial example, try running the (error) code below, have a look at 
 ```{r error, eval=FALSE}
 library(tidyvers) 
 ```
-
-
 
 
 ## Reading Data
@@ -140,7 +138,7 @@ polls
 
  
 
-## Selecting, renaming and filtering data
+## Selecting and renaming columns
 
 In the previous section, you managed to download data from the Internet. 
 Often, this data needs to be cleaned before we can use it for analysis. 
@@ -149,17 +147,13 @@ R Tidyverse has a number of functions that can be used for data cleaning.
 As a first step, let's learn how to use `select` and `rename`
 to change the *columns* of a data frame.
 
-### Cleaning columns with `select` and `rename`
+### Selecting columns with `select` 
 
 Let's continue with the gun polls data we used above:
 
 ```{r setupgun}
 url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
 gunpolls <- read_csv(url)
-gunpolls
-```
-
-```{r}
 gunpolls
 ```
 
@@ -184,7 +178,7 @@ select(gunpolls, -URL)
 ```
 
 
-### Renaming and non-standard names
+### Renaming columns and non-standard names
 
 In R, it is easiest if a column name does not contain any spaces or other special characters. 
 To select such columns, you need to use 'backticks' around the name (`` `like this` ``).
@@ -207,7 +201,7 @@ select(gunpolls, Question, rep = `Republican Support`, dem = `Democratic Support
 Note the difference between the two functions: `rename` keeps all variables that are not mentioned,
 while `select` only keeps the variables that you selected. 
 
-### Assigning results to objects
+### Note: Assigning results to objects
 
 In the examples above, the result of the select or rename was not assigned to an object.
 This means that the results are printed on the screen, but not remembered. 
@@ -256,3 +250,143 @@ gunpolls  # prints the result on screen
 ```
 
 
+
+## Subsetting (filtering) data
+
+In the previous section we looked at selecting columns with the `select` function.
+Another common task is selecting *rows*, which can be done with the `filter` function.
+
+### The `filter` function  {data-allow-skip=TRUE}
+
+The `filter` function can be used to select a subset of rows. 
+In the guns data, the `Question` column specifies which question was asked.
+We can select only those rows (polls) that asked whether the minimum purchage age for guns should be raised to 21:
+
+```{r filter, exercise.setup='setupgun'}
+age21 <- filter(gunpolls, Question == 'age-21')
+age21
+```
+
+This call is typical for a tidyverse function: the first argument is the data to be used (`d`), 
+and the remaining argument(s) contain information on what should be done to the data. 
+
+Note the use of `==` for comparison: In R, `=` means assingment and `==` means equals. 
+Other comparisons are e.g. `>` (greather than), `<=` (less than or equal) and `!=` (not equal).
+Yodu can also combine multiple conditions with logical (boolean) operators: `&` (and), `|` or, and `!` (not),
+and you can use parentheses like in mathematics. 
+
+So, we can find all surveys where support for raising the gun age was at least 80%:
+
+```{r filter-boolean}
+filter(gunpolls, Question == 'age-21' & Support >= 80)
+```
+
+Note that this command did not assign the result to an object. So, as explained above, the result is only displayed on the screen but not remembered.
+This can be a great way to quickly inspect your data, but if you want to continue analysing this subset you need to assign it to an object as above.
+
+### Removing missing values {data-allow-skip=TRUE}
+
+Often, data contains *missing values*, for example survey questions that were not answered or other data that is missing or unknown. 
+In R, such values are called `NA` (Not Available), and any comparison with a missing value are automatically missing as well. 
+To check if a value is missing, you should use the function `is.na(column)`. 
+
+For example, let's look at a version of the gun polls data which has some missing value:
+
+```{r readgunpollsdirty}
+gunpolls_dirty <- read_csv("https://cssbook.net/d/guns-polls-dirty.csv")
+gunpolls_dirty
+```
+
+As you can see, the Support column has a missing value for CBS news. 
+To remove rows where Support is missing, `filter` the dataset so only non-missing rows are kept,
+i.e. where `!is.na(Support)` (you can read `!is.na` as 'is not missing'):
+
+```{r isna, exercise.setup='readgunpollsdirty'}
+filter(gunpolls_dirty, !is.na(Support))
+```
+
+As a shortcut to remove all rows where any column is missing, you can use the `na.omit` function:
+
+```{r naomit, exercise.setup='readgunpollsdirty'}
+na.omit(gunpolls_dirty)
+```
+
+### Exercise: Filtering data
+
+Let's go back to the original gunpolls data. 
+Can you select the polls about stricter gun laws (`stricter-gun-laws`) where the overall suppport was at least 70%, and assign that selection to a new object called `strict_polls`?
+
+```{r filterex}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+___
+strict_polls
+```
+
+
+
+## Changing or computing values
+
+As a final part of this tutorial, let's look at how you can change values using the `mutate` function:
+
+### The `mutate()` function
+
+The mutate function makes it easy to create new variables or to modify existing ones. For those more familiar with SPSS, this is what you would do with `compute` and `recode`. As a simple example, let's start again with the 538 gun polls data used above:
+
+
+```{r setupgun2}
+# unfortunately, this chunk won't be shown in the exercise, so we'll have to duplicate it...
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+
+gunpolls <- select(gunpolls, Question, Support, 
+                   rep=`Republican Support`, dem=`Democratic Support`)
+```
+```{r}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+gunpolls <- select(gunpolls, Question, Support, 
+                   rep=`Republican Support`, dem=`Democratic Support`)
+```
+
+For example, to transform the Support percentage (0-100) to a proportion (0-1), we can divide the column by 100 using `mutate`:
+
+```{r mutate, exercise.setup='setupgun2'}
+mutate(gunpolls, Support_Prop = Support / 100)
+```
+
+The syntax of mutate is similar to that of `filter()` and `select()`:
+The first argument is the data frame to mutate, and then any number of additional arguments can be given to perform mutations. 
+The mutations themselves are named arguments, in which you can provide any calculations using existing columns such as `Support`.
+The result of the calculatoin will then be stored in the name of the argument, in this case `Support_Prop`.
+You can also overwrite columns by storing the result with an existing column's name. 
+
+For calculations, you can use mathematical symbols such as `+`, `/` (division), and `*` (multiplication).
+There are also many useful functions that you can use in calculations, such as 
+`round()` to round values, `as.numeric()` to change a text column to a numberic column, or `abs()` to take the absolute (positive) value of numbers. Feel free to play around a bit in the code above.
+
+### Exercise
+
+Using the `gunpolls` data as defined above, can you create a new column `party_diff` that contains the absolute value of the difference between republican and democratic support? 
+That is, if republican support is 61 and democratic support is 86 (or the other way around), the difference should be 17. 
+Overwrite the gunpolls object with the result (i.e. add the column to the existing data set).
+
+```{r mutatex, exercise.setup='setupgun2'}
+gunpolls <- mutate(gunpolls, ____)
+gunpolls
+```
+
+
+
+```{r mutatex-hint-1}
+# Hint: you need to do use the abs() function on the result 
+#       of subtracting dem from rep. 
+```
+```{r mutatex-hint-2}
+# Hint: you need to do use the abs() function on the result 
+#       of subtracting dem from rep: abs(rep - dem)
+```
+```{r mutatex-hint-3}
+# Hint: you need to do use the abs() function on the result 
+#       of subtracting dem from rep: party_diff = abs(rep - dem)
+```
