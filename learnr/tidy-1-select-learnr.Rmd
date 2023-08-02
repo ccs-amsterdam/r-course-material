@@ -171,15 +171,17 @@ R Tidyverse has a number of functions that can be used for data cleaning.
 As a first step, let's learn how to use `select` and `rename`
 to change the *columns* of a data frame.
 
-### Selecting columns with `select` 
-
-Let's continue with the gun polls data we used above:
+In this section, we will continue with the gun polls data we used above:
 
 ```{r setupgun}
 url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
 gunpolls <- read_csv(url)
 gunpolls
 ```
+
+### Selecting columns with `select` 
+
+
 
 This contains a number of columns that we might not be interested in. 
 Using `select`, we can select only the columns we are interested in:
@@ -305,13 +307,21 @@ grade_code()
 In the previous section we looked at selecting columns with the `select` function.
 Another common task is selecting *rows*, which can be done with the `filter` function.
 
+This section also uses the gun polls data we used above:
+
+```{r setupgun3}
+url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
+gunpolls <- read_csv(url)
+gunpolls
+```
+
 ### The `filter` function  {data-allow-skip=TRUE}
 
 The `filter` function can be used to select a subset of rows. 
 In the guns data, the `Question` column specifies which question was asked.
 We can select only those rows (polls) that asked whether the minimum purchage age for guns should be raised to 21:
 
-```{r filter, exercise=T, exercise.setup='setupgun'}
+```{r filter, exercise=T, exercise.setup='setupgun3'}
 age21 <- filter(gunpolls, Question == 'age-21')
 age21
 ```
@@ -326,7 +336,7 @@ and you can use parentheses like in mathematics.
 
 So, we can find all surveys where support for raising the gun age was at least 80%:
 
-```{r filter-boolean, exercise=T}
+```{r filter-boolean, exercise=T, exercise.setup='setupgun3'}
 filter(gunpolls, Question == 'age-21' & Support >= 80)
 ```
 
@@ -365,7 +375,7 @@ na.omit(gunpolls_dirty)
 Let's go back to the original gunpolls data. 
 Can you select the polls about stricter gun laws (`stricter-gun-laws`) where the overall suppport was at least 70%, and assign that selection to a new object called `strict_polls`?
 
-```{r filterex, exercise=TRUE}
+```{r filterex, exercise=TRUE, eval=F}
 url <- "https://raw.githubusercontent.com/fivethirtyeight/data/master/poll-quiz-guns/guns-polls.csv"
 gunpolls <- read_csv(url)
 ___
@@ -447,7 +457,7 @@ Using the `gunpolls` data as defined above, can you create a new column `party_d
 That is, if republican support is 61 and democratic support is 86 (or the other way around), the difference should be 17. 
 Overwrite the gunpolls object with the result (i.e. add the column to the existing data set).
 
-```{r mutatex, exercise=TRUE, exercise.setup='setupgun2'}
+```{r mutatex, exercise=TRUE, exercise.setup='setupgun2', eval=F}
 gunpolls <- mutate(gunpolls, ____)
 gunpolls
 ```
