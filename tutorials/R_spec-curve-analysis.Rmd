@@ -82,7 +82,7 @@ In a first step, we are going to standardize all variables (except those that we
 std_vars <- c("age", "tv_use", "internet_use", "sns_use",
               "self_esteem", "depression", "life_satisfaction_r", "friend_satisfaction")
 d <- d %>% 
-  mutate(across(std_vars, function(x) (x - mean(x, na.rm = T)) / sd(x, T))) 
+  mutate(across(all_of(std_vars), function(x) (x - mean(x, na.rm = T)) / sd(x, T))) 
 ```
 
 
@@ -90,44 +90,42 @@ d <- d %>%
 
 ## Setup specifications
 
-The next step involves identifying possible conceputal and analytical choices. This step involves an in-depth understanding of the research question and the model(s) that will be specified. In this case, we assume simply that media use should be positively (or negatively) correlated with well-being. We can first use the function `setup_specs()` to check how different analytical decisions create varying factorial designs.
+The next step involves identifying possible conceptual and analytical choices. This step involves an in-depth understanding of the research question and the model(s) that will be specified. In this case, we assume simply that media use should be positively (or negatively) correlated with well-being. We first use the function `setup()` to check how different analytical decisions create varying factorial designs.
 
-We simply pass the different measures for (1) `x` and (2) `y` to the function, add what type of (3) model we want to compute (can be several) and finally what (4) control variables we would like to add. By default, `specr` will compute models that have no controls, each control variable, and all controls. 
+We simply pass the different measures for (1) `x` and (2) `y` to the function, add what type of (3) model we want to compute (can be several) and finally what (4) control variables we would like to add. By default, `specr` will compute models that have no controls, each control variable, and all controls. We can then use the simple `summary()` function to explore the design. 
 
 ```{r}
-setup_specs(x = c("tv_use", "sns_use", "internet_use"),
-            y = c("self_esteem", "depression", "life_satisfaction_r"),
-            model = "lm",
-            controls = c("friend_satisfaction", "age"))
+# Setup specifications
+specs <- setup(data = d, 
+               x = c("tv_use", "sns_use", "internet_use"),
+               y = c("self_esteem", "depression", "life_satisfaction_r"),
+               model = "lm",
+               controls = c("friend_satisfaction", "age"))
+
+# Explore design
+summary(specs)
+
 ```
 
-We can see that the function simply computes all combinations from our input. So these few choices already lead to 36 different specifications (and thus models)!
+We can see that the function simply computes all combinations from our input. So these few choices already lead to 36 different specifications (and thus models)! We also get some other information including e.g., what function is used to extract parameters from the models (this function can technically be changed to whatever you want). 
 
 ## Run specifications
 
-The `setup_specs()` function is only a helper to better understand what we are doing. For the analysis itself, we don't need it as we can pass the "choices" directly to the function `run_specs()`, which computes all models. It is useful to save the resulting data set in a new object. 
-
-For the purpose of exemplifying the inclusion of a different model, we are also going to define a new model function that we can pass to `run_specs()` as well. As long as the function only takes formula and data as arguments, we can directly insert them to `run_specs()`. Yet, often, alternative models require the specification of a family, a random effect structure, and so on. In this case, we can simply define a new function that still takes the formula and the data as arguments, but adds whatever necessary to the function. In this case, we are going to create general linear model within the Gaussian family and identity as link function. For more information on how to use specifically defined functions in `specr` see e.g., [this](https://masurp.github.io/specr/articles/measurement_models.html) and [this](https://masurp.github.io/specr/articles/random_effects.html) tutorial.
+To estimate all models based on these specifications, we simply need to pass the setup to the function `specr()`. We can again get a first idea about the results using the `summary()` function. I am adding `digits = 3` here to get sufficient precision in the descriptive summaries.  
 
 ```{r}
-# specific model fitting function
-lm_gauss <- function(formula, data) {
-  glm(formula = formula, 
-      data = data, 
-      family = gaussian(link = "identity"))
-}
+# Estimating all models
+results <- specr(specs)
 
-results <- run_specs(df = d,
-                     x = c("tv_use", "sns_use", "internet_use"),
-                     y = c("self_esteem", "depression", "life_satisfaction_r"),
-                     model = c("lm", "lm_gauss"),
-                     controls = c("friend_satisfaction", "age"))
-head(results)
+# First insights
+summary(results, digits = 3)
 ```
 
-The resulting data set includes columns for all specifications and adds relevant statistical parameters for the relationship of interest (the association between x and y). `specr` automatically extracts relevant parameters depending on the model type, but usually it will include the estimate (in this case std. regression coefficients), their standard error, p-value, confidence intervals, and the number of observations use in the particular specification (can be different if missing values exists). 
 
-As this is a tibble, we can do whatever we want with is. In the following, we explore some way to work with it. 
+
+The resulting object includes a lot of information, but also a data set (tibble) that includes rows for all specifications and adds relevant statistical parameters for the relationship of interest (the association between x and y). `specr` automatically extracts relevant parameters depending on the model type, but usually it will include the estimate (in this case std. regression coefficients), their standard error, p-value, confidence intervals, and the number of observations use in the particular specification (can be different if missing values exists). 
+
+Among other things, we can see that the effect sizes range from -0.003 to 0.082 and the median is 0.65. The tibble at the bottom (here first 6 rows are shown) includes all model parameters. 
 
 # Summarizing and visualizing results
 
@@ -135,51 +133,56 @@ Specification curve analyses typically involve summarizing the distribution of p
 
 ## Summarizing the parameter distribution
 
-To summarize the results, we can use the function `summarize_specs()`. We can further customize the output by defining what choices the results should be "grouped by" and what statistics should be computed. 
+To summarize the results, we can use the function `summary()` with specific arguments. We can customize the output by defining what exactly we want to see (e.g., the choices the should be shown, whether the results should be "grouped by" andy choices and and what statistics should be computed".  
 
 ```{r}
-summarise_specs(results)
-summarise_specs(results, 
-                x,
-                stats = lst(median, mean, min, max))
+# Standard descriptive analysis
+summary(results, 
+        type = "curve")
+
+# With specific statistics
+summary(results, 
+        type = "curve",
+        group = "x",
+        stats = lst(median, mean, min, max))
 ```
 
 As we can see, the median relationship between media use and well-being is $\beta$ = .06. The largest effect sizes, however, are found for internet use. 
 
 ## Visualize the "specification curve"
 
-To produce the standard specification curve plot that we often see in publications, we can simply use the function `plot_specs()`. 
+To produce the standard specification curve plot that we often see in publications, we can simply use the function `plot()`. 
 
 ```{r, fig.height=12, fig.width=10}
-plot_specs(results)
+plot(results)
 ```
 
-Such a plot contains a lot of information and needs to be investigated carefully. To give one example, we can see that the largest (positive) effect sizes are found, when the relationship between TV use and life satisfaction is estimated, when controlling either for no other variables or age. The difference between the standard linear model and the gaussian linear model is (as perhaps expected) negligible. 
+Such a plot contains a lot of information and needs to be investigated carefully. To give one example, we can see that the largest (positive) effect sizes are found, when the relationship between TV use and life satisfaction is estimated, when controlling either for no other variables or age. 
 
 More generally speaking, the resulting plot includes the ranked specification curve (A) and an overview about how the different analytical choices affect the estimate of interest (B). Red represents negative and significant effects (based on the chosen significance level, by default $\alpha$ =.05). Blue represents positive and significant effects. Grey refers to non-significant effects.
 
-In some cases, we may want to adapt the visualization to our liking and change bits and pieces. This can be done by using the functions `plot_curve()` (upper panel) and `plot_choices()` (lower panel). They both produce ggplot objects and can thus be further modified using standard ggplot syntax. 
+In some cases, we may want to adapt the visualization to our liking and change bits and pieces. This can be done by plotting the two parts separately. They both produce ggplot objects and can thus be further modified using standard ggplot syntax. 
 
 
 ```{r, fig.height=3, fig.width=10}
 library(ggthemes)
 
 # Plot specification curve
-(a <- plot_curve(results, ci = F, ribbon = T) + 
+(a <- plot(results, type = "curve", ci = F, ribbon = T) + 
    geom_point(size = 4))
 ```
 
 
 ```{r, fig.height=6, fig.width=10}
 # Plot dashboard of choices
-(b <- plot_choices(results, choices = c("x", "y", "model", "controls")) +
+(b <- plot(results, type = "choices", choices = c("x", "y", "model", "controls")) +
    geom_point(size = 2, shape = 4)) 
 ```
 
 We can also add a third panel that shows a histrogram detailing the sample sizes for each specification.
 
 ```{r, fig.height=3, fig.width=10}
-(c <- plot_samplesizes(results) + ylim(0, 4000))
+(c <- plot(results, type = "samplesizes") + ylim(0, 4000))
 ```
 
 As all three plots are ggplot-objects, we can easily arrange them with packages such as ´cowplot`.
@@ -198,10 +201,9 @@ plot_grid(a, b, c, ncol = 1,
 Despite their prominence in the literature, such visualization are not the only ones that we can use to summarize and plot our results. An alternative would be a boxplot, which we can produce with the function `plot_summary()`. We can again customize with standard ggplot syntax. 
 
 ```{r, fig.height=8, fig.width=10}
-plot_summary(results) + 
+plot(results, type = "boxplot") + 
   geom_point(alpha = .4) + 
-  scale_fill_brewer(palette = "Dark2") +
-  theme_wsj() +
+  scale_fill_brewer(palette = "Pastel2") +
   labs(x = "Effect size", fill = "")
 ```
 
@@ -210,7 +212,7 @@ plot_summary(results) +
 
 ## Adding more specification via "subsets
 
-So far, our specification are only based on choosing different measures, models, and control variables. The real power of `specr`, however, is only visible if we start to understand the argument "subset" in the `run_specs()` function. This allows us to pass "grouping variables". Specr will then compute all combinations for each of these groups (as well as across all). This is of course convenient, when we have grouping variables such as age or gender, but it can also be used for other things. For example, we can create a second data set, in which outliers are removed, add it to the original data set (dont forget to produce a key variable). This way, a multitude of other specifications representing a plethora of analytical decisions becomes possible. 
+So far, our specification are only based on choosing different measures, models, and control variables. The real power of `specr`, however, is only visible if we start to understand the argument "subset" in the `setup()` function. This allows us to pass "grouping variables". Specr will then compute all combinations for each of these groups (as well as across all). This is of course convenient, when we have grouping variables such as age or gender, but it can also be used for other things. For example, we can create a second data set, in which outliers are removed, add it to the original data set (dont forget to produce a key variable). This way, a multitude of other specifications representing a plethora of analytical decisions becomes possible. 
 
 ```{r}
 # Checking for outliers
@@ -231,32 +233,27 @@ d.new <- rbind(d %>%
 
 
 ```{r, fig.height=10, fig.width=10}
-results2 <- run_specs(df = d.new,
-                     x = c("tv_use", "sns_use", "internet_use"),
-                     y = c("self_esteem", "depression", "life_satisfaction_r", "depression_p1"),
-                     model = c("lm", "lm_gauss"),
-                     controls = c("friend_satisfaction", "age"),
-                     subsets = list(outlier = unique(d$outlier)))
+# Setup with subsets
+specs2 <- setup(d = d.new,
+               x = c("tv_use", "sns_use", "internet_use"),
+               y = c("self_esteem", "depression", "life_satisfaction_r", "depression_p1"),
+               model = c("lm"),
+               controls = c("friend_satisfaction", "age"),
+               subsets = list(outlier = unique(d.new$outlier)))
+summary(specs2)
 
-plot_specs(results2)
+# Estimate models
+results2 <- specr(specs2)
+plot(results2)
 ```
 
 
 ## Decompose the variance in the specification curve
 
-We can also estimate how much variance in the specification curve is related to which analytical decisions. Therefore, we have to estimate a basic multilevel model without predictors and the analytical decisions as random effects (interactions could be included too). We then use the function `icc_specs()` to calculate a respective table or `plot_variance()` to visualize the distribution.
+We can also estimate how much variance in the specification curve is related to which analytical decisions. We simply can use the function `plot()` with the argument `type = "variance` and we receive both the table and the visualization. 
 
 ```{r, fig.height=5, fig.width=10}
-library(lme4)
-model <- lmer(estimate ~ 1 + (1|x)  + (1|y) + (1|controls) + (1|model) + (1|x:y), data = results)
-
-# Get intra-class correlation
-icc_specs(model) %>%
-  mutate_if(is.numeric, round, 2)
-
-# Plot decomposition
-plot_variance(model)
-
+plot(results2, type = "variance")
 ```
 
 Perhaps even more clearly than in the typical specification plot, we see here that most variance is explain by different media use measures and their interaction with well-being. 

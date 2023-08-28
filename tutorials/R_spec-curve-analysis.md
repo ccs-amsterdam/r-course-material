@@ -175,135 +175,140 @@ specifications.
 std_vars <- c("age", "tv_use", "internet_use", "sns_use",
               "self_esteem", "depression", "life_satisfaction_r", "friend_satisfaction")
 d <- d %>% 
-  mutate(across(std_vars, function(x) (x - mean(x, na.rm = T)) / sd(x, T))) 
+  mutate(across(all_of(std_vars), function(x) (x - mean(x, na.rm = T)) / sd(x, T))) 
 ```
 
 # Specification Curve Analysis
 
 ## Setup specifications
 
-The next step involves identifying possible conceputal and analytical
+The next step involves identifying possible conceptual and analytical
 choices. This step involves an in-depth understanding of the research
 question and the model(s) that will be specified. In this case, we
 assume simply that media use should be positively (or negatively)
-correlated with well-being. We can first use the function
-`setup_specs()` to check how different analytical decisions create
-varying factorial designs.
+correlated with well-being. We first use the function `setup()` to check
+how different analytical decisions create varying factorial designs.
 
 We simply pass the different measures for (1) `x` and (2) `y` to the
 function, add what type of (3) model we want to compute (can be several)
 and finally what (4) control variables we would like to add. By default,
 `specr` will compute models that have no controls, each control
-variable, and all controls.
+variable, and all controls. We can then use the simple `summary()`
+function to explore the design.
 
 ``` r
-setup_specs(x = c("tv_use", "sns_use", "internet_use"),
-            y = c("self_esteem", "depression", "life_satisfaction_r"),
-            model = "lm",
-            controls = c("friend_satisfaction", "age"))
+# Setup specifications
+specs <- setup(data = d, 
+               x = c("tv_use", "sns_use", "internet_use"),
+               y = c("self_esteem", "depression", "life_satisfaction_r"),
+               model = "lm",
+               controls = c("friend_satisfaction", "age"))
+
+# Explore design
+summary(specs)
 ```
 
-| x            | y                   | model | controls                  |
-|:-------------|:--------------------|:------|:--------------------------|
-| tv_use       | self_esteem         | lm    | friend_satisfaction + age |
-| sns_use      | self_esteem         | lm    | friend_satisfaction + age |
-| internet_use | self_esteem         | lm    | friend_satisfaction + age |
-| tv_use       | depression          | lm    | friend_satisfaction + age |
-| sns_use      | depression          | lm    | friend_satisfaction + age |
-| internet_use | depression          | lm    | friend_satisfaction + age |
-| tv_use       | life_satisfaction_r | lm    | friend_satisfaction + age |
-| sns_use      | life_satisfaction_r | lm    | friend_satisfaction + age |
-| internet_use | life_satisfaction_r | lm    | friend_satisfaction + age |
-| tv_use       | self_esteem         | lm    | friend_satisfaction       |
-| sns_use      | self_esteem         | lm    | friend_satisfaction       |
-| internet_use | self_esteem         | lm    | friend_satisfaction       |
-| tv_use       | depression          | lm    | friend_satisfaction       |
-| sns_use      | depression          | lm    | friend_satisfaction       |
-| internet_use | depression          | lm    | friend_satisfaction       |
-| tv_use       | life_satisfaction_r | lm    | friend_satisfaction       |
-| sns_use      | life_satisfaction_r | lm    | friend_satisfaction       |
-| internet_use | life_satisfaction_r | lm    | friend_satisfaction       |
-| tv_use       | self_esteem         | lm    | age                       |
-| sns_use      | self_esteem         | lm    | age                       |
-| internet_use | self_esteem         | lm    | age                       |
-| tv_use       | depression          | lm    | age                       |
-| sns_use      | depression          | lm    | age                       |
-| internet_use | depression          | lm    | age                       |
-| tv_use       | life_satisfaction_r | lm    | age                       |
-| sns_use      | life_satisfaction_r | lm    | age                       |
-| internet_use | life_satisfaction_r | lm    | age                       |
-| tv_use       | self_esteem         | lm    | no covariates             |
-| sns_use      | self_esteem         | lm    | no covariates             |
-| internet_use | self_esteem         | lm    | no covariates             |
-| tv_use       | depression          | lm    | no covariates             |
-| sns_use      | depression          | lm    | no covariates             |
-| internet_use | depression          | lm    | no covariates             |
-| tv_use       | life_satisfaction_r | lm    | no covariates             |
-| sns_use      | life_satisfaction_r | lm    | no covariates             |
-| internet_use | life_satisfaction_r | lm    | no covariates             |
+    ## Setup for the Specification Curve Analysis
+    ## -------------------------------------------
+    ## Class:                      specr.setup -- version: 1.0.0 
+    ## Number of specifications:   36 
+    ## 
+    ## Specifications:
+    ## 
+    ##   Independent variable:     tv_use, sns_use, internet_use 
+    ##   Dependent variable:       self_esteem, depression, life_satisfaction_r 
+    ##   Models:                   lm 
+    ##   Covariates:               no covariates, friend_satisfaction, age, friend_satisfaction + age 
+    ##   Subsets analyses:         all 
+    ## 
+    ## Function used to extract parameters:
+    ## 
+    ##   function (x) 
+    ## broom::tidy(x, conf.int = TRUE)
+    ## <environment: 0x7f9ea46f3a10>
+    ## 
+    ## 
+    ## Head of specifications table (first 6 rows):
+
+| x      | y           | model | controls                  | subsets | formula                                           |
+|:-------|:------------|:------|:--------------------------|:--------|:--------------------------------------------------|
+| tv_use | self_esteem | lm    | no covariates             | all     | self_esteem \~ tv_use + 1                         |
+| tv_use | self_esteem | lm    | friend_satisfaction       | all     | self_esteem \~ tv_use + friend_satisfaction       |
+| tv_use | self_esteem | lm    | age                       | all     | self_esteem \~ tv_use + age                       |
+| tv_use | self_esteem | lm    | friend_satisfaction + age | all     | self_esteem \~ tv_use + friend_satisfaction + age |
+| tv_use | depression  | lm    | no covariates             | all     | depression \~ tv_use + 1                          |
+| tv_use | depression  | lm    | friend_satisfaction       | all     | depression \~ tv_use + friend_satisfaction        |
 
 We can see that the function simply computes all combinations from our
 input. So these few choices already lead to 36 different specifications
-(and thus models)!
+(and thus models)! We also get some other information including e.g.,
+what function is used to extract parameters from the models (this
+function can technically be changed to whatever you want).
 
 ## Run specifications
 
-The `setup_specs()` function is only a helper to better understand what
-we are doing. For the analysis itself, we don’t need it as we can pass
-the “choices” directly to the function `run_specs()`, which computes all
-models. It is useful to save the resulting data set in a new object.
-
-For the purpose of exemplifying the inclusion of a different model, we
-are also going to define a new model function that we can pass to
-`run_specs()` as well. As long as the function only takes formula and
-data as arguments, we can directly insert them to `run_specs()`. Yet,
-often, alternative models require the specification of a family, a
-random effect structure, and so on. In this case, we can simply define a
-new function that still takes the formula and the data as arguments, but
-adds whatever necessary to the function. In this case, we are going to
-create general linear model within the Gaussian family and identity as
-link function. For more information on how to use specifically defined
-functions in `specr` see e.g.,
-[this](https://masurp.github.io/specr/articles/measurement_models.html)
-and [this](https://masurp.github.io/specr/articles/random_effects.html)
-tutorial.
+To estimate all models based on these specifications, we simply need to
+pass the setup to the function `specr()`. We can again get a first idea
+about the results using the `summary()` function. I am adding
+`digits = 3` here to get sufficient precision in the descriptive
+summaries.
 
 ``` r
-# specific model fitting function
-lm_gauss <- function(formula, data) {
-  glm(formula = formula, 
-      data = data, 
-      family = gaussian(link = "identity"))
-}
+# Estimating all models
+results <- specr(specs)
 
-results <- run_specs(df = d,
-                     x = c("tv_use", "sns_use", "internet_use"),
-                     y = c("self_esteem", "depression", "life_satisfaction_r"),
-                     model = c("lm", "lm_gauss"),
-                     controls = c("friend_satisfaction", "age"))
-head(results)
+# First insights
+summary(results, digits = 3)
 ```
 
-| x            | y           | model | controls                  |   estimate | std.error |  statistic |   p.value |   conf.low | conf.high |  obs | subsets |
-|:-------------|:------------|:------|:--------------------------|-----------:|----------:|-----------:|----------:|-----------:|----------:|-----:|:--------|
-| tv_use       | self_esteem | lm    | friend_satisfaction + age | -0.0029213 | 0.0177257 | -0.1648079 | 0.8691062 | -0.0376769 | 0.0318342 | 3033 | all     |
-| sns_use      | self_esteem | lm    | friend_satisfaction + age |  0.0609118 | 0.0182960 |  3.3292492 | 0.0008818 |  0.0250373 | 0.0967863 | 2886 | all     |
-| internet_use | self_esteem | lm    | friend_satisfaction + age |  0.0792760 | 0.0178721 |  4.4357392 | 0.0000095 |  0.0442333 | 0.1143187 | 3035 | all     |
-| tv_use       | depression  | lm    | friend_satisfaction + age | -0.0027580 | 0.0179085 | -0.1540022 | 0.8776189 | -0.0378729 | 0.0323570 | 2857 | all     |
-| sns_use      | depression  | lm    | friend_satisfaction + age |  0.0810108 | 0.0184700 |  4.3860746 | 0.0000120 |  0.0447941 | 0.1172275 | 2719 | all     |
-| internet_use | depression  | lm    | friend_satisfaction + age |  0.0793375 | 0.0181282 |  4.3764743 | 0.0000125 |  0.0437918 | 0.1148832 | 2854 | all     |
+    ## Results of the specification curve analysis
+    ## -------------------
+    ## Technical details:
+    ## 
+    ##   Class:                          specr.object -- version: 1.0.0 
+    ##   Cores used:                     1 
+    ##   Duration of fitting process:    0.63 sec elapsed 
+    ##   Number of specifications:       36 
+    ## 
+    ## Descriptive summary of the specification curve:
+    ## 
+    ##  median   mad    min   max  q25   q75
+    ##   0.065 0.023 -0.003 0.082 0.01 0.079
+    ## 
+    ## Descriptive summary of sample sizes: 
+    ## 
+    ##  median  min  max
+    ##  2929.5 2719 3080
+    ## 
+    ## Head of the specification results (first 6 rows): 
+    ## 
+    ## # A tibble: 6 × 24
+    ##   x      y           model controls subsets formula estimate std.error statistic
+    ##   <chr>  <chr>       <chr> <chr>    <chr>   <glue>     <dbl>     <dbl>     <dbl>
+    ## 1 tv_use self_esteem lm    no cova… all     self_e…    0.007     0.018     0.404
+    ## 2 tv_use self_esteem lm    friend_… all     self_e…   -0.003     0.018    -0.142
+    ## 3 tv_use self_esteem lm    age      all     self_e…    0.007     0.018     0.386
+    ## 4 tv_use self_esteem lm    friend_… all     self_e…   -0.003     0.018    -0.165
+    ## 5 tv_use depression  lm    no cova… all     depres…    0.01      0.019     0.526
+    ## 6 tv_use depression  lm    friend_… all     depres…   -0.003     0.018    -0.181
+    ## # … with 15 more variables: p.value <dbl>, conf.low <dbl>, conf.high <dbl>,
+    ## #   fit_r.squared <dbl>, fit_adj.r.squared <dbl>, fit_sigma <dbl>,
+    ## #   fit_statistic <dbl>, fit_p.value <dbl>, fit_df <dbl>, fit_logLik <dbl>,
+    ## #   fit_AIC <dbl>, fit_BIC <dbl>, fit_deviance <dbl>, fit_df.residual <dbl>,
+    ## #   fit_nobs <dbl>
 
-The resulting data set includes columns for all specifications and adds
-relevant statistical parameters for the relationship of interest (the
-association between x and y). `specr` automatically extracts relevant
-parameters depending on the model type, but usually it will include the
-estimate (in this case std. regression coefficients), their standard
-error, p-value, confidence intervals, and the number of observations use
-in the particular specification (can be different if missing values
-exists).
+The resulting object includes a lot of information, but also a data set
+(tibble) that includes rows for all specifications and adds relevant
+statistical parameters for the relationship of interest (the association
+between x and y). `specr` automatically extracts relevant parameters
+depending on the model type, but usually it will include the estimate
+(in this case std. regression coefficients), their standard error,
+p-value, confidence intervals, and the number of observations use in the
+particular specification (can be different if missing values exists).
 
-As this is a tibble, we can do whatever we want with is. In the
-following, we explore some way to work with it.
+Among other things, we can see that the effect sizes range from -0.003
+to 0.082 and the median is 0.65. The tibble at the bottom (here first 6
+rows are shown) includes all model parameters.
 
 # Summarizing and visualizing results
 
@@ -314,12 +319,16 @@ choices.
 
 ## Summarizing the parameter distribution
 
-To summarize the results, we can use the function `summarize_specs()`.
-We can further customize the output by defining what choices the results
-should be “grouped by” and what statistics should be computed.
+To summarize the results, we can use the function `summary()` with
+specific arguments. We can customize the output by defining what exactly
+we want to see (e.g., the choices the should be shown, whether the
+results should be “grouped by” andy choices and and what statistics
+should be computed”.
 
 ``` r
-summarise_specs(results)
+# Standard descriptive analysis
+summary(results, 
+        type = "curve")
 ```
 
 |    median |       mad |        min |       max |       q25 |       q75 |    obs |
@@ -327,9 +336,11 @@ summarise_specs(results)
 | 0.0645939 | 0.0229626 | -0.0032347 | 0.0821696 | 0.0101831 | 0.0786368 | 2929.5 |
 
 ``` r
-summarise_specs(results, 
-                x,
-                stats = lst(median, mean, min, max))
+# With specific statistics
+summary(results, 
+        type = "curve",
+        group = "x",
+        stats = lst(median, mean, min, max))
 ```
 
 | x            |    median |      mean |        min |       max |    obs |
@@ -346,10 +357,10 @@ is
 ## Visualize the “specification curve”
 
 To produce the standard specification curve plot that we often see in
-publications, we can simply use the function `plot_specs()`.
+publications, we can simply use the function `plot()`.
 
 ``` r
-plot_specs(results)
+plot(results)
 ```
 
 ![](R_spec-curve-analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
@@ -358,8 +369,7 @@ Such a plot contains a lot of information and needs to be investigated
 carefully. To give one example, we can see that the largest (positive)
 effect sizes are found, when the relationship between TV use and life
 satisfaction is estimated, when controlling either for no other
-variables or age. The difference between the standard linear model and
-the gaussian linear model is (as perhaps expected) negligible.
+variables or age.
 
 More generally speaking, the resulting plot includes the ranked
 specification curve (A) and an overview about how the different
@@ -371,16 +381,15 @@ level, by default
 non-significant effects.
 
 In some cases, we may want to adapt the visualization to our liking and
-change bits and pieces. This can be done by using the functions
-`plot_curve()` (upper panel) and `plot_choices()` (lower panel). They
-both produce ggplot objects and can thus be further modified using
-standard ggplot syntax.
+change bits and pieces. This can be done by plotting the two parts
+separately. They both produce ggplot objects and can thus be further
+modified using standard ggplot syntax.
 
 ``` r
 library(ggthemes)
 
 # Plot specification curve
-(a <- plot_curve(results, ci = F, ribbon = T) + 
+(a <- plot(results, type = "curve", ci = F, ribbon = T) + 
    geom_point(size = 4))
 ```
 
@@ -388,7 +397,7 @@ library(ggthemes)
 
 ``` r
 # Plot dashboard of choices
-(b <- plot_choices(results, choices = c("x", "y", "model", "controls")) +
+(b <- plot(results, type = "choices", choices = c("x", "y", "model", "controls")) +
    geom_point(size = 2, shape = 4)) 
 ```
 
@@ -398,7 +407,7 @@ We can also add a third panel that shows a histrogram detailing the
 sample sizes for each specification.
 
 ``` r
-(c <- plot_samplesizes(results) + ylim(0, 4000))
+(c <- plot(results, type = "samplesizes") + ylim(0, 4000))
 ```
 
 ![](R_spec-curve-analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
@@ -424,10 +433,9 @@ alternative would be a boxplot, which we can produce with the function
 `plot_summary()`. We can again customize with standard ggplot syntax.
 
 ``` r
-plot_summary(results) + 
+plot(results, type = "boxplot") + 
   geom_point(alpha = .4) + 
-  scale_fill_brewer(palette = "Dark2") +
-  theme_wsj() +
+  scale_fill_brewer(palette = "Pastel2") +
   labs(x = "Effect size", fill = "")
 ```
 
@@ -440,9 +448,9 @@ plot_summary(results) +
 So far, our specification are only based on choosing different measures,
 models, and control variables. The real power of `specr`, however, is
 only visible if we start to understand the argument “subset” in the
-`run_specs()` function. This allows us to pass “grouping variables”.
-Specr will then compute all combinations for each of these groups (as
-well as across all). This is of course convenient, when we have grouping
+`setup()` function. This allows us to pass “grouping variables”. Specr
+will then compute all combinations for each of these groups (as well as
+across all). This is of course convenient, when we have grouping
 variables such as age or gender, but it can also be used for other
 things. For example, we can create a second data set, in which outliers
 are removed, add it to the original data set (dont forget to produce a
@@ -471,14 +479,51 @@ d.new <- rbind(d %>%
 ```
 
 ``` r
-results2 <- run_specs(df = d.new,
-                     x = c("tv_use", "sns_use", "internet_use"),
-                     y = c("self_esteem", "depression", "life_satisfaction_r", "depression_p1"),
-                     model = c("lm", "lm_gauss"),
-                     controls = c("friend_satisfaction", "age"),
-                     subsets = list(outlier = unique(d$outlier)))
+# Setup with subsets
+specs2 <- setup(d = d.new,
+               x = c("tv_use", "sns_use", "internet_use"),
+               y = c("self_esteem", "depression", "life_satisfaction_r", "depression_p1"),
+               model = c("lm"),
+               controls = c("friend_satisfaction", "age"),
+               subsets = list(outlier = unique(d.new$outlier)))
+summary(specs2)
+```
 
-plot_specs(results2)
+    ## Setup for the Specification Curve Analysis
+    ## -------------------------------------------
+    ## Class:                      specr.setup -- version: 1.0.0 
+    ## Number of specifications:   144 
+    ## 
+    ## Specifications:
+    ## 
+    ##   Independent variable:     tv_use, sns_use, internet_use 
+    ##   Dependent variable:       self_esteem, depression, life_satisfaction_r, depression_p1 
+    ##   Models:                   lm 
+    ##   Covariates:               no covariates, friend_satisfaction, age, friend_satisfaction + age 
+    ##   Subsets analyses:         all, < 5 
+    ## 
+    ## Function used to extract parameters:
+    ## 
+    ##   function (x) 
+    ## broom::tidy(x, conf.int = TRUE)
+    ## <environment: 0x7f9e9eef3470>
+    ## 
+    ## 
+    ## Head of specifications table (first 6 rows):
+
+| x      | y           | model | controls            | subsets | outlier | formula                                     |
+|:-------|:------------|:------|:--------------------|:--------|:--------|:--------------------------------------------|
+| tv_use | self_esteem | lm    | no covariates       | all     | all     | self_esteem \~ tv_use + 1                   |
+| tv_use | self_esteem | lm    | no covariates       | \< 5    | \< 5    | self_esteem \~ tv_use + 1                   |
+| tv_use | self_esteem | lm    | no covariates       | all     | NA      | self_esteem \~ tv_use + 1                   |
+| tv_use | self_esteem | lm    | friend_satisfaction | all     | all     | self_esteem \~ tv_use + friend_satisfaction |
+| tv_use | self_esteem | lm    | friend_satisfaction | \< 5    | \< 5    | self_esteem \~ tv_use + friend_satisfaction |
+| tv_use | self_esteem | lm    | friend_satisfaction | all     | NA      | self_esteem \~ tv_use + friend_satisfaction |
+
+``` r
+# Estimate models
+results2 <- specr(specs2)
+plot(results2)
 ```
 
 ![](R_spec-curve-analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
@@ -486,34 +531,20 @@ plot_specs(results2)
 ## Decompose the variance in the specification curve
 
 We can also estimate how much variance in the specification curve is
-related to which analytical decisions. Therefore, we have to estimate a
-basic multilevel model without predictors and the analytical decisions
-as random effects (interactions could be included too). We then use the
-function `icc_specs()` to calculate a respective table or
-`plot_variance()` to visualize the distribution.
+related to which analytical decisions. We simply can use the function
+`plot()` with the argument `type = "variance` and we receive both the
+table and the visualization.
 
 ``` r
-library(lme4)
-model <- lmer(estimate ~ 1 + (1|x)  + (1|y) + (1|controls) + (1|model) + (1|x:y), data = results)
-
-# Get intra-class correlation
-icc_specs(model) %>%
-  mutate_if(is.numeric, round, 2)
+plot(results2, type = "variance")
 ```
 
-| grp      | vcov |  icc | percent |
-|:---------|-----:|-----:|--------:|
-| x:y      |    0 | 0.68 |   68.00 |
-| controls |    0 | 0.00 |    0.04 |
-| y        |    0 | 0.00 |    0.00 |
-| x        |    0 | 0.27 |   27.24 |
-| model    |    0 | 0.00 |    0.00 |
-| Residual |    0 | 0.05 |    4.72 |
-
-``` r
-# Plot decomposition
-plot_variance(model)
-```
+    ##        grp vcov  icc percent
+    ## 1 controls    0 0.00    0.00
+    ## 2        y    0 0.11   11.07
+    ## 3        x    0 0.48   48.02
+    ## 4  subsets    0 0.00    0.48
+    ## 5 Residual    0 0.40   40.43
 
 ![](R_spec-curve-analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
