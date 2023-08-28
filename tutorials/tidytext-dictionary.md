@@ -3,11 +3,14 @@ Dictionaries with Tidy Text
 Wouter van Atteveldt
 2022-10
 
--   [Introduction](#introduction)
--   [Lexical Sentiment Analysis with
-    Tidytext](#lexical-sentiment-analysis-with-tidytext)
--   [Inspecting dictionary hits](#inspecting-dictionary-hits)
--   [More complicated dictionaries](#more-complicated-dictionaries)
+- <a href="#introduction" id="toc-introduction">Introduction</a>
+- <a href="#lexical-sentiment-analysis-with-tidytext"
+  id="toc-lexical-sentiment-analysis-with-tidytext">Lexical Sentiment
+  Analysis with Tidytext</a>
+- <a href="#inspecting-dictionary-hits"
+  id="toc-inspecting-dictionary-hits">Inspecting dictionary hits</a>
+- <a href="#more-complicated-dictionaries"
+  id="toc-more-complicated-dictionaries">More complicated dictionaries</a>
 
 # Introduction
 

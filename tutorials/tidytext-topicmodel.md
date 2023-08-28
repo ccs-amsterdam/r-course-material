@@ -3,15 +3,21 @@ Topic modeling with Tidy Text
 Wouter van Atteveldt
 2022-10
 
--   [Introduction](#introduction)
--   [(1) Creating a DTM](#1-creating-a-dtm)
--   [(2) Running the topic model](#2-running-the-topic-model)
--   [(3) Inspecting and analysing the
-    results](#3-inspecting-and-analysing-the-results)
-    -   [Word-topic probabilities](#word-topic-probabilities)
-    -   [Topics per document](#topics-per-document)
-    -   [Topics in their original
-        context](#topics-in-their-original-context)
+- <a href="#introduction" id="toc-introduction">Introduction</a>
+- <a href="#1-creating-a-dtm" id="toc-1-creating-a-dtm">(1) Creating a
+  DTM</a>
+- <a href="#2-running-the-topic-model"
+  id="toc-2-running-the-topic-model">(2) Running the topic model</a>
+- <a href="#3-inspecting-and-analysing-the-results"
+  id="toc-3-inspecting-and-analysing-the-results">(3) Inspecting and
+  analysing the results</a>
+  - <a href="#word-topic-probabilities"
+    id="toc-word-topic-probabilities">Word-topic probabilities</a>
+  - <a href="#topics-per-document" id="toc-topics-per-document">Topics per
+    document</a>
+  - <a href="#topics-in-their-original-context"
+    id="toc-topics-in-their-original-context">Topics in their original
+    context</a>
 
 # Introduction
 
