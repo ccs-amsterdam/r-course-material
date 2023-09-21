@@ -3,36 +3,56 @@ Web Scraping with RVest
 Kasper Welbers, Wouter van Atteveldt & Philipp Masur
 2021-12
 
--   [Video tutorial](#video-tutorial)
--   [What is web scraping and why learn
-    it?](#what-is-web-scraping-and-why-learn-it)
-    -   [Web scraping in a nutshell](#web-scraping-in-a-nutshell)
-    -   [How to read this tutorial](#how-to-read-this-tutorial)
--   [Web scraping HTML pages in three
-    steps](#web-scraping-html-pages-in-three-steps)
-    -   [A short intro to HTML](#a-short-intro-to-html)
-    -   [Selecting HTML elements](#selecting-html-elements)
-    -   [Selecting descendants (children, children’s children,
-        etc.)](#selecting-descendants-children-childrens-children-etc)
-    -   [Extracting data from elements](#extracting-data-from-elements)
--   [Two demo cases](#two-demo-cases)
-    -   [Scraping single pages: An actor profile from
-        IMDB](#scraping-single-pages-an-actor-profile-from-imdb)
-        -   [Putting it all together](#putting-it-all-together)
-    -   [Scraping an archive: all actor profiles for a
-        movie](#scraping-an-archive-all-actor-profiles-for-a-movie)
-        -   [looping over the URLs](#looping-over-the-urls)
-        -   [Putting it all together](#putting-it-all-together-1)
--   [Bonus. Doing it more elegantly](#bonus-doing-it-more-elegantly)
-    -   [making functions for the main scraper
-        components](#making-functions-for-the-main-scraper-components)
-    -   [Building a scraper using the
-        functions](#building-a-scraper-using-the-functions)
--   [FAQs](#faqs)
-    -   [The *inspect* tool is lying! it shows stuff that’s not in the
-        HTML
-        code](#the-inspect-tool-is-lying-it-shows-stuff-thats-not-in-the-html-code)
-    -   [Wait, is this even allowed?](#wait-is-this-even-allowed)
+- <a href="#video-tutorial" id="toc-video-tutorial">Video tutorial</a>
+- <a href="#what-is-web-scraping-and-why-learn-it"
+  id="toc-what-is-web-scraping-and-why-learn-it">What is web scraping and
+  why learn it?</a>
+  - <a href="#web-scraping-in-a-nutshell"
+    id="toc-web-scraping-in-a-nutshell">Web scraping in a nutshell</a>
+  - <a href="#how-to-read-this-tutorial"
+    id="toc-how-to-read-this-tutorial">How to read this tutorial</a>
+- <a href="#web-scraping-html-pages-in-three-steps"
+  id="toc-web-scraping-html-pages-in-three-steps">Web scraping HTML pages
+  in three steps</a>
+  - <a href="#a-short-intro-to-html" id="toc-a-short-intro-to-html">A short
+    intro to HTML</a>
+  - <a href="#selecting-html-elements"
+    id="toc-selecting-html-elements">Selecting HTML elements</a>
+  - <a href="#selecting-descendants-children-childrens-children-etc"
+    id="toc-selecting-descendants-children-childrens-children-etc">Selecting
+    descendants (children, children’s children, etc.)</a>
+  - <a href="#extracting-data-from-elements"
+    id="toc-extracting-data-from-elements">Extracting data from elements</a>
+- <a href="#two-demo-cases" id="toc-two-demo-cases">Two demo cases</a>
+  - <a href="#scraping-single-pages-an-actor-profile-from-imdb"
+    id="toc-scraping-single-pages-an-actor-profile-from-imdb">Scraping
+    single pages: An actor profile from IMDB</a>
+    - <a href="#putting-it-all-together"
+      id="toc-putting-it-all-together">Putting it all together</a>
+  - <a href="#scraping-an-archive-all-actor-profiles-for-a-movie"
+    id="toc-scraping-an-archive-all-actor-profiles-for-a-movie">Scraping an
+    archive: all actor profiles for a movie</a>
+    - <a href="#looping-over-the-urls" id="toc-looping-over-the-urls">looping
+      over the URLs</a>
+    - <a href="#putting-it-all-together-1"
+      id="toc-putting-it-all-together-1">Putting it all together</a>
+- <a href="#bonus-doing-it-more-elegantly"
+  id="toc-bonus-doing-it-more-elegantly">Bonus. Doing it more
+  elegantly</a>
+  - <a href="#making-functions-for-the-main-scraper-components"
+    id="toc-making-functions-for-the-main-scraper-components">making
+    functions for the main scraper components</a>
+  - <a href="#building-a-scraper-using-the-functions"
+    id="toc-building-a-scraper-using-the-functions">Building a scraper using
+    the functions</a>
+- <a href="#faqs" id="toc-faqs">FAQs</a>
+  - <a
+    href="#the-inspect-tool-is-lying-it-shows-stuff-thats-not-in-the-html-code"
+    id="toc-the-inspect-tool-is-lying-it-shows-stuff-thats-not-in-the-html-code">The
+    <em>inspect</em> tool is lying! it shows stuff that’s not in the HTML
+    code</a>
+  - <a href="#wait-is-this-even-allowed"
+    id="toc-wait-is-this-even-allowed">Wait, is this even allowed?</a>
 
 # Video tutorial
 
@@ -86,6 +106,9 @@ tidyverse fashion it makes web scraping really intuitive. Check out this
 small piece of code that scrapes the world happiness report from
 Wikipedia and shows the relationship between wealth and life expectancy.
 
+**This code is a bit different from the YouTube video, because the World
+Happiness Report tables of recent years are empty (for some reason)**
+
 ``` r
 library(rvest)
 library(tidyverse)
@@ -93,12 +116,16 @@ library(tidyverse)
 url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
 
 ## import table from the Wikipedia url
-happy_table = read_html(url) %>%
-  html_element(".wikitable") %>% 
+happy_tables = read_html(url) %>%
+  html_elements(".wikitable") %>% 
   html_table()
 
+## You now have all the tables as a list.
+## The third table (at the time of writing) is 2020
+happy_table_2020 = happy_tables[[3]]
+
 ## Plot relationship wealth and life expectancy
-ggplot(happy_table, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
+ggplot(happy_table_2020, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
   geom_point() + geom_smooth(method = 'lm')
 ```
 
@@ -106,20 +133,20 @@ ggplot(happy_table, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) +
 
 The scraping part is really just the short pipe there! With
 `read_html(url)`, we visit the Wikipedia page. Then
-`html_element(".wikitable")` searches this website to find any elements
-called ‘wikitable’, and `html_table()` imports this table as a data
-frame.
+`html_elements(".wikitable")` searches this website to find all elements
+called ‘wikitable’, and `html_table()` imports this these tables as data
+frames.
 
 *As an exercise, you could try the same thing for other Wikipedia pages
 with tables. Just replace the url and change the columns for the x and y
 axis in gglot*
 
 If you happen to know a bit about HTML, you might realize that
-`html_element(".wikitable")` just uses CSS to select the (first) element
-with the .wikitable class. If so, congratulations, you now basically
-know web scraping! If not, don’t worry! You really only need to know
-very little about HTML to use web scraping. We’ll cover this in the next
-section.
+`html_elements(".wikitable")` just uses CSS to select the (first)
+element with the .wikitable class. If so, congratulations, you now
+basically know web scraping! If not, don’t worry! You really only need
+to know very little about HTML to use web scraping. We’ll cover this in
+the next section.
 
 Off course, this is just a simple example. If you need to scrape all
 press releases from a website, you will need more steps and some
@@ -148,16 +175,16 @@ In this tutorial we focus on web scraping of HTML pages, which covers
 the vast majority of websites. The general workflow then covers three
 steps:
 
--   **Reading HTML pages into R**. This step is by far the easiest. With
-    `rvest` we simply use the `read_html()` function for a given URL. As
-    such, you now already learned this step (one down, two to go!).
--   **Selecting HTML elements from these pages**. This step is the most
-    involved, because you need to know a bit about HTML. But even if
-    this is completely new to you, you’ll be able to learn the most
-    important steps within a good hour or so.
--   **Extracting data from these elements**. This step is again quite
-    easy. `rvest` has some nice, intuitive functions for extracting data
-    from selected HTML elements.
+- **Reading HTML pages into R**. This step is by far the easiest. With
+  `rvest` we simply use the `read_html()` function for a given URL. As
+  such, you now already learned this step (one down, two to go!).
+- **Selecting HTML elements from these pages**. This step is the most
+  involved, because you need to know a bit about HTML. But even if this
+  is completely new to you, you’ll be able to learn the most important
+  steps within a good hour or so.
+- **Extracting data from these elements**. This step is again quite
+  easy. `rvest` has some nice, intuitive functions for extracting data
+  from selected HTML elements.
 
 In this section we’ll start with a **short introduction to HTML**, using
 an example web page that we made for this tutorial. Then we’ll cover
@@ -329,7 +356,7 @@ cat(text)  ## (cat just prints the text more nicely)
 
 The `rvest` package supports two ways for selecting HTML elements. The
 first and default approach is to use **CSS selectors**. CSS is mostly
-used by web developers to *style* web pages[1], but it works just as
+used by web developers to *style* web pages[^1], but it works just as
 well for scraping. The second approach is to use **xpath**. This is a
 bit more flexible, but it’s also harder to read and write. For sake of
 simplicity we’ll only cover CSS selectors, which is often all you need.
@@ -389,12 +416,11 @@ elements.
 
 Important to remember:
 
--   `html_element` always returns a single element. If there are
-    multiple elements that meet the condition, it will return the first
-    element.
--   `html_elements` always returns a list of elements. If there is only
-    one element that meets the condition, you’ll just get a list with
-    that one element.
+- `html_element` always returns a single element. If there are multiple
+  elements that meet the condition, it will return the first element.
+- `html_elements` always returns a list of elements. If there is only
+  one element that meets the condition, you’ll just get a list with that
+  one element.
 
 Luckily, `rvest` is quite flexible in how it handles single elements and
 lists of elements. The functions to extract data from single elements
@@ -434,7 +460,7 @@ typically in `<a>` tags, so we’ll get all of them, and then use the
   length()
 ```
 
-    ## [1] 538
+    ## [1] 540
 
 Now let’s do this again, but first selecting only the body. If you
 inspect the HTML, you’d find that the body is in an element with the
@@ -451,7 +477,7 @@ that select all `<a>`.
   length()
 ```
 
-    ## [1] 411
+    ## [1] 484
 
 Indeed, we got less links this time, because it worked! The nice thing
 about this is that it works for any combination of CSS selectors. This
@@ -473,7 +499,7 @@ run `html_elements('a')` on that element.
   length()
 ```
 
-    ## [1] 411
+    ## [1] 484
 
 If this is your first run in with CSS and HTML, this might al seem a bit
 overwhelming. The good part though: this should cover most of what you
@@ -508,7 +534,7 @@ html %>% html_element('.leftColumn') %>% html_text()
 
     ## [1] "\n    Left Column\n\n    This is a simple HTML document. Right click on the page and select view page source \n       (or something similar, depending on browser) to view the HTML source code.\n    \n    Alternatively, right click on a specific element on the page and select inspect element. \n       This also shows the HTML code, but focused on the selected element. You should be able to fold \n       and unfold HTML nodes (using the triangle-like thing before the <tags>), and when you hover \n       your mouse over them, they should light up in the browser. Play around with this for a bit to get \n       a feel for exploring HTML code.\n\n    Here's a stupid table.\n    \n    First column                         \n        Second column                        \n        Third column                         \n      1                                    \n        2                                    \n        3                                    \n      4                                    \n        5                                    \n        6                                    \n      "
 
-That’s pretty ugly. See all those ‘\\n’ and empty spaces? That’s because
+That’s pretty ugly. See all those ‘\n’ and empty spaces? That’s because
 in the HTML source code the developer added some line breaks and empty
 space to make it look better in the code. But in the browser these extra
 breaks and spaces are ignored. `html_text2` let’s you get the text as
@@ -579,7 +605,7 @@ name_overview = html %>%
 html_text2(name_overview)  
 ```
 
-    ## [1] "Bill Murray (I) Actor | Writer | Producer STARmeter Top 5000 Down 236 this week View rank on IMDbPro » 1:40 | Clip 140 VIDEOS | 795 IMAGES window.IMDbHeroVideoPreview = { heroVideoPreviewContainerId: \"name_hero_video_preview\", videoId: \"vi1805828889\", videoType: \"Clip\", duration: \"1:40\" }; Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio » Born: September 21, 1950 in Wilmette, Illinois, USA More at IMDbPro » Contact Info: View agent, publicist, legal on IMDbPro"
+    ## [1] NA
 
 Looks pretty good! Now let’s see what we have. The first h1 header in
 this box is the name. It’s fairly safe to assume this is always the
@@ -597,7 +623,7 @@ name = name_overview %>%
 name
 ```
 
-    ## [1] "Bill Murray"
+    ## [1] NA
 
 Next, let’s get the job categories. There’s this div with
 `id="name-job-categories"` just lying there. Inside, there are again
@@ -612,7 +638,7 @@ job_categories = name_overview %>%
 job_categories
 ```
 
-    ## [1] "Actor"    "Writer"   "Producer"
+    ## character(0)
 
 Now for the bio text. Inspect the element of the bio text, and you’ll as
 `<div>` with `id="name-bio-text"`. Nice.
@@ -625,7 +651,7 @@ bio = name_overview %>%
 bio
 ```
 
-    ## [1] "Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his ... See full bio »"
+    ## [1] NA
 
 Finally, let’s get the birth date and location. There’s a `<div>` with
 `id="name-born-info"`. Inside there is a `<time>`, which shows the date
@@ -641,7 +667,7 @@ born_date = name_overview %>%
 born_date
 ```
 
-    ## [1] "1950-9-21"
+    ## [1] NA
 
 Now, the location is actually a bit tricky. It’s in a `<a>` tag, but
 that’s the third `<a>` tag in the name_born node. We could assume this
@@ -669,7 +695,7 @@ born_location = name_overview %>%
 born_location
 ```
 
-    ## [1] "Wilmette, Illinois, USA"
+    ## [1] NA
 
 ### Putting it all together
 
@@ -695,9 +721,9 @@ tibble(name, born_date, born_location, bio,
        job_categories = paste(job_categories, collapse=' | '))
 ```
 
-| name        | born_date | born_location           | bio                                                                                                                                                                                                                                                                                                                                                                           | job_categories              |
-|:------------|:----------|:------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|
-| Bill Murray | 1950-9-21 | Wilmette, Illinois, USA | Bill Murray is an American actor, comedian, and writer. The fifth of nine children, he was born William James Murray in Wilmette, Illinois, to Lucille (Collins), a mailroom clerk, and Edward Joseph Murray II, who sold lumber. He is of Irish descent. Among his siblings are actors Brian Doyle-Murray, Joel Murray, and John Murray. He and most of his … See full bio » | Actor \| Writer \| Producer |
+| name | born_date | born_location | bio | job_categories |
+|:-----|:----------|:--------------|:----|:---------------|
+| NA   | NA        | NA            | NA  |                |
 
 ## Scraping an archive: all actor profiles for a movie
 
@@ -1030,10 +1056,10 @@ Among recent publications there is [Fiesler, Beard & Keegan,
 [Luscombe, Dick &
 Walby](https://link.springer.com/article/10.1007/s11135-021-01164-0).
 
-[1] If you look at the HTML code of our [example
-page](view-source:https://bit.ly/31keW5P), you see that there is this
-`<style>...</style>` section, and in this section we also use CSS
-selectors to select elements. For example, the `.someTable` class is
-selected to style this table like an APA table, and the `.blue` class
-defines that any element with this class (in our case the second table)
-is colored blue.
+[^1]: If you look at the HTML code of our [example
+    page](view-source:https://bit.ly/31keW5P), you see that there is
+    this `<style>...</style>` section, and in this section we also use
+    CSS selectors to select elements. For example, the `.someTable`
+    class is selected to style this table like an APA table, and the
+    `.blue` class defines that any element with this class (in our case
+    the second table) is colored blue.

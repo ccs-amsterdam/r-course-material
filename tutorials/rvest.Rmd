@@ -53,6 +53,8 @@ This is a neat little package developed by the venerable Hadley Wickham (aka the
 And in true tidyverse fashion it makes web scraping really intuitive.
 Check out this small piece of code that scrapes the world happiness report from Wikipedia and shows the relationship between wealth and life expectancy.
 
+**This code is a bit different from the YouTube video, because the World Happiness Report tables of recent years are empty (for some reason)**
+
 ```{r example_wiki_scrape}
 library(rvest)
 library(tidyverse)
@@ -60,22 +62,26 @@ library(tidyverse)
 url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
 
 ## import table from the Wikipedia url
-happy_table = read_html(url) %>%
-  html_element(".wikitable") %>% 
+happy_tables = read_html(url) %>%
+  html_elements(".wikitable") %>% 
   html_table()
 
+## You now have all the tables as a list.
+## The third table (at the time of writing) is 2020
+happy_table_2020 = happy_tables[[3]]
+
 ## Plot relationship wealth and life expectancy
-ggplot(happy_table, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
+ggplot(happy_table_2020, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
   geom_point() + geom_smooth(method = 'lm')
 ```
 
 The scraping part is really just the short pipe there!
 With `read_html(url)`, we visit the Wikipedia page.
-Then `html_element(".wikitable")` searches this website to find any elements called 'wikitable', and `html_table()` imports this table as a data frame.
+Then `html_elements(".wikitable")` searches this website to find all elements called 'wikitable', and `html_table()` imports this these tables as data frames.
 
 *As an exercise, you could try the same thing for other Wikipedia pages with tables. Just replace the url and change the columns for the x and y axis in gglot*
 
-If you happen to know a bit about HTML, you might realize that `html_element(".wikitable")` just uses CSS to select the (first) element with the .wikitable class.
+If you happen to know a bit about HTML, you might realize that `html_elements(".wikitable")` just uses CSS to select the (first) element with the .wikitable class.
 If so, congratulations, you now basically know web scraping!
 If not, don't worry!
 You really only need to know very little about HTML to use web scraping.
