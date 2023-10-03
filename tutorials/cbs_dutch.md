@@ -411,7 +411,7 @@ scheelt een hoop wachten!
 ``` r
 meta <- cbs_get_meta("70072ned")
 inkomen <- cbs_get_data("70072ned", RegioS=has_substring("GM"), Perioden="2021JJ00") |>
-  select(RegioS, inkomen=ParticuliereHuishoudensExclStudenten_122)
+  select(RegioS, inkomen=ParticuliereHuishoudensExclStudenten_121)
 gemeentes <- meta$RegioS |> as_tibble() |> select(RegioS=Key, gemeente=Title)
 inkomen = inner_join(inkomen, gemeentes)
 ```
