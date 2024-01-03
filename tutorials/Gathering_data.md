@@ -3,22 +3,26 @@ Gathering data into R
 Kasper Welbers & Wouter van Atteveldt
 January 8, 2021
 
--   [Tabular data formats](#tabular-data-formats)
-    -   [CSV files](#csv-files)
-    -   [Excel files](#excel-files)
-    -   [SPSS files](#spss-files)
-    -   [Stata files](#stata-files)
--   [Hierachical file formats](#hierachical-file-formats)
-    -   [Working with hierarchical data in
-        R](#working-with-hierarchical-data-in-r)
-    -   [JSON](#json)
-    -   [XML](#xml)
-    -   [HTML (sort of)](#html-sort-of)
--   [APIs](#apis)
-    -   [Google trends](#google-trends)
-    -   [Yahoo stock exchange data](#yahoo-stock-exchange-data)
-    -   [Example: CBS](#example-cbs)
--   [Web scraping](#web-scraping)
+- <a href="#tabular-data-formats" id="toc-tabular-data-formats">Tabular
+  data formats</a>
+  - <a href="#csv-files" id="toc-csv-files">CSV files</a>
+  - <a href="#excel-files" id="toc-excel-files">Excel files</a>
+  - <a href="#spss-files" id="toc-spss-files">SPSS files</a>
+  - <a href="#stata-files" id="toc-stata-files">Stata files</a>
+- <a href="#hierachical-file-formats"
+  id="toc-hierachical-file-formats">Hierachical file formats</a>
+  - <a href="#working-with-hierarchical-data-in-r"
+    id="toc-working-with-hierarchical-data-in-r">Working with hierarchical
+    data in R</a>
+  - <a href="#json" id="toc-json">JSON</a>
+  - <a href="#xml" id="toc-xml">XML</a>
+  - <a href="#html-sort-of" id="toc-html-sort-of">HTML (sort of)</a>
+- <a href="#apis" id="toc-apis">APIs</a>
+  - <a href="#google-trends" id="toc-google-trends">Google trends</a>
+  - <a href="#yahoo-stock-exchange-data"
+    id="toc-yahoo-stock-exchange-data">Yahoo stock exchange data</a>
+  - <a href="#example-cbs" id="toc-example-cbs">Example: CBS</a>
+- <a href="#web-scraping" id="toc-web-scraping">Web scraping</a>
 
 # Tabular data formats
 
@@ -53,15 +57,14 @@ Luckily, the diversity of such settings in CSV files is limited today.
 The `readr` package (which is part of the tidyverse) therefore has 3
 general flavours and 1 more versatile function.
 
--   `read_csv` is the default with a comma separator and dot for decimal
-    point. This is often what you need.
--   `read_csv2` uses a semicolon (;) separator with comma for decimal
-    point.
--   `read_tsv` uses tabs as separator (tsv stands for tab-separated
-    values). (`read_csv`, `read_csv2`, `read_tsv`). If you encounter a
-    CSV
--   `read_delim` lets you specify the delimiter and quotation character,
-    and some other settings.
+- `read_csv` is the default with a comma separator and dot for decimal
+  point. This is often what you need.
+- `read_csv2` uses a semicolon (;) separator with comma for decimal
+  point.
+- `read_tsv` uses tabs as separator (tsv stands for tab-separated
+  values). (`read_csv`, `read_csv2`, `read_tsv`). If you encounter a CSV
+- `read_delim` lets you specify the delimiter and quotation character,
+  and some other settings.
 
 Naturally, this is all properly documented:
 
@@ -336,9 +339,13 @@ library(gtrendsR)
 Now we can for instance look for when people searched for ‘covid’. In
 addition, we distinguish between the Netherlands (NL) and the United
 States (US), and we’ll look from the start of 2020 till the end of 2021.
+Note that we add `onlyInterest = T`, which means that we ask Google
+Trends to only give us data about interest in the search term over time.
+We can also ask for other things, but it seems that recently Google
+Trends sometimes refuses if we ask for too much data.
 
 ``` r
-trend = gtrends('covid', geo=c("NL","US"), time = '2020-01-01 2021-12-31')
+trend = gtrends('covid', geo=c("NL","US"), time = '2020-01-01 2021-12-31', onlyInterest = T)
 plot(trend)
 ```
 
@@ -367,9 +374,15 @@ as_tibble(trend$interest_over_time) %>%
   mutate(hits = as.numeric(ifelse(hits == '<1', 0, hits)))
 ```
 
-There’s some other fun stuff as well, such as related queries.
+There’s some other fun stuff as well, such as related queries. However,
+it seems that at the moment Google Trends get’s angry if we ask for
+multiple things at once. the `gtrends` package currently only has an
+option for `onlyInterest`, and not any options for `only` getting
+specific other information. So at the moment the following doesn’t
+really seem to work consistently.
 
 ``` r
+trend = gtrends('covid', geo=c("NL","US"), time = '2020-01-01 2021-12-31')
 as_tibble(trend$related_queries)
 ```
 
@@ -425,11 +438,15 @@ Some providers of open data (such as government institutions) provide
 APIs to access their datasets. And moreover, some of them also provide R
 packages for using these APIs.
 
-How this works really depends on the package. Here we provide an example
-of the Dutch CBS (central agency for statistics).
+How this works really depends on the package, so you will first want to
+read a package *vignette* (which you can often easily find by Google-in
+on *\[package name\] vignette*). Here we provide an example of the Dutch
+CBS (central agency for statistics), which has the [csbodataR
+package](https://cran.r-project.org/web/packages/cbsodataR/vignettes/cbsodata.html)
 
 ``` r
 library(cbsodataR)
+
 d = cbs_get_data("80030NED") %>% 
   cbs_add_date_column() %>% 
   cbs_add_label_columns() %>%
@@ -487,5 +504,5 @@ ha-rvest-ing data) it is certainly possible to do webscraping in R. It
 is also a good way to learn about webscraping (and basic HTML), and the
 skills are easily transferable to Python.
 
-Since this is a pretty big topic, we have a separate tutorial on [web
-scraping in R](https://www.youtube.com/watch?v=9GR26Y4z_v4).
+Since this is a pretty big topic, we have a separate tutorial on *Web
+scraping in R* (on the r-course-material Github repository)
