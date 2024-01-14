@@ -62,8 +62,8 @@ library(tidyverse)
 url = "https://en.wikipedia.org/wiki/World_Happiness_Report"
 
 ## import table from the Wikipedia url
-happy_tables = read_html(url) %>%
-  html_elements(".wikitable") %>% 
+happy_tables = read_html(url) |>
+  html_elements(".wikitable") |> 
   html_table()
 
 ## You now have all the tables as a list.
@@ -96,7 +96,7 @@ Then for each link, we can again use `read_html()` to read the data, and look fo
 
 ## How to read this tutorial
 
-Off course, it makes most sense to just read this thing from start to finish.
+Of course, it makes most sense to just read this thing from start to finish.
 However, we'll go through quite a lot of details before we get to the actual scraping.
 If you're the type of person that rather sees something in action first, or want to see what scraping can do before you decide to learn the details, you can also skip straight to the demo cases section.
 
@@ -200,7 +200,7 @@ With it, you can right click on any part of a webpage, and then select **inspect
 
 ![](img/inspect_element.png){width=50%}
 
-</center
+</center>
 
 This will open a sidebar in which you see the HTML code, but focused on that element. 
 
@@ -247,13 +247,13 @@ There are quite a lot of [CSS selectors](https://www.w3schools.com/cssref/css_se
 Here are the most common ones you'll need for web scraping.
 You can always look up the other ones, but these are good to know by heart.
 
-| selector      | example           | Selects                                                |
-|---------------|-------------------|--------------------------------------------------------|
-| element/tag   | `table`           | **all** `<table>` elements                             |
-| class         | `.someTable`      | **all** elements with `class="someTable"`              |
-| id            | `#steve`          | **unique** element with `id="steve"`                   |
-| element.class | `tr.headerRow`    | **all** `<tr>` elements with the `someTable` class     |
-| class1.class2 | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
+| selector       | example           | Selects                                                |
+|----------------|-------------------|--------------------------------------------------------|
+| element/tag    | `table`           | **all** `<table>` elements                             |
+| class          | `.someTable`      | **all** elements with `class="someTable"`              |
+| id             | `#steve`          | **unique** element with `id="steve"`                   |
+| element.class  | `tr.headerRow`    | **all** `<tr>` elements with the `someTable` class     |
+| .class1.class2 | `.someTable.blue` | **all** elements with the `someTable` AND `blue` class |
 
 We can use these `CSS selectors` in `rvest` with the `html_element` and `html_elements` functions.
 Both work the same way, but `html_element` only returns **the first** element that meets the criteria, whereas `html_elements` returns a set with all elements.
