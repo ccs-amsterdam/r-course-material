@@ -32,7 +32,7 @@ install.packages("skimr")
 install.packages("corrplot")
 ```
 
-The main library we use is `tidymodels`, which (like `tidyvers`) is a 'meta-package' that 
+The main library we use is `tidymodels`, which (like `tidyverse`) is a 'meta-package' that 
 includes various packages to do machine learning. This tutorial will take you through the most important, including:
 
 + [rsample](https://rsample.tidymodels.org/) to split data into train/test sets
