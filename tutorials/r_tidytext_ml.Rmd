@@ -142,3 +142,61 @@ to see how to do parameter tuning.
 
 Of course, you can also try one of the other classification models in [parsnip](https://parsnip.tidymodels.org/),
 and/or try a regression model instead to predict the actual star value. 
+
+## Using embeddings as features
+
+Rather than using word frequencies (i.e. DTM columns) as features, we can also use word embedding dimensions. 
+First, let's download these embeddings using the textdata package:
+
+```{r}
+library(textdata)
+# Note, if you get a timeout you might want to manually download http://nlp.stanford.edu/data/glove.6B.zip,
+# copy it to ~/.cache/textdata/glove6b and set manual_download to T
+# see ?embedding_glove for more info
+embeddings = textdata::embedding_glove6b(manual_download = T)
+```
+
+Now, you can manually join these embeddings with the tokens, and use these columns as numerical predictors. 
+
+To make this a bit easier, `textrecipes` contains a step to do this. 
+Note that this recipe seems to assume that there is a single column labeled `text`,
+so we merge the summary and reviewText columns:
+
+```{r}
+library(textrecipes)
+reviews_text <- reviews |>
+  mutate(text = str_c(summary, reviewText))
+embedding_recipe = recipe(rating ~ text, data=reviews_text) |>
+  step_tokenize(all_predictors())  |>
+  step_word_embeddings(text, embeddings = embeddings, aggregation='mean', keep_original_cols=FALSE) 
+```
+
+Let's see how that preps the data:
+
+```{r}
+embedding_recipe |> prep() |> bake(new_data = NULL) |> select(1:10)
+```
+
+So you can see, for every document it computed the mean dimension loading 
+
+We can now use that as before, e.g.:
+
+```{r}
+library(discrim)
+library(tidymodels)
+
+embedding_workflow = workflow() |>
+  add_recipe(embedding_recipe) |>
+  add_model(logistic_reg(mixture = 0, penalty = 0.1))
+
+split = initial_split(reviews_text)
+
+m <- fit(embedding_workflow, data = training(split))
+predict(m, new_data=testing(split)) |>
+  bind_cols(select(testing(split), rating)) |>
+  rename(predicted=.pred_class, actual=rating) |>
+  metrics(truth = actual, estimate = predicted)
+```
+
+Did it acutally perform better in this case? Why would that be the case? Can you think of ways to improve this?
+
