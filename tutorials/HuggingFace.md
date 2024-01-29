@@ -1,7 +1,7 @@
 Running Large Language Models via the Huggingface API, and learning a
 bit about APIs on the way
 ================
-Kasper Welbers, Philipp Masuer & Wouter van Atteveldt
+Kasper Welbers, Philipp Masur & Wouter van Atteveldt
 2024-01
 
 - [Introduction](#introduction)
@@ -9,6 +9,9 @@ Kasper Welbers, Philipp Masuer & Wouter van Atteveldt
     account](#setting-up-a-hugging-face-account)
 - [Using the Hugging Face Inference
   API](#using-the-hugging-face-inference-api)
+  - [Using the httr2 library to talk to an
+    API](#using-the-httr2-library-to-talk-to-an-api)
+    - [Example](#example)
   - [What can we do with the Hugging Face
     API](#what-can-we-do-with-the-hugging-face-api)
   - [How can we use this API from within
@@ -28,12 +31,12 @@ Kasper Welbers, Philipp Masuer & Wouter van Atteveldt
 [Hugging Face](https://huggingface.co/) is a popular platform and
 community for open-source sharing of Large Language Models and datasets.
 In addition to letting you search and download all sorts of models to
-use them on your own computer, Hugging Face provides an API for running
-models on their servers. This API also includes a free-tier, which we’ll
-use in this tutorial to play around with LLMs.
+use them on your own computer, Hugging Face provides an **Inference
+API** for running models on their servers. This API also includes a
+free-tier, which we’ll use in this tutorial to play around with LLMs.
 
 If you are not yet familiar with how APIs work, don’t worry! We’ll make
-this tutorial a quick introduction to using API’s as well.
+this tutorial a quick introduction to using APIs as well.
 
 ## Setting up a hugging face account
 
@@ -51,10 +54,12 @@ rate limit for API prompts. Registering is free and easy:
 4.  Click on “Access Tokens” on the left and create a new one.
 
 5.  Copy the Access Token (the long string of random characters). This
-    is kind of like your password for connecting to the API. To use it,
-    we’ll now directly enter it in R. Note, however, that these keys are
-    sensitive information (especially if you have a paid account), so
-    normally you would want to avoid storing them visibly in your code.
+    token, also called an API key, is your way of authenticating
+    yourself. It is important to keep this key secret, especially if you
+    let Hugging Face charge your creditcard for API usage. Accordingly,
+    you should normally avoid storing your key directly in your R code.
+    But for this tutorial, with this rather harmless API key, we’ll do
+    just that to keep things simple.
 
 ``` r
 token = "PASTE YOUR ACCESS TOKEN HERE"
@@ -63,18 +68,92 @@ token = "PASTE YOUR ACCESS TOKEN HERE"
 # Using the Hugging Face Inference API
 
 Now we’re going to set up a small routine for talking to the Hugging
-Face API. There is probably some R package out there that can do this
-for you, but it’s really not that difficult, and we want to show you how
-to do this yourself. We’ll first walk throug the steps, and then wrap
-them up in our own custom function!
+Face Inference API. There is probably some R package out there that can
+do this for you, but it’s really not that difficult, and we want to show
+you how to do this yourself. We’ll first walk through the steps, and
+then wrap them up in our own custom function!
 
-We’ll be using the httr2 library, which provides a powerfull framework
-for making HTTP requests. In simple terms, it allows us to talk to the
-Hugging Face API.
+## Using the httr2 library to talk to an API
+
+We’ll be using the **httr2** library, which provides a powerful
+framework for making **HTTP requests**. In short, HTTP requests allow us
+to interact with *resources* on the internet, and you are already doing
+this all the time when you visit a URL in your web browser (URL stands
+for Universal *Resource* Locator). When using HTTP requests to
+communicate with an API, we typically need to know the following
+information:
+
+- The URI (like a URL) that points to the resource. This is also
+  referred to as an API *endpoint*
+- The required HTTP *verb*. These indicate different ways of interacting
+  with a resource. The most common verbs are GET (for retrieving
+  information) or POST (for sending information)
+- If the API requires authentication, we need an API key, that we
+  typically send in the request *headers*
+- Any additional information, passed in the request *headers*,
+  *parameters*, or *body*
+
+Any good API will have clear documentation that discloses the available
+endpoints, what verbs to use, how to authenticate, and what additional
+information you can/should provide.
+
+### Example
+
+A nice example for using httr2 is the [dummyJSON
+API](https://dummyjson.com), which is a fake API designed to be used by
+web developers for prototyping. The [documentation for
+authentication](https://dummyjson.com/docs/auth) shows simple examples
+of a GET and POST requests and how to authenticate. Here’s a quick
+example of how to make these requests using httr2.
+
+First, we’ll make a POST request that contains our username and password
+to the `https://dummyjson.com/auth/login` endpoint. This is basically a
+login request. If our username and password are correct, the API should
+return our account information.
 
 ``` r
 library(httr2)
+
+response = request('https://dummyjson.com/auth/login') |>
+  req_body_json(list(username = "kminchelle", password = "0lelplR")) |>
+  req_perform() |>    # send the request
+  resp_body_json()    # read the response
+
+response
 ```
+
+Note that we didn’t need to specify that this is a POST request. httr2
+automatically determined that this is the case because we added a
+request body (with `req_body_json(...)`). A request **body** is the data
+send along with a request, and JSON is one of the common formats to
+structure this information. A GET request (meant for retrieving
+information) cannot have a body.
+
+Now, in the response we also received the **token** for this user. We
+can now use this token for any requests that require us to be signed-in
+(i.e. authenticated). The second example of the authentication
+documentation page shows how we can make a GET request to the
+`https://dummyjson.com/auth/me` endpoint to get information about the
+current user. Note that we now pass an **Authentication** header that
+contains our token. As the value, we need to pass a string of the format
+`"Bearer [our token]"`, so we first create this string by pasting the
+word “Bearer” to the token that we received when signing in (paste
+automatically adds a space between the two strings that it pastes
+together).
+
+``` r
+auth_header = paste("Bearer", response$token)
+
+request('https://dummyjson.com/auth/me') |>
+  req_headers(Authorization = auth_header) |>
+  req_perform() |>
+  resp_body_json()
+```
+
+This is all we need to know about HTTP requests and httr2 to use the
+Hugging Face Inference API. The next step is to look into the
+documentation of this API to learn what endpoints to use, what
+information we need to provide, and how to authenticate.
 
 ## What can we do with the Hugging Face API
 
@@ -118,20 +197,18 @@ This information can be found in the
 [documentation](https://huggingface.co/docs/api-inference/detailed_parameters),
 but we’ll spoil the answers because we’re cool like that:
 
-- We specify the model in the **endpoint**. An API endpoint is basically
-  just a URL that indicates what resource on a server you want to
-  interact with. To use the Inference API for a specific model, the
-  endpoint is:
+- We specify the model in the **endpoint**. To use the Inference API for
+  a specific model, the endpoint is:
   `https://api-inference.huggingface.co/models/[author]/[modelname]`.
 - The [documentation for zero-shot classification
   tasks](https://huggingface.co/docs/api-inference/detailed_parameters#zero-shot-classification-task)
   shows us that we need to make a **POST request** to the API endpoint
   in which we include the input text and candidate labels in a specific
-  JSON format (which we show below).
+  JSON format.
 - In the same documentation we see that to authenticate, we need to
   include an Authorization header, and provide the value “Bearer \[our
-  shiny token\]”. This is a commonly used standard, that is readily
-  supported by httr2.
+  shiny token\]”. This is a commonly used standard (same as we saw for
+  dummyJSON).
 
 Without further ado, let us show you the R code, and then we’ll go
 through it step-by-step.
