@@ -3,28 +3,19 @@ LLMs part 2: running generative models locally with Ollama
 Kasper Welbers, Philipp Masur & Wouter van Atteveldt
 2024-01
 
-- <a href="#introduction" id="toc-introduction">Introduction</a>
-- <a href="#installing-ollama" id="toc-installing-ollama">Installing
-  Ollama</a>
-  - <a href="#firing-up-ollama" id="toc-firing-up-ollama">Firing up
-    Ollama</a>
-  - <a href="#firing-up-an-llm" id="toc-firing-up-an-llm">Firing up an
-    LLM</a>
-- <a href="#talking-to-ollama-using-the-httr2-library"
-  id="toc-talking-to-ollama-using-the-httr2-library">Talking to Ollama
-  using the httr2 library</a>
-  - <a href="#starting-a-conversation"
-    id="toc-starting-a-conversation">Starting a conversation</a>
-  - <a href="#keeping-a-conversation"
-    id="toc-keeping-a-conversation">Keeping a conversation</a>
-  - <a href="#lowering-the-temperature"
-    id="toc-lowering-the-temperature">Lowering the temperature</a>
-  - <a href="#other-stuff" id="toc-other-stuff">Other stuff</a>
-- <a href="#using-the-rollama-package"
-  id="toc-using-the-rollama-package">Using the rollama package</a>
-  - <a href="#using-gllms-for-text-classification"
-    id="toc-using-gllms-for-text-classification">Using gLLMs for text
-    classification</a>
+- [Introduction](#introduction)
+- [Installing Ollama](#installing-ollama)
+  - [Firing up Ollama](#firing-up-ollama)
+  - [Firing up an LLM](#firing-up-an-llm)
+- [Talking to Ollama using the httr2
+  library](#talking-to-ollama-using-the-httr2-library)
+  - [Starting a conversation](#starting-a-conversation)
+  - [Keeping a conversation](#keeping-a-conversation)
+  - [Lowering the temperature](#lowering-the-temperature)
+  - [Other stuff](#other-stuff)
+- [Using the rollama package](#using-the-rollama-package)
+  - [Using gLLMs for text
+    classification](#using-gllms-for-text-classification)
 
 # Introduction
 
@@ -154,7 +145,7 @@ res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
     model = "llama2",
     prompt = "Hi, my dearest lama",
-    stream = FALSE,
+    stream = FALSE
   )) |>
   req_perform() |>
   resp_body_json(simplifyVector = T)

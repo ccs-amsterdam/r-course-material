@@ -395,8 +395,7 @@ zero-shot classifier as above, it would look like this.
 ask_huggingface(token, 
       model = "MoritzLaurer/deberta-v3-large-zeroshot-v1.1-all-33", 
       texts = c('a test', 'an example'), 
-      candidate_labels=c('test','example'),
-      simplify_output=T)
+      candidate_labels=c('test','example'))
 ```
 
 It works! Do note that there are currently two downsides of making our

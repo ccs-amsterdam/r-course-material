@@ -76,7 +76,7 @@ res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
     model = "llama2",
     prompt = "Hi, my dearest lama",
-    stream = FALSE,
+    stream = FALSE
   )) |>
   req_perform() |>
   resp_body_json(simplifyVector = T)

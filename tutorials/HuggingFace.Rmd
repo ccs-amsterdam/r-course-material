@@ -239,8 +239,7 @@ So what this means for our function, is that any parameters the Hugging Face mod
 ask_huggingface(token, 
       model = "MoritzLaurer/deberta-v3-large-zeroshot-v1.1-all-33", 
       texts = c('a test', 'an example'), 
-      candidate_labels=c('test','example'),
-      simplify_output=T)
+      candidate_labels=c('test','example'))
 ```
 
 It works! Do note that there are currently two downsides of making our function more general:
