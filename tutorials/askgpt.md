@@ -88,7 +88,7 @@ There are some R (and RStudio) specific features in the package:
 One specific use case is asking for help on an error message. To use
 this, first run `log_init()` to give askGPT access to the error log.
 Then, if you get an error, you can use the special prompt
-`askgpt("help!)` to get information on the last error:
+`askgpt("help!")` to get information on the last error:
 
 For example, suppose we are tring to filter our dataframe to only
 include Almere:
