@@ -81,11 +81,9 @@ Note that the code above doesn’t actually really do anything. If
 *defines* the functions, but the function is not actually executed until
 you call it, i.e. with `hello('world')`
 
-<div class="Info">
-
-The code above explicitly `return`s the result. If you don’t include a
-return value, the result of the last line will be implictly returned.
-So, we could also have written:
+Also note that the code above explicitly `return`s the result. If you
+don’t include a return value, the result of the last line will be
+implictly returned. So, we could also have written:
 
 ``` r
 hello <- function(name) {
@@ -96,8 +94,6 @@ hello <- function(name) {
 Since this is shorter, many R veterans will prefer this – but of course
 it’s up to you how you write your functions. They are your functions,
 after all!
-
-</div>
 
 ### Why use functions?
 
