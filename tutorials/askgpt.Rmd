@@ -17,10 +17,13 @@ library(printr)
 # Calling GPT from R
 
 Like many companies, OpenAI (maker of ChatGPT) has an API that makes it easy to call it from R or other languages. 
-In this tutorial, you will learn how to use the `askGPT` package to send questions to GPT automatically.
+In this tutorial, you will learn how to use the `askGPT` package (created by my colleague Johannes Gruber)
+to send questions to GPT automatically.
 
 For this, you will need an **API key**. The instructor might make one available for your, otherwise you can [make one at openai.com](https://platform.openai.com/signup). There are some costs involved,
 but it's [pretty cheap](https://openai.com/api/pricing/) -- you can make hundreds of calls for a single euro. 
+
+Check out his [blog post](https://www.johannesbgruber.eu/post/2023-04-02-introducing-askgpt-a-chat-interface-that-helps-you-to-learn-r/) for more information!
 
 ## Installing and setting up AskGPT
 
