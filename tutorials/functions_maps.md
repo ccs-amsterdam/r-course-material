@@ -11,20 +11,6 @@ September 2024
   - [Mapping to data frames](#mapping-to-data-frames)
   - [Showing progress](#showing-progress)
 
-<style>
-.Info {
-    background-color: rgb(204, 229, 255);
-    border: 1px solid rgb(184, 218, 255);
-    color: rgb(0, 64, 133);
-    padding: 1em;
-    margin: 1em;
-}
-.Info::before {
-  font-weight: bold;
-  content: "🛈 Information";
-}
-</style>
-
 ## Introduction
 
 All the time that you have been using R, you have been using
