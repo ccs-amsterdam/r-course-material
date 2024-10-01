@@ -275,7 +275,8 @@ korte namen. Deze staan in dezelfde volgorde als in statline.
 Als we specifiek op zoek gaan naar kolommen met het woord ‘achtergrond’,
 dan zien we dat er twee zijn: “NederlandseAchtergrond_34” en
 “NederlandseAchtergrond_43”. Omdat de absolute gegevens in statline
-eerst stonden, weten
+eerst stonden, weten we dat de eerste (\_34) de absolute gegevens zijn,
+en de tweede (\_43) de relatieve.
 
 ``` r
 kerncijfers <- cbs_get_data("70072ned", RegioS=has_substring("GM"), Perioden="2021JJ00")
@@ -420,7 +421,8 @@ Nu kunnen we de kaart en inkomensgegevens koppelen en plotten:
 
 ``` r
 inner_join(inkomen, shapes) |>
-  ggplot(aes(geometry=geom, fill=inkomen)) + geom_sf()
+  ggplot(aes(geometry=geom, fill=inkomen)) + geom_sf() + 
+  theme_void()
 ```
 
 ![](img/cbsmap-1.png)<!-- -->

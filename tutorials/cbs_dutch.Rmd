@@ -203,7 +203,7 @@ Vink nu `Totale bevolking`, `Nederlandse achtergrond (aantal)`, en `Nederlandse 
 In 2021 had Arnhem bijvoorbeeld 162.424 inwoners, waarvan 108.400 met Nederlandse achtergrond, en dat is 66.7%. Als we naar de totale kerncijfers kijken, dan zien we dat er heel veel kolommen zijn met vaak korte namen. 
 Deze staan in dezelfde volgorde als in statline. 
 
-Als we specifiek op zoek gaan naar kolommen met het woord 'achtergrond', dan zien we dat er twee zijn: "NederlandseAchtergrond_34" en "NederlandseAchtergrond_43". Omdat de absolute gegevens in statline eerst stonden, weten 
+Als we specifiek op zoek gaan naar kolommen met het woord 'achtergrond', dan zien we dat er twee zijn: "NederlandseAchtergrond_34" en "NederlandseAchtergrond_43". Omdat de absolute gegevens in statline eerst stonden, weten we dat de eerste (_34) de absolute gegevens zijn, en de tweede (_43) de relatieve. 
 
 ```{r}
 kerncijfers <- cbs_get_data("70072ned", RegioS=has_substring("GM"), Perioden="2021JJ00")
@@ -320,7 +320,7 @@ Noot: we filteren hier bij het ophalen al op periode en regio, dat scheelt een h
 ```{r}
 meta <- cbs_get_meta("70072ned")
 inkomen <- cbs_get_data("70072ned", RegioS=has_substring("GM"), Perioden="2021JJ00") |>
-  select(RegioS, inkomen=ParticuliereHuishoudensExclStudenten_122)
+  select(RegioS, inkomen=ParticuliereHuishoudensExclStudenten_121)
 gemeentes <- meta$RegioS |> as_tibble() |> select(RegioS=Key, gemeente=Title)
 inkomen = inner_join(inkomen, gemeentes)
 ```
@@ -329,8 +329,8 @@ Nu kunnen we de kaart en inkomensgegevens koppelen en plotten:
 
 ```{r cbsmap, fig.keep='all', fig.path='img/'}
 inner_join(inkomen, shapes) |>
-  ggplot(aes(geometry=geom, fill=inkomen)) + geom_sf()
-
+  ggplot(aes(geometry=geom, fill=inkomen)) + geom_sf() + 
+  theme_void()
 ```
 
 
