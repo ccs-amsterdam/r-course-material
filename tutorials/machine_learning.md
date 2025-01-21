@@ -3,25 +3,24 @@ Supervised Machine Learning in R with tidymodels
 Wouter van Atteveldt & Kasper Welbers
 2022-01
 
--   [Introduction](#introduction)
-    -   [Packages used](#packages-used)
--   [Obtaining and exploring data](#obtaining-and-exploring-data)
--   [Training and test data](#training-and-test-data)
--   [A naive Bayes model](#a-naive-bayes-model)
-    -   [Fitting the model](#fitting-the-model)
-    -   [Validating the model](#validating-the-model)
-    -   [Using **yardstick** for performance
-        metrics](#using-yardstick-for-performance-metrics)
--   [SVM: Tuning models, recipes, and
-    workflows](#svm-tuning-models-recipes-and-workflows)
-    -   [Using preprocessing **recipes**](#using-preprocessing-recipes)
-    -   [Creating **workflows**](#creating-workflows)
-    -   [Using workflows](#using-workflows)
--   [Parameter tuning](#parameter-tuning)
-    -   [Grid search with `tune`](#grid-search-with-tune)
-    -   [Using the best model to
-        predict](#using-the-best-model-to-predict)
--   [What’s next?](#whats-next)
+- [Introduction](#introduction)
+  - [Packages used](#packages-used)
+- [Obtaining and exploring data](#obtaining-and-exploring-data)
+- [Training and test data](#training-and-test-data)
+- [A naive Bayes model](#a-naive-bayes-model)
+  - [Fitting the model](#fitting-the-model)
+  - [Validating the model](#validating-the-model)
+  - [Using **yardstick** for performance
+    metrics](#using-yardstick-for-performance-metrics)
+- [SVM: Tuning models, recipes, and
+  workflows](#svm-tuning-models-recipes-and-workflows)
+  - [Using preprocessing **recipes**](#using-preprocessing-recipes)
+  - [Creating **workflows**](#creating-workflows)
+  - [Using workflows](#using-workflows)
+- [Parameter tuning](#parameter-tuning)
+  - [Grid search with `tune`](#grid-search-with-tune)
+  - [Using the best model to predict](#using-the-best-model-to-predict)
+- [What’s next?](#whats-next)
 
 # Introduction
 
@@ -39,44 +38,58 @@ install.packages("skimr")
 install.packages("corrplot")
 ```
 
+The main library we use is `tidymodels`, which (like `tidyverse`) is a
+‘meta-package’ that includes various packages to do machine learning.
+This tutorial will take you through the most important, including:
+
+- [rsample](https://rsample.tidymodels.org/) to split data into
+  train/test sets
+- [parsnip](https://parsnip.tidymodels.org/) to do the actual machine
+  learning
+- [recipes](https://recuoes.tidymodels.org/) to create preprocessing /
+  feature encoding ‘recipes’
+- [workflows](https://workflows.tidymodels.org/) \` to encode the whole
+  workflow of training and testing models
+- [tune](https://tune.tidymodels.org/) to do hyperparameter tuning
+
+This might sound daunting, but there is method to the madness. This
+image (from the free online book (Tidyverse Skills for Data
+Science)\[<https://jhudatascience.org/tidyversecourse/>\]) gives a nice
+overview:
+
+<figure>
+<img
+src="https://jhudatascience.org/tidyversecourse/images/book_figures/MachineLearning_tidymodels.png"
+alt="The tidyverse ecosystem" />
+<figcaption aria-hidden="true">The tidyverse ecosystem</figcaption>
+</figure>
+
+So, the core of the actual ‘machine learning’ happens in the `parsnip`
+package. Before this, you can use the `rsample` package for splitting
+the dataset, and the `recipes` package for the various preprocessing and
+feature selection/engineering steps needed to go from raw data to the
+input variables for the machine learning. After model fitting, the
+`tune` package is used to do fine-tuning of the model (hyperparameter
+tuning), and `yardstick` is used to compute the various evaluation
+metrics. Finally, the `workflows` package helps package the
+pre-processing and fitting into a single workflow which makes it easier
+to use.
+
+The tutorial below will go through each of these steps. For reference,
+this figure (from the same source) gives an overview of these packages
+and key functions:
+
+<figure>
+<img
+src="https://jhudatascience.org/tidyversecourse/images/book_figures/Updated_tidymodels_basics.png"
+alt="Tidymodels packages and functions" />
+<figcaption aria-hidden="true">Tidymodels packages and
+functions</figcaption>
+</figure>
+
 ``` r
 library(tidymodels)
 ```
-
-The main library we use is `tidymodels`, which (like `tidyvers`) is a
-‘meta-package’ that includes various packages to do machine learning.
-This tutorial will take you through the most important, including
-
--   [rsample](https://rsample.tidymodels.org/) to split data into
-    train/test sets
--   [parsnip](https://parsnip.tidymodels.org/) to do the actual machine
-    learning
--   [recipes](https://recuoes.tidymodels.org/) to create preprocessing /
-    feature encoding ‘recipes’
--   [workflows](https://workflows.tidymodels.org/) \` to encode the
-    whole workflow of training and testing models
--   [tune](https://tune.tidymodels.org/) to do hyperparameter tuning
-
-
-
-This might sound daunting, but there is method to the madness. This image (from the free online book [Tidyverse Skills for Data Science](https://jhudatascience.org/tidyversecourse/)) gives a nice overview:
-
-![The tidyverse ecosystem](https://jhudatascience.org/tidyversecourse/images/book_figures/MachineLearning_tidymodels.png)
-
-So, the core of the actual 'machine learning' happens in the `parsnip` package. 
-Before this, you can use the `rsample` package for splitting the dataset,
-and the `recipes` package for the various preprocessing and feature selection/engineering steps
-needed to go from raw data to the input variables for the machine learning. 
-After model fitting, the `tune` package is used to do fine-tuning of the model (hyperparameter tuning),
-and `yardstick` is used to compute the various evaluation metrics. 
-Finally, the `workflows` package helps package the pre-processing and fitting into a single workflow
-which makes it easier to use. 
-
-The tutorial below will go through each of these steps. For reference, this figure (from the same source)
-gives an overview of these packages and key functions:
-
-![Tidymodels packages and functions](https://jhudatascience.org/tidyversecourse/images/book_figures/Updated_tidymodels_basics.png)
-
 
 # Obtaining and exploring data
 
@@ -84,7 +97,7 @@ For this tutorial, we will use the ‘german credit data’ dataset:
 
 ``` r
 library(tidyverse)
-d = read_csv("https://www.openml.org/data/get_csv/31/dataset_31_credit-g.arff")
+d <- foreign::read.arff("https://raw.githubusercontent.com/vincentpun123/Credit-Risk-Assessment/refs/heads/main/dataset_31_credit-g.arff")
 ```
 
 This dataset contains details about past credit applicants, including
@@ -499,7 +512,7 @@ To select the best model specification from the grid result
 
 ``` r
 final_svm = grid_results |>
-  select_best("f_meas") |>
+  select_best(metric="f_meas") |>
   finalize_workflow(x=svm_workflow)
 ```
 

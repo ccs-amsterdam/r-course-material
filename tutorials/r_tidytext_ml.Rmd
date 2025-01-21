@@ -136,12 +136,12 @@ This makes it interesting to see if using ngrams will help performance, as it is
 Have a look at the [textrecipes documentation](https://textrecipes.tidymodels.org/reference/) to see the possibilities for text preprocessing.
 
 Also, we just tried out a regularization penalty of 0.1, and it is quite possible that this is not the best choice possible.
-Thus, it is a good idea to now do some hyperparameter tuning for the regularization penalty and other parameters. 
-Take a look at the [machine learning handout](machine_learning.md) and/or the [tune documentation](https://tune.tidymodels.org/)
+Thus, it is a good idea to now do some hyperparameter tuning for the regularization penalty and other parameters (see the section on tuning below). For more information, take a look at the [machine learning handout](machine_learning.md) and/or the [tune documentation](https://tune.tidymodels.org/)
 to see how to do parameter tuning. 
 
 Of course, you can also try one of the other classification models in [parsnip](https://parsnip.tidymodels.org/),
 and/or try a regression model instead to predict the actual star value. 
+
 
 ## Using embeddings as features
 
@@ -151,9 +151,8 @@ First, let's download these embeddings using the textdata package:
 ```{r}
 library(textdata)
 # Note, if you get a timeout you might want to manually download http://nlp.stanford.edu/data/glove.6B.zip,
-# copy it to ~/.cache/textdata/glove6b and set manual_download to T
-# see ?embedding_glove for more info
-embeddings = textdata::embedding_glove6b(manual_download = T)
+# and copy it to ~/.cache/textdata/glove6b. See ?embedding_glove for more info
+embeddings = textdata::embedding_glove6b()
 ```
 
 Now, you can manually join these embeddings with the tokens, and use these columns as numerical predictors. 

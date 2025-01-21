@@ -69,7 +69,7 @@ For this tutorial, we will use the 'german credit data' dataset:
 
 ```{r}
 library(tidyverse)
-d = read_csv("https://www.openml.org/data/get_csv/31/dataset_31_credit-g.arff")
+d <- foreign::read.arff("https://raw.githubusercontent.com/vincentpun123/Credit-Risk-Assessment/refs/heads/main/dataset_31_credit-g.arff")
 ```
 
 This dataset contains details about past credit applicants, including why they are applying, checking and saving status,
@@ -434,7 +434,7 @@ To select the best model specification from the grid result
 
 ```{r}
 final_svm = grid_results |>
-  select_best("f_meas") |>
+  select_best(metric="f_meas") |>
   finalize_workflow(x=svm_workflow)
 ```
 

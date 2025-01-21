@@ -141,11 +141,9 @@ texts = tribble(
   "The Power of the Doctor: Jodie Whittaker's dr. Who finale", "Guardian",
   "Our open access #css textbook is published! @damian0604 @carlosarcila https://cssbook.net", "vanatteveldt")
             
-texts |> unnest_tokens(word, text, token='tweets')
 texts |> unnest_tokens(word, text, to_lower=F, strip_punct=F)
 ```
 
-What is the different between `token='tweets'` and the (default) `token='words'`?
 What do the `to_lower` and `strip_punct` arguments do?
 
 # Cleaning text

@@ -3,32 +3,21 @@ Tidytext basics
 Wouter van Atteveldt
 2022-10
 
-- <a href="#introduction-a-tidy-text-format"
-  id="toc-introduction-a-tidy-text-format">Introduction: A Tidy Text
-  Format</a>
-- <a href="#motivating-example" id="toc-motivating-example">Motivating
-  Example</a>
-- <a href="#importing-text-into-r"
-  id="toc-importing-text-into-r">Importing text into R</a>
-  - <a href="#csv-files" id="toc-csv-files">CSV files</a>
-  - <a href="#text-word-or-pdf-files" id="toc-text-word-or-pdf-files">Text,
-    word, or PDF files</a>
-- <a href="#tokenizing-text" id="toc-tokenizing-text">Tokenizing text</a>
-- <a href="#cleaning-text" id="toc-cleaning-text">Cleaning text</a>
-  - <a href="#stop-word-removal" id="toc-stop-word-removal">Stop word
-    removal</a>
-  - <a href="#trimming-overly-infrequent-words"
-    id="toc-trimming-overly-infrequent-words">Trimming overly (in)frequent
-    words</a>
-- <a href="#analyzing-and-visualizing-texts"
-  id="toc-analyzing-and-visualizing-texts">Analyzing and visualizing
-  texts</a>
-  - <a href="#word-frequencies-and-word-clouds"
-    id="toc-word-frequencies-and-word-clouds">Word frequencies and word
-    clouds</a>
-  - <a href="#corpus-comparison" id="toc-corpus-comparison">Corpus
-    comparison</a>
-- <a href="#where-next" id="toc-where-next">Where next?</a>
+- [Introduction: A Tidy Text Format](#introduction-a-tidy-text-format)
+- [Motivating Example](#motivating-example)
+- [Importing text into R](#importing-text-into-r)
+  - [CSV files](#csv-files)
+  - [Text, word, or PDF files](#text-word-or-pdf-files)
+- [Tokenizing text](#tokenizing-text)
+- [Cleaning text](#cleaning-text)
+  - [Stop word removal](#stop-word-removal)
+  - [Trimming overly (in)frequent
+    words](#trimming-overly-infrequent-words)
+- [Analyzing and visualizing texts](#analyzing-and-visualizing-texts)
+  - [Word frequencies and word
+    clouds](#word-frequencies-and-word-clouds)
+  - [Corpus comparison](#corpus-comparison)
+- [Where next?](#where-next)
 
 # Introduction: A Tidy Text Format
 

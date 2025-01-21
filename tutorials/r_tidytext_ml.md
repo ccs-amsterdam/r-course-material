@@ -168,9 +168,8 @@ embeddings using the textdata package:
 ``` r
 library(textdata)
 # Note, if you get a timeout you might want to manually download http://nlp.stanford.edu/data/glove.6B.zip,
-# copy it to ~/.cache/textdata/glove6b and set manual_download to T
-# see ?embedding_glove for more info
-embeddings = textdata::embedding_glove6b(manual_download = T)
+# and copy it to ~/.cache/textdata/glove6b. See ?embedding_glove for more info
+embeddings = textdata::embedding_glove6b()
 ```
 
 Now, you can manually join these embeddings with the tokens, and use
