@@ -2,7 +2,7 @@ Running Large Language Models via the Huggingface API, and learning a
 bit about APIs on the way
 ================
 Kasper Welbers, Philipp Masur & Wouter van Atteveldt
-2024-01
+2025-01
 
 - [Introduction](#introduction)
   - [Setting up a hugging face
@@ -115,7 +115,7 @@ return our account information.
 library(httr2)
 
 response = request('https://dummyjson.com/auth/login') |>
-  req_body_json(list(username = "kminchelle", password = "0lelplR")) |>
+  req_body_json(list(username = "emilys", password = "emilyspass")) |>
   req_perform() |>    # send the request
   resp_body_json()    # read the response
 
@@ -142,7 +142,7 @@ automatically adds a space between the two strings that it pastes
 together).
 
 ``` r
-auth_header = paste("Bearer", response$token)
+auth_header = paste("Bearer", response$accessToken)
 
 request('https://dummyjson.com/auth/me') |>
   req_headers(Authorization = auth_header) |>
@@ -443,7 +443,7 @@ using the
 [dslim/bert-base-NER](https://huggingface.co/dslim/bert-base-NER) model
 
 ``` r
-text = "My name is Sarah and I live in London"
+texts = "My name is Sarah and I live in London"
 ask_huggingface(token, model = "dslim/bert-base-NER", texts=texts)
 ```
 
