@@ -110,6 +110,19 @@ See also the open access book, [Text Mining with R: A TidyText approach](https:/
 | [Supervised machine learning for text classification](tutorials/r_text_ml.md) | [Supervised Machine Learning](https://www.youtube.com/playlist?list=PLjXODJ_lGN_XdMBgyscXHXuSB81zUoXCR) |  caret |
 | [Creating a topic browser with LDA](tutorials/R_text_topicbrowser.md) | |  [corpustools](https://cran.r-project.org/web/packages/corpustools/vignettes/corpustools.html) |
 
+## Large Language Models
+
+These are some tutorials on using LLMs in R. 
+We also talk a bit about how to manually talk to APIs. 
+This isn't strictly needed to use LLMs, so if you're just interested in the LLM stuff you can skip over that and just use R packages that 
+do this stuff for you (e.g., rollama, tidyllm)
+
+
+| Tutorial | Video tutorial | Core packages / functions |
+|----|---|---|
+| [LLMs 1: Using the Huggingface API](tutorials/Huggingface.md) | | |
+| [LLMs 2: Running generative AI locally with Ollama](tutorials/LLMs_2_ollama.md) | | |
+| [LLMs 3: Running generative AI remotely on (paid) APIs](tutorials/LLMs_3_APIs.md) | | |
 
 
 # Data collection
