@@ -47,10 +47,10 @@ To verify that Ollama is running, please visit [http://localhost:11434/](http://
 
 ## Firing up an LLM
 
-Before we start talking to Ollama, we'll first need to download a model. This is as easy as now telling Ollama (in our terminal, or in the shell that Docker opened) to `run` a model. You can find an overview of the available models on the [Ollama website](https://ollama.ai/library). For now we'll run the most popular model called `llama2`, which should run fine on most devices. Enter the following command:
+Before we start talking to Ollama, we'll first need to download a model. This is as easy as now telling Ollama (in our terminal, or in the shell that Docker opened) to `run` a model. You can find an overview of the available models on the [Ollama website](https://ollama.ai/library). For now we'll run a popular model called `llama3.1`, which should run fine on most devices. Enter the following command:
 
 ```{bash}
-ollama run llama2
+ollama run llama3.1
 ```
 
 If everything works, this should download the model (only the first time) and fire it up. It's about 4Gb, so depending on your connection it might take a little while. Once fired up, you can immediately start talking to the model in your terminal/shell, similar to how you can talk with chatGPT.
@@ -74,7 +74,7 @@ library(httr2)
 
 res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "Hi, my dearest lama",
     stream = FALSE
   )) |>
@@ -109,7 +109,7 @@ With the following code I can respond to llama2's answer to clear up our little 
 ```{r}
 request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     context = res$context,
     prompt = "I'm sorry if that was confusing for you. Since you are the llama2 model, which has a nice logo showing a lama, I though this is how you would like for me to refer to your",
     stream = FALSE
@@ -129,7 +129,7 @@ If we want to use a gLLM for research, we might want to reduce the randomness of
 ```{r}
 res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "Hi, my dearest lama",
     stream = FALSE,
     options = list(temperature = 0)
@@ -153,7 +153,7 @@ There are some other endpoints that you can read about in [the documentation](ht
 ```{r}
 request("http://localhost:11434/api/embeddings") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "gimme them embeddings"
   )) |>
   req_perform() |>
@@ -165,19 +165,18 @@ request("http://localhost:11434/api/embeddings") |>
 
 Above we showed you how to talk to Ollama using httr2 just because we think the ability to talk to APIs like this and learning a bit about servers is a great skill to have as a data scientist. As shown in the previous tutorial, we could wrap now wrap up our API calls in functions to make them easier to work with. However, if you are serious about using Ollama for research, we recommend first looking for an existing package that does the leg-work for you. Properly studying an API and making good bug-free functions takes time. If someone else has already made this effort, it can save you a ton of time.
 
-Lucky for us, Johannes Gruber and Maximillian Weber have already created an R package for Ollama, called [rollama](https://github.com/JBGruber/rollama). It's still very new, and thereby a bit experimental, but the design and documentation is already really good. You can install the package from CRAN
+Lucky for us, Johannes Gruber and Maximillian Weber have already created an R package for Ollama, called [rollama](https://github.com/JBGruber/rollama). It's still very new, and thereby a bit experimental, but the design and documentation is already really good. You can install the package from CRAN.
 
 ```{r}
 install.packages('rollama')
 ```
 
-Since we already have the Ollama server running, and have already downloaded the llama2 package, you can get started right away. If not, you can follow [rollama's instructions](https://github.com/JBGruber/rollama) for running the Docker container.
+Since we already have the Ollama server running, and have already downloaded the llama3.1 model, you can get started right away. If not, you can follow [rollama's instructions](https://github.com/JBGruber/rollama) for running the Docker container.
 
 ```{r}
 library(rollama)
-pull_model()
-chat("Hi. How would you prefer for me to call you?", model_params = list(temperature=0))
-chat("Great! Nice to meet you LLaMa!", model_params = list(temperature=0))
+pull_model('llama3.1') 
+query("Hi. How would you prefer for me to call you?")
 ```
 
 ## Using gLLMs for text classification
@@ -191,3 +190,32 @@ vignette("annotation", 'rollama')
 ```
 
 This should have opened the vignette in your RStudio Help panel, or in your browser. We greatly recommmend going through it!
+Here is one example from the vignette.
+
+```{r}
+# Create an example dataframe with 5 movie reviews
+movie_reviews <- tibble::tibble(
+  review_id = 1:5,
+  review = c("A stunning visual spectacle with a gripping storyline.",
+             "The plot was predictable, but the acting was superb.",
+             "An overrated film with underwhelming performances.",
+             "A beautiful tale of love and adventure, beautifully shot.",
+             "The movie lacked depth, but the special effects were incredible.")
+)
+
+# Use rollama's make_query function to help make a prompt for classification
+queries <- make_query(
+  text = movie_reviews$review,
+  prompt = "Categories: positive, neutral, negative",
+  template = "{prefix}{text}\n{prompt}",
+  system = "Classify the sentiment of the movie review. Answer with just the correct category.",
+  prefix = "Text to classify: "
+)
+
+# Use the query to perform the annotation
+movie_reviews$annotation <- query(queries, screen = FALSE, output = "text")
+
+# Print the annotated dataframe
+movie_reviews
+```
+

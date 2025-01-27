@@ -97,11 +97,11 @@ Before we start talking to Ollama, we’ll first need to download a model.
 This is as easy as now telling Ollama (in our terminal, or in the shell
 that Docker opened) to `run` a model. You can find an overview of the
 available models on the [Ollama website](https://ollama.ai/library). For
-now we’ll run the most popular model called `llama2`, which should run
-fine on most devices. Enter the following command:
+now we’ll run a popular model called `llama3.1`, which should run fine
+on most devices. Enter the following command:
 
 ``` bash
-ollama run llama2
+ollama run llama3.1
 ```
 
 If everything works, this should download the model (only the first
@@ -143,7 +143,7 @@ library(httr2)
 
 res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "Hi, my dearest lama",
     stream = FALSE
   )) |>
@@ -192,7 +192,7 @@ you might want to change the prompt in the following codeblock.
 ``` r
 request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     context = res$context,
     prompt = "I'm sorry if that was confusing for you. Since you are the llama2 model, which has a nice logo showing a lama, I though this is how you would like for me to refer to your",
     stream = FALSE
@@ -223,7 +223,7 @@ Ideally, the results should now be deterministic (i.e. always the same)
 ``` r
 res = request("http://localhost:11434/api/generate") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "Hi, my dearest lama",
     stream = FALSE,
     options = list(temperature = 0)
@@ -261,7 +261,7 @@ you can use the models to get the text embeddings.
 ``` r
 request("http://localhost:11434/api/embeddings") |>
   req_body_json(list(
-    model = "llama2",
+    model = "llama3.1",
     prompt = "gimme them embeddings"
   )) |>
   req_perform() |>
@@ -284,23 +284,22 @@ Lucky for us, Johannes Gruber and Maximillian Weber have already created
 an R package for Ollama, called
 [rollama](https://github.com/JBGruber/rollama). It’s still very new, and
 thereby a bit experimental, but the design and documentation is already
-really good. You can install the package from CRAN
+really good. You can install the package from CRAN.
 
 ``` r
 install.packages('rollama')
 ```
 
 Since we already have the Ollama server running, and have already
-downloaded the llama2 package, you can get started right away. If not,
+downloaded the llama3.1 model, you can get started right away. If not,
 you can follow [rollama’s
 instructions](https://github.com/JBGruber/rollama) for running the
 Docker container.
 
 ``` r
 library(rollama)
-pull_model()
-chat("Hi. How would you prefer for me to call you?", model_params = list(temperature=0))
-chat("Great! Nice to meet you LLaMa!", model_params = list(temperature=0))
+pull_model('llama3.1') 
+query("Hi. How would you prefer for me to call you?")
 ```
 
 ## Using gLLMs for text classification
@@ -322,4 +321,32 @@ vignette("annotation", 'rollama')
 ```
 
 This should have opened the vignette in your RStudio Help panel, or in
-your browser. We greatly recommmend going through it!
+your browser. We greatly recommmend going through it! Here is one
+example from the vignette.
+
+``` r
+# Create an example dataframe with 5 movie reviews
+movie_reviews <- tibble::tibble(
+  review_id = 1:5,
+  review = c("A stunning visual spectacle with a gripping storyline.",
+             "The plot was predictable, but the acting was superb.",
+             "An overrated film with underwhelming performances.",
+             "A beautiful tale of love and adventure, beautifully shot.",
+             "The movie lacked depth, but the special effects were incredible.")
+)
+
+# Use rollama's make_query function to help make a prompt for classification
+queries <- make_query(
+  text = movie_reviews$review,
+  prompt = "Categories: positive, neutral, negative",
+  template = "{prefix}{text}\n{prompt}",
+  system = "Classify the sentiment of the movie review. Answer with just the correct category.",
+  prefix = "Text to classify: "
+)
+
+# Use the query to perform the annotation
+movie_reviews$annotation <- query(queries, screen = FALSE, output = "text")
+
+# Print the annotated dataframe
+movie_reviews
+```
