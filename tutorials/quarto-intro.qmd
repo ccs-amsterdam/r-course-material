@@ -1,0 +1,74 @@
+---
+title: "Introducing R Markdown"
+date: "2025-09-03"
+author: "Wouter van Atteveldt"
+output: html
+execute:
+  echo: true
+  warning: true
+editor_options: 
+  chunk_output_type: console
+---
+
+This is a **Quarto** document. This is a very useful way of creating data-driven reports, papers, assignments etc. 
+This is done by *knitting* the text and data analysis outcomes (and visualizations!) into a single document.
+
+The document you are looking at now is the 'source' document. 
+It contains two types of content. Text like this, with a white background, is simply kept as text in the resulting report. 
+It can contain the introduction, explanation, interpretation, etc. 
+You can also use some simple formatting, e.g. to create *italics*, **bold**, or `code` text, and you can mark section headers with `#` or `##` in front of them.
+
+The second type of content is R code. This is contained in *chunks*, which have a gray background like the one below:
+
+```{r example-chunk}
+x <- 12
+x * 2
+```
+
+You should see a button in R Studio called 'Knit' (in the top of this pane).
+Go ahead and click that button! R should then run all the code chunks, and create an html document containin both the text, the code, and the results of running the code. You can also click on the triangle next to the knit button, and create an HTML, word or PDF document. 
+
+Note that for PDF output, you might need to install tinytex running the code below:
+
+```{r eval=FALSE}
+tinytex::install_tinytex()
+```
+
+## Chunk headers
+
+As you can see, the code chunks are marked by triple backticks (reverse quotes). You don't often use these backticks, so you might have to look around at your keyboard a bit to find them. You can also insert new code chunks by selecting `Code -> Insert Chunk` in the menu, or pressing control+alt+i (this might be different on a mac).
+
+The opening marker for a chunk also contains language (`r`), name (`example-chunk`), and can contain options. For example, you can choose to hide the input code by disabling the `echo`:
+
+```{r hidden, echo=FALSE}
+x + 4
+```
+
+Another thing we often want to do is to hide warnings and message. For example, when loading the tidyverse packages with `library(tidyverse)`,
+R prints a lot of information that you probably don't want to include in the report:
+
+```{r import}
+library(tidyverse)
+```
+
+Try adding `message=FALSE` to the chunk header above, knit again, and see if you understand the difference. 
+You can also add `warning: false` to the execution options in the top, which will surpress all messages and warnings in the document
+(this is probably a good idea for all assignments and reports!)
+
+## Best practices
+
+As with any piece of academic or professional writing, make life as easy as possible for your reader. 
+So, include only content that the reader needs to see to follow the story. 
+
++ Include enough text to make sure the reader know what you are doing (and why), and how you interpret the results.
++ Make sure there are no unnecessary outputs left behind when you inspecting your data or were trying out analyses.
++ If you are including raw data, consider using `head` to only show to top rows.
++ Make sure you don't include any unneeded log or warning messages.
++ After creating the report, read over it again to check if there is any output that should not be included.
+
+And some debugging tips:
+
++ Remember that R runs the code from top to bottom in a new session. So, all data imports or `library` calls need to be included before they are used.
++ All chunk names need to be unique. Note that you can also omit the name, but it's often better to use names so you can see where an error occurred. 
++ If your document does not work, it is often a good idea to clear your environment (the broom icon in the top right pane in RStudio) and then run through your code from top to bottom yourself. 
++ Make sure you don't include and `install.packages` or `View` commands as these cannot be used while knitting
