@@ -11,7 +11,7 @@ editor_options:
 ---
 
 This is a **Quarto** document. This is a very useful way of creating data-driven reports, papers, assignments etc. 
-This is done by *knitting* the text and data analysis outcomes (and visualizations!) into a single document.
+This is done by *rendering* the text and data analysis outcomes (and visualizations!) into a single document.
 
 The document you are looking at now is the 'source' document. 
 It contains two types of content. Text like this, with a white background, is simply kept as text in the resulting report. 
@@ -25,8 +25,8 @@ x <- 12
 x * 2
 ```
 
-You should see a button in R Studio called 'Knit' (in the top of this pane).
-Go ahead and click that button! R should then run all the code chunks, and create an html document containin both the text, the code, and the results of running the code. You can also click on the triangle next to the knit button, and create an HTML, word or PDF document. 
+You should see a button in R Studio called 'Render' (in the top of this pane).
+Go ahead and click that button! R should then run all the code chunks, and create an html document containin both the text, the code, and the results of running the code. 
 
 Note that for PDF output, you might need to install tinytex running the code below:
 
@@ -51,8 +51,8 @@ R prints a lot of information that you probably don't want to include in the rep
 library(tidyverse)
 ```
 
-Try adding `message=FALSE` to the chunk header above, knit again, and see if you understand the difference. 
-You can also add `warning: false` to the execution options in the top, which will surpress all messages and warnings in the document
+Try changing the chunk header above to `{r import, message=FALSE}`, render again, and see if you understand the difference. 
+You can also add `warning: false` to the execution options in the top, which will suppress all messages and warnings in the document
 (this is probably a good idea for all assignments and reports!)
 
 ## Best practices
@@ -71,4 +71,4 @@ And some debugging tips:
 + Remember that R runs the code from top to bottom in a new session. So, all data imports or `library` calls need to be included before they are used.
 + All chunk names need to be unique. Note that you can also omit the name, but it's often better to use names so you can see where an error occurred. 
 + If your document does not work, it is often a good idea to clear your environment (the broom icon in the top right pane in RStudio) and then run through your code from top to bottom yourself. 
-+ Make sure you don't include and `install.packages` or `View` commands as these cannot be used while knitting
++ Make sure you don't include and `install.packages` or `View` commands as these cannot be used while rendering.
