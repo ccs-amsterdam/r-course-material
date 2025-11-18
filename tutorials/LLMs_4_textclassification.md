@@ -1,0 +1,282 @@
+LLMs part 3: running generative models remotely on (paid) APIs
+================
+2025-01-27
+
+- [Introduction](#introduction)
+  - [Setup](#setup)
+- [Defining the task](#defining-the-task)
+  - [Creating a template for your
+    prompt](#creating-a-template-for-your-prompt)
+  - [Defining the output structure](#defining-the-output-structure)
+  - [Calling the classifier](#calling-the-classifier)
+- [Scaling up](#scaling-up)
+  - [Getting the data](#getting-the-data)
+  - [Wrapping the call in a function](#wrapping-the-call-in-a-function)
+  - [Mapping our input](#mapping-our-input)
+- [Validation](#validation)
+
+# Introduction
+
+In the [previous tutorial](LLMs_3_APIs.md) we used the `tidyllm` package
+to perform zero-shot text classification. The code introduced there
+categorized tests one at at time. We normally have multiple texts that
+we want to categorize, however.
+
+This tutorial shows how to use the `str_glue` and `map` functions to
+classify multipe texts automatically. For more information on creating
+your own functions and using `map`, see the [Functions and
+Mapping](https://github.com/ccs-amsterdam/r-course-material/blob/master/tutorials/functions_maps.md)
+tutorial.
+
+## Setup
+
+Like in the previous tutorial, you need to provide an API key for a LLM
+service. You can get a [free Google API key
+here](https://aistudio.google.com/app/apikey) and use it. Alternatively,
+you can use OpenAI or another provider, just replace `chat(gemini(..))`
+with the appropriate provider, e.g. `chat(openai(...))`:
+
+``` r
+library(tidyverse)
+library(tidyllm)
+```
+
+``` r
+Sys.setenv(GOOGLE_API_KEY = "your API key goes here")
+```
+
+# Defining the task
+
+For this example, we will use the economic headline sentiment data
+published in [Van Atteveldt et
+al. (2021)](https://doi.org/10.1080/19312458.2020.1869198) who
+conveniently published the full dataset and coding instructions on
+[Github](https://github.com/vanatteveldt/ecosent), including a [small
+set of headlines with English translations and gold standard
+annotation](https://raw.githubusercontent.com/vanatteveldt/ecosent/refs/heads/master/data/intermediate/gold_en.csv)
+
+Briefly put, they manually classified over 8 thousand (Dutch) newspaper
+headlines about the economy, making it an excellent data set to use for
+testing automatic classification strategies. For convenience, I used
+similar code to the scripts described here to translate all Dutch
+headlines to English.
+
+## Creating a template for your prompt
+
+Since we need to adapt our prompt to the example text, we want to create
+a prompt ‘template’ into which we can insert the text to be classified.
+
+Let’s first make a prompt template based on their [crowdcoding
+instructions](https://github.com/vanatteveldt/ecosent/blob/master/report/crowdcoding.md)
+
+``` r
+PROMPT_TEMPLATE = ("
+This task is about the tone of newspaper headlines or titles of online news items about economic news. For each headline, we want to know whether it is negative or positive. A headline is only negative or positive if it gives a clear and explicit judgment about economic developments. You may also indicate that a headline is neutral.
+
+A headline is positive if, for example, it states that the economy is growing, consumer confidence is rising, more jobs are being created, or if a company is growing, making a profit, or expanding production.
+
+A headline is negative if, for example, it says that the economy is doing poorly, unemployment is increasing, home sales are declining, or that a company is going bankrupt or laying off people.
+
+A headline is neutral if it only states facts without giving any judgment. For example, if unemployment is 7%, but it does not say whether that is high or low.
+
+Below is the headline or title of a newspaper or online news article. Read this headline carefully:
+
+{text}
+
+Is this headline positive, negative, or neutral about the economy? 
+Please first give your reasoning first and then the sentiment.
+")
+```
+
+You can fill in the template based on existing variables (in this case
+`headline`) by calling the `str_glue` function:
+
+``` r
+text = "Rabobank predicts a significant increase in mortgage interest rates"
+prompt = str_glue(PROMPT_TEMPLATE)
+cat(prompt)
+```
+
+    ## This task is about the tone of newspaper headlines or titles of online news items about economic news. For each headline, we want to know whether it is negative or positive. A headline is only negative or positive if it gives a clear and explicit judgment about economic developments. You may also indicate that a headline is neutral.
+    ## 
+    ## A headline is positive if, for example, it states that the economy is growing, consumer confidence is rising, more jobs are being created, or if a company is growing, making a profit, or expanding production.
+    ## 
+    ## A headline is negative if, for example, it says that the economy is doing poorly, unemployment is increasing, home sales are declining, or that a company is going bankrupt or laying off people.
+    ## 
+    ## A headline is neutral if it only states facts without giving any judgment. For example, if unemployment is 7%, but it does not say whether that is high or low.
+    ## 
+    ## Below is the headline or title of a newspaper or online news article. Read this headline carefully:
+    ## 
+    ## Rabobank predicts a significant increase in mortgage interest rates
+    ## 
+    ## Is this headline positive, negative, or neutral about the economy? 
+    ## Please first give your reasoning first and then the sentiment.
+
+## Defining the output structure
+
+To ensure we can parse the output correctly, let’s specify that we want
+the reasonining as a free text field, and the sentiment as a factor with
+levels positive, negative and neutral:
+
+``` r
+output_format = tidyllm_schema(sentiment=field_object(
+  reasoning=field_chr(),
+  sentiment=field_fct(.levels=c("positive", "negative", "neutral"))
+))
+```
+
+## Calling the classifier
+
+Now we can call the classifier, ‘pluck’ the sentiment object, and turn
+it into a (single row) tibble:
+
+``` r
+llm_message(prompt) |>
+  chat(gemini(), .json_schema = output_format) |>
+  get_reply_data() |>
+  pluck("sentiment") |>
+  as_tibble()
+```
+
+    ## # A tibble: 1 × 2
+    ##   reasoning                                                            sentiment
+    ##   <chr>                                                                <chr>    
+    ## 1 An increase in mortgage interest rates typically makes borrowing mo… negative
+
+# Scaling up
+
+To scale up, we want to call the classifier for each sentence in the
+data.
+
+## Getting the data
+
+We download the data from the github repository accompanying the paper:
+
+``` r
+gold = read_csv("https://raw.githubusercontent.com/vanatteveldt/ecosent/refs/heads/master/data/intermediate/gold_en.csv")
+gold
+```
+
+    ## # A tibble: 284 × 7
+    ##       id value date                medtype  medium   headline        translation
+    ##    <dbl> <dbl> <dttm>              <chr>    <chr>    <chr>           <chr>      
+    ##  1 10273     0 2015-02-10 18:05:27 Internet 4 NOS.nl Dijsselbloem w… Dijsselblo…
+    ##  2 10367    -1 2015-02-13 09:52:58 Internet 4 NOS.nl Dijsselbloem p… Dijsselblo…
+    ##  3 10881     0 2015-03-05 10:59:19 Internet 4 NOS.nl Dijsselbloem: … Dijsselblo…
+    ##  4 11191     1 2015-03-16 12:40:04 Internet 4 NOS.nl Aandelenbeurze… Stock mark…
+    ##  5 11745     1 2015-04-03 13:03:10 Internet 4 NOS.nl Cyprus heft la… Cyprus lif…
+    ##  6 12255    -1 2015-04-22 10:00:30 Internet 4 NOS.nl TSN Thuiszorg … TSN Home C…
+    ##  7 12363    -1 2015-04-27 06:42:30 Internet 4 NOS.nl Deutsche Bank … Deutsche B…
+    ##  8 12367     1 2015-04-27 11:56:21 Internet 4 NOS.nl Spanje rekent … Spain coun…
+    ##  9 12501     0 2015-05-02 13:32:05 Internet 4 NOS.nl Van Baalen (VV… Van Baalen…
+    ## 10 12681    -1 2015-05-11 16:13:45 Internet 4 NOS.nl 'EU-ministers … EU ministe…
+    ## # ℹ 274 more rows
+
+## Wrapping the call in a function
+
+To efficiently classify each headline, we need to first create a
+`function` to classify a single headline in one step, and then use
+`pmap` to call this function for each row in the data.
+
+First, let’s bundle the lines above in a single function call:
+
+``` r
+classify_sentiment <- function(id, text) {
+  str_glue(PROMPT_TEMPLATE) |>
+    llm_message() |>
+    chat(gemini(), .json_schema = output_format) |>
+    get_reply_data() |>
+    pluck("sentiment") |>
+    as_tibble() |>
+      add_column(id=id)
+}
+```
+
+This defines a function which takes a `id` and `text`, and uses the code
+bove (and the `PROMPT_TEMPLATE` and `output_format`) to call an LLM and
+return the result as a tibble. To test this out, let’s call it with the
+same text as above:
+
+``` r
+classify_sentiment(id=123, text=text)
+```
+
+    ## # A tibble: 1 × 3
+    ##   reasoning                                                      sentiment    id
+    ##   <chr>                                                          <chr>     <dbl>
+    ## 1 A significant increase in mortgage interest rates typically m… negative    123
+
+## Mapping our input
+
+Now that we have this function, we can use `pmap` to call it for every
+row in our dataframe. Since this function expects (only) the `id` and
+`headline` columns, we select only those columns when we call it.
+Finally, `pmap` will return a list of (1-row) dataframes, which we can
+combine into a single dataframe using `list_rbind`.
+
+For the sake of this example code, we take a small (n=10) sample to
+test:
+
+``` r
+set.seed(42)
+result <- gold |>
+  slice_sample(n=10) |>
+  head(n=10) |>
+  select(id, text=translation) |>
+  pmap(classify_sentiment, .progress=TRUE) |>
+  list_rbind()
+```
+
+# Validation
+
+As with any automatic text analysis application, validation is key to
+ensure the method performs as desired.
+
+In this case, we can validate by comparing to the manual text
+classification by joining the two data sets and comparing the gold
+`value` and the predicted `sentiment`:
+
+``` r
+result <- left_join(result, gold)
+table(result$sentiment, result$value)
+```
+
+    ##           
+    ##            -1 0 1
+    ##   negative  2 3 0
+    ##   neutral   0 3 0
+    ##   positive  0 1 1
+
+If we recode the gold standard into the same values (or the other way
+around) we can easily calculate accuracy:
+
+``` r
+result <- result |>
+  mutate(gold=case_match(value, -1 ~ "negative", 0 ~ "neutral", 1 ~ "positive"))
+result |> summarize(accuracy = mean(sentiment == gold))
+```
+
+    ## # A tibble: 1 × 1
+    ##   accuracy
+    ##      <dbl>
+    ## 1      0.6
+
+Or use the yardstick package for standard performance metric (which
+requires factors for the input):
+
+``` r
+library(yardstick)
+result <- result |> mutate(sentiment=as.factor(sentiment), gold=as.factor(gold))
+metrics <- metric_set(precision, recall, f_meas)
+metrics(result, truth=gold, estimate=sentiment)
+```
+
+    ## # A tibble: 3 × 3
+    ##   .metric   .estimator .estimate
+    ##   <chr>     <chr>          <dbl>
+    ## 1 precision macro          0.633
+    ## 2 recall    macro          0.810
+    ## 3 f_meas    macro          0.613
+
+Of course, for serious applications you will need more validation data,
+but the general principle (and most of the code) stays the same.
