@@ -67,8 +67,8 @@ happy_tables = read_html(url) |>
   html_table()
 
 ## You now have all the tables as a list.
-## The third table (at the time of writing) is 2020
-happy_table_2020 = happy_tables[[3]]
+## The fifth table (at the time of writing) is 2020
+happy_table_2020 = happy_tables[[5]]
 
 ## Plot relationship wealth and life expectancy
 ggplot(happy_table_2020, aes(x=`GDP per capita`, y=`Healthy life expectancy`)) + 
