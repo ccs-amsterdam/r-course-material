@@ -1,0 +1,72 @@
+---
+title: 'URL metadata scraper'
+author: "Kasper Welbers & Wouter van Atteveldt"
+date: "2026-02"
+output: 
+  github_document:
+    toc: yes
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: sentence
+---
+
+```{r, echo=F, message=F}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(printr)
+library(rvest)
+```
+
+# Why scraper URL metadata
+
+In our Rvest tutorials, we explain how you can scrape websites. 
+This is a great, flexible data gathering technique, but it has the downside that it takes quite some time to build scrapers for different websites.
+
+Sometimes, all you need for a given URL is to get a general idea of what kind of webpage it is. 
+For example, if you run a data donation study, you might get a whole bunch of URLs for different websites, that can potentially tell you what type of content a person consumed.
+Or maybe you use a database like Mediacloud, where you can search for news articles, but only download the URLs. 
+
+To get more information about each URL, we could build a simple scraper that just targets the metadata.
+Many web pages include meta tags that tell you things like the title, description, author and publication date, and even links to multimedia content.
+This is why applications like Instagram and Whatsapp can automatically show a thumbnail image with a title whenever you share a URL. 
+So in this tutorial we'll show you how to build a simple scraper that works for most web pages that provide this metadata. 
+I say 'most' websites, because sometimes they have some protection mechanisms that make it more difficult.
+
+# 
+
+```{r}
+ua <- httr::user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36")
+
+fake_browser_session <- session("https://tiktok.com", ua) 
+
+fake_browser_session |>
+  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873')
+```
+
+You can reuse the session for multiple read_html requests. 
+
+## Pretend to be a known bot (or 'like' one)
+
+The user agent is also used by common bots to tell websites what they're there for (kind of like how Mafiosi wear recognizable hats). Google uses `Googlebot`, X (still) uses `Twitterbot`, etc. 
+
+Some websites present different content to these bots, because this is easier for both the bot and website.
+The Twitterbot only scrapes metadata, like the title, description and an image. 
+This is what allows X/Twitter to show a nice link and thumbnail when you share a link.
+Websites want X/Twitter to do this, so they happily make this as fast and easy as possible, by disabling things that complicate scraping, like dynamic rendering and cookie banners.
+
+So if you are only interested in scraping metadata (which is often very usefull, especially for social media posts), you could consider pretending to be *Twitterbot*.
+Or if you don't want to lie, you could say that you are **like** twitterbot, with a user agent such as `Twitterbot/1.0 (Researcher; yourname@email.com)`.
+This way you're being very transparent that you're not actually Twitterbot, but they often don't notice and just treat you like Twitterbot. 
+
+An example where this works is Tiktok.
+
+```{r}
+ua <- httr::user_agent("Not actually Twitterbot but pls data")
+fake_twitterbot_session <- session("https://tiktok.com", ua) 
+
+fake_twitterbot_session |>
+  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873') |>
+  html_elements('head meta')
+```
+
+Try removing 'Twitterbot' and you'll see that you get far less metadata.

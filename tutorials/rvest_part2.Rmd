@@ -117,7 +117,7 @@ This is because you're no longer just getting the HTML source code, but everythi
 But if you need to scrape a website that uses dynamic rendering, or where you need to perform some interactions before you can start scraping, this is a relatively painless way to achieve it!
 
 
-# How to tell websites you're a bot (or not)
+# Setting your scraper's name tag
 
 One thing that often trips up people trying to scrape websites, is that they don't specify their *User Agent*.
 Whenever your browser interacts with a website, you usually provide a user agent that tells the website things about you, like what operating system and browser you use.
@@ -165,7 +165,7 @@ Websites want X/Twitter to do this, so they happily make this as fast and easy a
 
 So if you are only interested in scraping metadata (which is often very usefull, especially for social media posts), you could consider pretending to be *Twitterbot*.
 Or if you don't want to lie, you could say that you are **like** twitterbot, with a user agent such as `Twitterbot/1.0 (Researcher; yourname@email.com)`.
-This way you're being very transparent, but they often don't notice and just treat you like Twitterbot. 
+This way you're being very transparent that you're not actually Twitterbot, but they often don't notice and just treat you like Twitterbot. 
 
 An example where this works is Tiktok.
 
