@@ -1,0 +1,167 @@
+---
+title: "parsing_traces"
+format: gfm
+execute:
+  output: false  
+  echo: true     
+  warning: false  
+  error: false    
+editor_options: 
+  chunk_output_type: console
+---
+
+# Parsing Social Media Traces in R
+
+Thanks perhaps to the GDPR, we are able to download our own data from most social media services.
+
+If desired, you can follow or share [these takeout instructions](https://docs.google.com/document/d/1h0FjneGH3xb3pXMlJDqlfbcYkZsfPeqlZUlJXoNSBpU/edit?usp=sharing) for most popular social media services to download. 
+
+You can also follow along the instructions based on the [example instagram takeout file](https://github.com/ccs-amsterdam/r-course-material/raw/refs/heads/master/data/example_instagram_takeout.zip) in this repository.
+
+# Exploring the data structure
+
+Most social media allow you to download the data in "JSON" format, 
+and the download then generally consists of a zip-file containing multiple JSON files. 
+
+JSON, or JavaScript Object Notation, is a standardized format for writing data.
+Where CSV files are mostly used for tabular (rectangular) data, JSON can be used for 
+data with more complex nested structures. 
+
+Since the 'default' data structure in R is the rectangular data frame, this means that 
+the nested social media data needs to be restructured into rectangular data before further processing.
+Fortunately, most of the trace data is actually relatively simple, 
+and with the functions in the `tidyverse`, `jsonlite` and `listviewer` packages we can deal with 
+this data relatively easily.
+
+## Reading ZIP files
+
+Of course, you can of course extract the zip file and look at the json files with the default
+tools of your computer. 
+However, you can also work with these files directly in R.
+
+To download the example instagram file and view its contents, you can use the functions below:
+
+```{r}
+library(tidyverse)
+download.file("https://github.com/ccs-amsterdam/r-course-material/raw/refs/heads/master/data/example_instagram_takeout.zip", destfile="takeout.zip")
+unzip("takeout.zip", list = TRUE) |> as_tibble() |> arrange(-Length)
+```
+
+## Viewing a single JSON file
+
+An potentially interesting file is the `your_instagram_activity/likes/liked_posts.json` file shown above.
+We can directly extract that from the zip file using the `unz` function, and then parse the json using
+`fromJSON`:
+
+```{r}
+library(jsonlite)
+d <- unz("takeout.zip", "your_instagram_activity/likes/liked_posts.json") |>
+  fromJSON() 
+d
+```
+
+The result looks a bit like a data frame, but you can see the strange `$likes_media_likes` before the header,
+and the columns to the right of `title` all seem part of a `string_list_data` column.
+
+## Understanding JSON structure
+
+To understand this structure better, let's explore the JSON file using the `listviewer` package,
+which has a nice `reactjson` function that allows you to interactively browse the json data:
+
+```{r}
+#| eval: false
+install.packages(c("listviewer", "reactR"))
+
+library(listviewer)
+reactjson(d)
+```
+
+In the viewer, pay attention specifically to the little `{` and `[` symbols.
+These determine the type of nesting: `{` means that the data is a named list (also called mapping or dictionary),
+where each value also has a name or key attached. So, the data is primarily a named list (the "root" is a named list as indicated by `{`),
+and `likes_media_likes` is the first (and only) key of this list. We can access the value belonging to this key using `d$likes_media_likes` (or its tidy equivalent: `d |> pluck("likes_media_likes)`).
+
+Now, `d$likes_media_likes` is again a named list, with two keys: `title` and `string_list_data`.
+Each of those entries is an array or unnamed list (marked by the `[` symbol) with 8 items.
+The titles are regular texts (character data), but the `string_list_data` values
+are itself again named lists, with each data point having `href`, `value` and `timestamp` data.
+
+If we look back at how `d` was printed above, it starts to make more sense.
+Although `d` looks like a data frame, in fact it is a (named) `list` with a single name: `$likes_media_likes`.
+This is an actual data frame with two columns, but the class of the second column is again a list,
+which itself contains data frames:
+
+```{r}
+class(d)
+class(d$likes_media_likes)
+class(d$likes_media_likes$string_list_data)
+class(d$likes_media_likes$string_list_data[[1]])
+```
+
+This showcases the logic of the `fromJSON` command: 
+Named lists are generally represented as lists, unless all the values itself are arrays of equal length,
+in which case it is represented as a data frame (as is the case with the `title` and `string_list_data` entries,
+which both are lists of 8 elements). 
+
+# Tidying JSON data
+
+To tidy the data above, we want to do two things: (1) Select or `pluck` the `likes_media_likes` 
+entry from the top-level named list, and (2) `unnest` the nested data frames:
+
+```{r}
+d |> pluck("likes_media_likes") |>
+  unnest(string_list_data)
+```
+
+As you can see, the actual commands to parse the social media data structure
+are not terribly complicated, but it's important to really understand the json
+structure before we can reshape the data in R.
+
+To finish this example, let's also parse the timestamp as an actual date-time object,
+and let's fix the encoding of the value:
+
+```{r}
+fix_unicode <- function(x) {
+  # Convert from UTF-8 to Latin1, then force label back to UTF-8
+  out <- iconv(x, from = "UTF-8", to = "latin1")
+  Encoding(out) <- "UTF-8"
+  return(out)
+}
+
+likes <- d |> pluck("likes_media_likes") |>
+  unnest(string_list_data) |>
+  mutate(timestamp = as.POSIXct(timestamp),
+         value=fix_unicode(value))
+likes
+```
+
+## Exercise
+
+As an example, can you tidy the list of followers and posts?
+
+```{r}
+#| eval: false
+following <- unz("takeout.zip", "connections/followers_and_following/following.json") |>
+  fromJSON() 
+reactjson(following)
+```
+
+```{r}
+#| eval: false
+
+comments <- unz("takeout.zip", "your_instagram_activity/comments/post_comments_1.json") |>
+  fromJSON()
+reactjson(comments)
+```
+
+
+
+
+
+
+
+
+
+
+
+
