@@ -1,7 +1,7 @@
-# parsing_traces
-
-
 # Parsing Social Media Traces in R
+
+
+# Introduction
 
 Thanks perhaps to the GDPR, we are able to download our own data from
 most social media services.
@@ -161,3 +161,21 @@ comments <- unz("takeout.zip", "your_instagram_activity/comments/post_comments_1
   fromJSON()
 reactjson(comments)
 ```
+
+# Google takeout data
+
+As an additional exercise, have a look at the example google takeout
+data:
+
+``` r
+download.file("https://github.com/ccs-amsterdam/r-course-material/raw/refs/heads/master/data/example_google_takeout.zip", destfile="takeout_google.zip")
+unzip("takeout_google.zip", list = TRUE) |> as_tibble() |> arrange(-Length) |> print(n=Inf)
+```
+
+As you can see, this is a mix of json, csv and even some html files. Can
+you parse the youtube comments and subscriptions csv files directly from
+the zip archive? Hint: replace `fromJSON` by `read_csv` in the command
+above.
+
+For a more interesting substantive analysis, can you parse the chrome
+history (`Takeout/Chrome/History.json`) into a tidy data frame?
