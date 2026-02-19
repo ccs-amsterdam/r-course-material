@@ -17,7 +17,7 @@ library(printr)
 library(rvest)
 ```
 
-# Why scraper URL metadata
+# Why scrape URL metadata
 
 In our Rvest tutorials, we explain how you can scrape websites. 
 This is a great, flexible data gathering technique, but it has the downside that it takes quite some time to build scrapers for different websites.
@@ -32,41 +32,82 @@ This is why applications like Instagram and Whatsapp can automatically show a th
 So in this tutorial we'll show you how to build a simple scraper that works for most web pages that provide this metadata. 
 I say 'most' websites, because sometimes they have some protection mechanisms that make it more difficult.
 
-# 
+# The basic set up
+
+We'll first create two functions:
+
+* `get_html(url)` reads the HTML code from a given URL.
+* `get_meta(html)` extracts metadata from this HTML code
+
+In the `get_html` function we make a request to the URL with a user agent that mentions "twitterbot". 
+This way we basically ask the website to show us what it would show to twitterbot, which is a well known bot that collects metadata.
 
 ```{r}
-ua <- httr::user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36")
-
-fake_browser_session <- session("https://tiktok.com", ua) 
-
-fake_browser_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873')
+get_html <- function(url) {
+  ua <- "Twitterbot (Research Metadata Scraper)"
+  
+  session(url, httr::user_agent(ua)) |>
+    read_html() 
+}
 ```
 
-You can reuse the session for multiple read_html requests. 
+In the `get_meta` function we extract the metadata that we're interested in. 
+You can usually find this in the <head> tag of the HTML code.
+In this example, we'll specifically get the meta tags where the property attribute starts with (`^=`) `og:`. 
+These are tags for the Open Graph Protocol, which is used by many social media platforms to show the link thumbnails, and therefore widely supported.
 
-## Pretend to be a known bot (or 'like' one)
-
-The user agent is also used by common bots to tell websites what they're there for (kind of like how Mafiosi wear recognizable hats). Google uses `Googlebot`, X (still) uses `Twitterbot`, etc. 
-
-Some websites present different content to these bots, because this is easier for both the bot and website.
-The Twitterbot only scrapes metadata, like the title, description and an image. 
-This is what allows X/Twitter to show a nice link and thumbnail when you share a link.
-Websites want X/Twitter to do this, so they happily make this as fast and easy as possible, by disabling things that complicate scraping, like dynamic rendering and cookie banners.
-
-So if you are only interested in scraping metadata (which is often very usefull, especially for social media posts), you could consider pretending to be *Twitterbot*.
-Or if you don't want to lie, you could say that you are **like** twitterbot, with a user agent such as `Twitterbot/1.0 (Researcher; yourname@email.com)`.
-This way you're being very transparent that you're not actually Twitterbot, but they often don't notice and just treat you like Twitterbot. 
-
-An example where this works is Tiktok.
+We'll return the contents of the tags as a list, and name them based on the `og:` tag.
 
 ```{r}
-ua <- httr::user_agent("Not actually Twitterbot but pls data")
-fake_twitterbot_session <- session("https://tiktok.com", ua) 
-
-fake_twitterbot_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873') |>
-  html_elements('head meta')
+get_meta <- function(html) {
+  og <- html |>
+    html_elements('head meta[property^="og:"]')
+  
+  propnames <- og |> html_attr('property')
+  content <- og |> html_attr('content')
+  
+  l <- as.list(content)
+  names(l) <- propnames
+  
+  l  
+}
 ```
 
-Try removing 'Twitterbot' and you'll see that you get far less metadata.
+Here's an example for a Tiktok url
+
+```{r}
+url = 'https://www.tiktok.com/@vdnews.tv/video/7597020638548675873'
+get_html(url) |> get_meta()
+```
+
+
+# Getting metadata for multiple urls
+
+Now let's put this into a loop.
+We'll use the map function from the `purrr` package.
+
+To make this easier, we'll first make a single function that takes a url and returns the metadata.
+This is just a really light wrapper around our two prior functions.
+
+```{r}
+library(purrr)
+
+get_url_meta <- function(url) {
+  url |> get_html() |> get_meta()
+}
+
+urls <- c(
+  'https://www.tiktok.com/@vdnews.tv/video/7597020638548675873',
+  'https://www.nytimes.com/2026/01/28/us/politics/minneapolis-ice-states.html'
+)
+
+meta_list <- map(urls, get_url_meta) 
+```
+
+Now that we have a list of named lists, we can bind them together into a tibble
+
+```{r}
+library(tidyverse)
+bind_rows(meta_list)
+```
+

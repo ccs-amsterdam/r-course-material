@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.Rproj
+
 # downloaded resources
 udpipe_models/*
 tutorials/udpipe_models/*
@@ -14,3 +15,5 @@ model.html
 *.DS_Store
 */*_cache
 *.parquet
+takeout.zip
+takeout_google.zip

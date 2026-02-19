@@ -7,8 +7,7 @@ Kasper Welbers & Wouter van Atteveldt
   - [Websites with dynamic rendering](#websites-with-dynamic-rendering)
   - [Websites don’t like bots](#websites-dont-like-bots)
 - [Dealing with dynamic rendering](#dealing-with-dynamic-rendering)
-- [How to tell websites you’re a bot (or
-  not)](#how-to-tell-websites-youre-a-bot-or-not)
+- [Setting your scraper’s name tag](#setting-your-scrapers-name-tag)
   - [Pretend to be a browser](#pretend-to-be-a-browser)
   - [Pretend to be a known bot (or ‘like’
     one)](#pretend-to-be-a-known-bot-or-like-one)
@@ -143,7 +142,7 @@ that uses dynamic rendering, or where you need to perform some
 interactions before you can start scraping, this is a relatively
 painless way to achieve it!
 
-# How to tell websites you’re a bot (or not)
+# Setting your scraper’s name tag
 
 One thing that often trips up people trying to scrape websites, is that
 they don’t specify their *User Agent*. Whenever your browser interacts
@@ -173,25 +172,26 @@ your own, or the one I show above). This is sometimes enough to give you
 access.
 
 Setting a user agent in `rvest` is pretty easy. Instead of calling
-`read_html` directly, we first create a session in which we set the user
-agent. This requires the `httr` package, but this is used under-the-hood
-by rvest, so you should already have it installed.
+`read_html` directly, we use `session`. In session we then specify the
+URL we want to visit, and the user agent we want to use. We can then
+call read_html (without setting a new url!)
+
+Note that creating the user agent requires the `httr` package. Since
+this package is used under-the-hood by rvest, you should already have it
+installed. So we can use `httr::user_agent("your user agent string")`.
 
 ``` r
-ua <- httr::user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36")
+url = "https://www.tiktok.com/@vdnews.tv/video/7597020638548675873"
+ua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"
 
-fake_browser_session <- session("https://tiktok.com", ua) 
-
-fake_browser_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873')
+session(url, httr::user_agent(ua)) |>
+  read_html()
 ```
 
     ## {html_document}
     ## <html lang="en">
     ## [1] <head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=devi ...
     ## [2] <body style="margin: 0">\n     <svg style="position:absolute;width:0;heig ...
-
-You can reuse the session for multiple read_html requests.
 
 ## Pretend to be a known bot (or ‘like’ one)
 
@@ -212,41 +212,22 @@ usefull, especially for social media posts), you could consider
 pretending to be *Twitterbot*. Or if you don’t want to lie, you could
 say that you are **like** twitterbot, with a user agent such as
 `Twitterbot/1.0 (Researcher; yourname@email.com)`. This way you’re being
-very transparent, but they often don’t notice and just treat you like
-Twitterbot.
+very transparent that you’re not actually Twitterbot, but they often
+don’t notice and just treat you like Twitterbot.
 
 An example where this works is Tiktok.
 
 ``` r
-ua <- httr::user_agent("Not actually Twitterbot but pls data")
-fake_twitterbot_session <- session("https://tiktok.com", ua) 
+url <- "https://www.tiktok.com/@vdnews.tv/video/7597020638548675873"
+ua <- "Twitterbot (University teaching example)"
 
-fake_twitterbot_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873') |>
-  html_elements('head meta')
+session(url, httr::user_agent(ua)) |>
+  read_html() |>
+  html_elements('head meta[property="og:description"]') |>
+  html_attr('content')
 ```
 
-    ## {xml_nodeset (23)}
-    ##  [1] <meta name="og:locale" content="en_US">\n
-    ##  [2] <meta name="lark:url:enable" content="true">\n
-    ##  [3] <meta name="lark:url:video_brand_name" content="TikTok">\n
-    ##  [4] <meta name="lark:url:video_icon_url" content="https://lf16-tiktok-common ...
-    ##  [5] <meta name="lark:url:video_title" content="TikTok - Make Your Day">\n
-    ##  [6] <meta name="lark:url:video_cover_image_url" content="https://lf16-tiktok ...
-    ##  [7] <meta property="fb:app_id" content="597615686992125">\n
-    ##  [8] <meta property="al:ios:app_store_id" content="835599320">\n
-    ##  [9] <meta property="al:ios:app_name" content="musical.ly">\n
-    ## [10] <meta property="al:android:app_name" content="musical.ly">\n
-    ## [11] <meta property="al:android:package" content="com.zhiliaoapp.musically">\n
-    ## [12] <meta property="al:android:url" content="snssdk1233://feed?ug_medium=car ...
-    ## [13] <meta property="al:ios:url" content="snssdk1233://feed?ug_medium=card&am ...
-    ## [14] <meta property="og:type" content="website">\n
-    ## [15] <meta property="og:site_name" content="TikTok">\n
-    ## [16] <meta property="og:url" content="https://www.tiktok.com/">\n
-    ## [17] <meta property="og:image" content="https://lf16-tiktok-common.ibytedtos. ...
-    ## [18] <meta property="twitter:card" content="summary">\n
-    ## [19] <meta property="twitter:image" content="https://lf16-tiktok-common.ibyte ...
-    ## [20] <meta property="og:title" content="TikTok - Make Your Day">\n
-    ## ...
+    ## [1] "19.1K likes, 86 comments. â€œUn video diventato virale mostra un agente dellâ€™Immigration and Customs Enforcement (ICE) scivolare su una superficie ghiacciata mentre partecipa a unâ€™operazione a Minneapolis, Minnesota, il 11 gennaio 2026. Nel video, lâ€™agente perde lâ€™equilibrio e cade davanti a osservatori e manifestanti, attirando subito lâ€™attenzione degli utenti sui social media per la sua incongruenza rispetto al contesto generalmente teso delle proteste. La diffusione della clip arriva in un periodo di forte mobilitazione pubblica a Minneapolis dopo che, pochi giorni prima, un agente ICE aveva ucciso a colpi dâ€™arma da fuoco Renee Nicole Good, una donna di 37 anni, durante un raid di immigrazione. La sparatoria ha scatenato manifestazioni e critiche a livello nazionale sulla tattica e la legittimitÃ  delle azioni federali della polizia dellâ€™immigrazione.â€\u009d"
 
-Try removing ‘Twitterbot’ and you’ll see that you get far less metadata.
+Try removing ‘Twitterbot’ and you’ll see that you are no longer able to
+get the description.

@@ -140,19 +140,21 @@ There are two useful options:
 You could pretend to be a browser by using a common user agent (like your own, or the one I show above). This is sometimes enough to give you access.
 
 Setting a user agent in `rvest` is pretty easy. 
-Instead of calling `read_html` directly, we first create a session in which we set the user agent.
-This requires the `httr` package, but this is used under-the-hood by rvest, so you should already have it installed.
+Instead of calling `read_html` directly, we use `session`.
+In session we then specify the URL we want to visit, and the user agent we want to use. We can then call read_html (without setting a new url!)
+
+Note that creating the user agent requires the `httr` package. 
+Since this package is used under-the-hood by rvest, you should already have it installed. 
+So we can use `httr::user_agent("your user agent string")`. 
 
 ```{r}
-ua <- httr::user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36")
+url = "https://www.tiktok.com/@vdnews.tv/video/7597020638548675873"
+ua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"
 
-fake_browser_session <- session("https://tiktok.com", ua) 
-
-fake_browser_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873')
+session(url, httr::user_agent(ua)) |>
+  read_html()
 ```
 
-You can reuse the session for multiple read_html requests. 
 
 ## Pretend to be a known bot (or 'like' one)
 
@@ -170,12 +172,17 @@ This way you're being very transparent that you're not actually Twitterbot, but 
 An example where this works is Tiktok.
 
 ```{r}
-ua <- httr::user_agent("Not actually Twitterbot but pls data")
-fake_twitterbot_session <- session("https://tiktok.com", ua) 
+url <- "https://www.tiktok.com/@vdnews.tv/video/7597020638548675873"
+ua <- "Twitterbot (University teaching example)"
 
-fake_twitterbot_session |>
-  read_html('https://www.tiktok.com/@vdnews.tv/video/7597020638548675873') |>
-  html_elements('head meta')
+session(url, httr::user_agent(ua)) |>
+  read_html() |>
+  html_elements('head meta[property="og:description"]') |>
+  html_attr('content')
 ```
 
-Try removing 'Twitterbot' and you'll see that you get far less metadata.
+Try removing 'Twitterbot' from our user agent string and you'll see that you are no longer able to get the description.
+
+
+
+

@@ -169,6 +169,20 @@ As you can see, this is a mix of json, csv and even some html files. Can you par
 For a more interesting substantive analysis, can you parse the chrome history (`Takeout/Chrome/History.json`) into a tidy data frame?
 
 
+```{r}
+
+history <- unz("takeout_google.zip", "Takeout/Chrome/History.json") |>
+  fromJSON()
+history
+
+reactjson(history)
+
+hist <- history$`Browser History` |> unnest(cols=c())
+
+hist
+```
+
+
 
 
 
