@@ -1,0 +1,388 @@
+---
+title: "Using embeddings in R"
+format: gfm
+execute:
+  echo: true     
+  warning: false  
+  error: false    
+editor_options: 
+  chunk_output_type: console
+---
+
+"You shall know a word by the company it keeps" (Firth, 1957)
+
+
+The goal of this tutorial is to gain a better understanding of what embeddings are,
+and how you can compute static or contextual embeddings in R. 
+
+Although it does not showcase any applications of embeddings, 
+the most prominent direct usecase is probably clustering: 
+which words or documents have similar meanings based on their embeddings? 
+
+You can do this directly, but not that topic modeling techniques (vanialla LDA, Structural Topic Models or BERTopic)
+provide packages to do this in an efficient and robust manner. 
+For that reason, the goal of this tutorial is more to gain insight into how embeddings work
+rather than for direct applications. 
+
+The tutorial is divided into three parts. 
+First, we will have a look at the Document-Term-Matrix (DTM) as a representation of meaning,
+and show how this DTM can be directly clustered to provide a form of topic modeling.
+Next, we look at **static embeddings**, i.e. embeddings where one word (e.g. *party*) always has the same embedding,
+regardless of context.
+The final section uses transformer-based models (BERT and GPT) to derive **contextual embeddings**,
+i.e. where 'party' has a different embedding when used in the meaning of political parties than as celebration. 
+
+
+
+
+# Projecting a DTM to fewer dimensions
+
+
+Using `tidytext`, we can `unnest` texts into words and store them in a (long) one word per row format.
+If we count the frequency per document per word, we have a DTM in long format,
+which we can `pivot_wider` to show the traditional DTM format:
+
+```{r}
+library(tidyverse)
+library(tidytext)
+
+texts = c("The party competed in the election",
+           "The Conservative Party: victory in the election",
+           "They threw a fantastic party after the election",
+           "It was a brilliant and fantastic victory party")
+
+
+dtm_long <- tibble(doc_id=1:4, text=texts) |>
+  unnest_tokens(output="word", input="text") |>
+  group_by(doc_id, word) |>
+  summarize(n=n(), .groups = "drop")
+
+dtm <- pivot_wider(dtm_long, names_from="word", values_from=n, values_fill=0)
+```
+
+In this dtm, we can say that the *meaning* of document 1 for the computer is the vector `c(`r dtm[1,]`)`, 
+and that the *meaning* of election is `c(`r dtm$election`)`. With 'meaning' or representation we mean here that this is all the computer knows of that document and that word. If the computer only has this dtm to go by, `brilliant` and `it` are essentially identical words because they occur in exactly the same documents. 
+
+Spatially, we can think of words as being in a 4-dimensional space as each word is represented by four numbers. 
+If we could draw in 4d we could plot this directly, but we can also group the first and second pair of documents together
+and then display the words as vectors in a two-dimensional space:
+
+```{r}
+dtm_long |> 
+  filter(word %in% c("election", "party", "conservative", "fantastic")) |>
+  mutate(label=if_else(doc_id <= 2, "P", "C")) |>
+  group_by(word, label) |> 
+  summarize(n=n()) |>
+  pivot_wider(names_from="label", values_from=n, values_fill=0)  |>
+  ggplot(aes(x=C, y=P, label=word, color=word)) + geom_label(hjust=0)  + 
+  geom_segment(aes(x=0, y=0, xend=C, yend=P),
+               arrow = arrow(length = unit(0.15, "cm"))) +
+  xlim(0, 2.5) +
+  ylim(0, 2.1) + theme_minimal()+theme(legend.position="none")
+```
+
+In this space, *election* and *party* are clearly closer to each other than
+*conservative* and *fantastic*. Since the absolute frequency of a word is generally less interesting than
+its distribution over different documents or context, we ofte look at the *angle* between vectors to express proximity.
+Moreover, we often use `cosine` as a measure of similarity, since the cosine of two perpendicular vectors (like *conservative* and *fantastic*) is 0, while the cosine of two vectors that are pointing in the same general direction (like *election* and *party*) is close to one. 
+
+To calculate cosine, we can use the fact that the inner product between two vectors of length one is the same as the cosine. In other words, if we first *normalize* the vectors so they have length one, we can sum the product of each dimension to get the cosine:
+
+```{r}
+election = c(1,2)
+party = c(2,2)
+# per Pythagoras, the length of a vector is the square root of the sum of its squared values:
+election_normalized = election / sqrt(sum(election^2))
+party_normalized = party / sqrt(sum(party^2))
+# Now, we can take the inner product by taking the sum of the product of the respective dimensions:
+sum(election_normalized * party_normalized)
+```
+
+## Clustering of words 
+
+We can use the logic above to find similarities between words in the "four-dimensional" space, i.e. which words occur in similar documents?
+
+```{r}
+#' Function to calculate cosine similarity between rows of a matrix
+cosine_sim_rows <- function(M) {
+  # Step 1: normalize by dividing each row by its Euclidean length
+  M_norm <- M / sqrt(rowSums(M^2))
+  # Step 2: cosine = inner products of normalized vector pairs = matrix times transposed matrix
+  M_norm %*% t(M_norm)
+}
+  
+similarities <- dtm |>
+  select(-any_of(stopwords::stopwords("en"))) |>
+  select(-doc_id) |>
+  as.matrix() |> 
+  t() |> # transpose because we want column (word) similarity
+  cosine_sim_rows() 
+
+library(ggcorrplot)
+ggcorrplot(similarities, show.diag = F, lab=T)
+```
+
+(note that instead of ggocrrplot, we could also transform to a tibble, pivot_longer, and use geom_tile plus geom_text)
+
+Finally, we could *cluster* the words together to find out groups of words ('topics') which occur in similar documents.
+For the sake of this example we use a simple built-in hierarchical cluster model. 
+If we would use SVD here this would be a latent semantic analysis, and LDA topic modeling does something similar with a more sophisticated model.
+
+
+```{r}
+clustering <- hclust(as.dist(1 - similarities), 
+                     method = "average") 
+
+d <- ggdendro::dendro_data(clustering)
+
+clusters <- cutree(clustering, k=3)
+clusters <- tibble(label = names(clusters), cluster = as.factor(clusters) )
+
+ggplot() +
+  geom_segment(data = d$segments,
+               aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_text(data = inner_join(d$labels, clusters),
+            aes(x = x, y = y - 0.02, label = label, 
+                color=cluster),
+            angle = 45, hjust = 1) +
+  coord_cartesian(clip = "off") +
+  ylab("Cosine distance") + 
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.margin = margin(20, 20, 40, 20),
+        legend.position = "none"
+  )
+```
+
+
+# Fits like a GloVe: Static pre-trained word embeddings
+
+The example above showed how we could represent words and documents in a high-dimensional vectors space
+based on their occurrence within our four-sentence 'corpus'. 
+We could use the same logic to analyze larger text collections, and of course the many topic modeling papers out there show that this is a useful strategy.
+
+In the end, however, the representation of the meaning of each word remains dependent on the data we feed into the model.
+R doesn't 'know' that brilliant and fantastic are similar words, it can only observe that they occur in similar documents. 
+
+Assuming that many word meanings are fairly universal, it would make sense to use as large a text collection as possible 
+to learn which words are similar. 
+In fact, this is exactly what Mikolov and others at Google did in 2013 by estimating vector representations of words on a (very) large text collection. 
+Although their techniques use a neural network approach rather than the simple clustering shown above,
+the idea is the same: words that occur in similar contexts get a similar representation vector.
+This vector is called an **embedding** as it embeds a word in a relatively low-dimensional space. 
+
+The nice thing of these embedding vectors is that the training is non-trivial, the result is a simple matrix of (e.g. 300-dimensional) vectors for the most frequent words in the English (or another) language, and we can just download these vectors:
+
+```{r}
+library(fastTextR)
+if (!file.exists(here::here("cc.en.300.bin"))) {
+  url = "https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.bin.gz"
+  options(timeout=4300)  # assuming 1Mb/s
+  download.file(url, destfile = here::here("cc.en.300.bin.gz"))
+  R.utils::gunzip(here::here("cc.en.300.bin"))
+}
+model <- ft_load(here::here("cc.en.300.bin"))
+```
+
+Let's look at the vectors for some words related to political and celebratory parties:
+
+```{r}
+words <- c("party", "election", "ballot", "parliament", "government",
+           "minister", "candidate", "campaign", "coalition", "opposition",
+           "conservative", "labour", "liberal", "republican", "democrat",
+           "birthday", "celebration", "dance", "music",
+           "drinks", "friends", "fun", "cake", "gifts",
+           "invite", "crowd", "club", "loud", "festival")
+embeddings <- ft_word_vectors(model, words) |>
+  as_tibble(rownames = "word")
+embeddings
+```
+
+As you can see, each word is represented by a 300-length vector that (to some degree) captures the general meaning of that word. 
+So, we would expect the vector of election to be closer to parliament than to cake.
+Since party can be used in both contexts, it should be somewhat close to both election/ballot and cake:
+
+```{r}
+embeddings |> 
+  filter(word %in% c("election", "ballot", "party", "cake")) |>
+  column_to_rownames("word") |>
+  as.matrix() |> 
+  cosine_sim_rows()
+```
+
+As you can see here, the meaning of 'party' is in a sense the average between its meaning in the political and celebratory senses. To make this even more clear, let's plot the position of these words in a two dimensional space.
+
+For this, we first compute the similarities between all word pairs.
+Then, we place all words in a two-dimensional space using multidimensional scaling -- the favorite tool of political scientists to produce the "political compass" plots one sees in the memes. 
+We then extract the two dimensions for each word from the `mds` object,
+and plot it using ggplot:
+
+```{r}
+similarities <- embeddings |> 
+    column_to_rownames("word") |>
+  as.matrix() |> 
+  cosine_sim_rows()
+
+D <- as.dist(1 - similarities)
+mds <- cmdscale(D, k = 2)
+
+words_2d <- tibble(
+  word = rownames(mds),
+  dim1 = mds[,1],
+  dim2 = mds[,2]
+)
+
+ggplot(words_2d, aes(dim1, dim2, label = word, 
+                     color=(word == "party"))) +
+  geom_point() +
+  geom_text(vjust = -0.4) +  
+  coord_equal() +
+  theme_minimal() + 
+  theme(legend.position="none") 
+```
+
+As you can see, all the political words are on the left, while the celebratory words are on the right - with party right in the middle. I leave interpreting the second dimension to the reader, but apparently conservatives are to friends as campaigns are to birthdays. 
+
+
+# Embeddings, transform! Contextual embeddings from BERT and GPT
+
+The previous section used pre-trained embedding vectors to represent the meaning of words in a static way:
+a *party* is a *party*, regardless of whether it's a celebration or a political organization. 
+Although such `static` embeddings are actually still the starting point of powerful models like BERT and ChatGPT,
+we can use the more sophisticated technology of these models to represent the **contextual** meaning of a word.
+
+These models, generally termed *transformers*, were sparked by a paper called *Attention is all you need*,
+again from Google. 
+Essentially, these models use multiple hidden layers in a complex neural network to progressively *transform* the input embeddings to a contextual representation of their meaning, using so-called *attention layers* to model which words form the relevant context in which to understand each other word:
+if the attention layer says the word "political" is important for the word "party" in this sentence,
+the embedding vector for party in that sentence is moved closer to that of political. 
+
+Although at a technical level these models are quite hard to fully understand, 
+for this tutorial it suffices to know that these layers capture more and more of the semantics and pragmatics of a word as used in the text. 
+In normal use of these models, we would then use these representations to perform a specific task: 
+generally supervised machine learning in BERT and next word prediction in GPT.
+However, we can also access the representation from these models directly, extracting the contextualized 'meaning' of a word or document according to these models. 
+
+To do this in practice we have two basic choices: 'encoder' models like BERT or 'decoder' models like GPT.
+
+
+## Extracting contextual embeddings with BERT
+
+We can use BERT or a similar 'encoder' model to embed our words or sentences.
+You can generally run these models on your own computer (provided you have a decent graphical card or a lot of patience).
+This has the advantage of keeping both your data and your credit card details to yourself.
+The downside is that you need a somehwat beefy computer and it can be a bit of a pain to set up, 
+especially as most R packages for this actually call python in the backend,
+which makes especially installing them more complicated.
+
+The most used package is probably the `text` package, which you can install with the following commands:
+
+```{r eval=F}
+ install.packages("text")
+text::textrpp_install()
+```
+
+Then, initialize the library with:
+
+
+```{r}
+library(text)
+textrpp_initialize()
+```
+
+Now, let's use a basic BERT model to embed the four sentences we used earlier:
+
+```{r}
+doc_emb <- textEmbed(
+  texts,
+  model = "bert-base-uncased"
+)
+doc_emb$texts$texts 
+```
+
+As you can see, each text is now represented in a 768-dimensional vector space,
+representing the overall meaning of that text.
+
+We can now use similar code to before to see which documents are most similar:
+
+```{r}
+doc_emb$texts$texts |>
+  column_to_rownames("id_texts") |>
+  as.matrix() |>
+  cosine_sim_rows()  |>
+  magrittr::set_rownames(texts)
+```
+
+As you can see, the first two documents and the last two documents are the most similar pairs,
+with document three (which talks about a celebratory party after a political victory) being in the middle. 
+
+## Extracting contextual word embeddings with BERT
+
+Instead of document embeddings, we can also extract contextual word embeddings directly. 
+To make the representation of 'party' clearer, let's add a fifth sentence to the set:
+
+```{r}
+texts2 <- c(texts,
+  "The political organization held a celebration"
+)
+word_emb <- textEmbed(
+  texts2,
+  model = "bert-base-uncased",
+  aggregation_from_tokens_to_texts = NULL
+)
+word_emb$tokens$texts[[1]]
+```
+
+The table above shows the rerpresentation of each word (or *token*) in the first sentence, 
+and in fact the representation of the whole sentence in the first example is the exact (column-wise) average of the representation of the separate words. 
+
+Now, let's extract the representation of *party*  in sentences one and four,
+as well as the representation fo the words *organization* and *celebration* in the newly added fifth sentence:
+
+```{r}
+party_emb <- list_rbind(word_emb$tokens$texts) |>
+  filter(tokens == "party" & id %in% c(1,4) | 
+         tokens %in% c("organization", "celebration") & id==5)
+party_emb
+```
+
+As you can see, party in the first sentence now has a different embedding from party in the fourth sentence:
+a political party is not (always) a celebration!
+
+Now, let's see how each usage of party relates to the meaning of the words organization and celebration:
+
+```{r}
+party_sim <- party_emb |>
+  unite("word", id, tokens) |>
+  column_to_rownames("word") |>
+  as.matrix() |> 
+  cosine_sim_rows()
+
+ggcorrplot::ggcorrplot(party_sim, show.diag = FALSE, lab=TRUE, show.legend = FALSE) 
+```
+
+This shows very clearly that the two uses of 'party' have quite different meanings,
+with a relatively low similarity between `1_party` and `4_party`.
+Moverover, party in the first sentence is most similar to *organization* in the last sentence,
+while party in the fourth sentence most closely resembles *celebration*
+
+Finally, we can represent this graphically, e.g. using the same multidimensional scaling employed above:
+
+```{r}
+as.dist(1 - party_sim) |>
+  cmdscale(k = 2) |> 
+  as_tibble(rownames="word", .name_repair=~c("d1", "d2")) |>
+  ggplot(aes(d1, d2, label=word)) + 
+  geom_label() + 
+  theme_minimal() + 
+  xlim(c(-.4, .4)) +   
+  ylim(c(-.4, .4))
+```
+
+This neatly shows a primary dimension on the x-axis which celebrates the political from the celebratory,
+with the vector from celebration to organization being quite similar to the vector between the two usages of party.
+
+
+
