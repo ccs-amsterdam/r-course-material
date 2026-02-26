@@ -1,6 +1,9 @@
 ---
 title: "Using embeddings in R"
 format: gfm
+knitr:
+  opts_chunk:
+    fig.path: "img/embedding-"
 execute:
   echo: true     
   warning: false  
@@ -42,7 +45,7 @@ Using `tidytext`, we can `unnest` texts into words and store them in a (long) on
 If we count the frequency per document per word, we have a DTM in long format,
 which we can `pivot_wider` to show the traditional DTM format:
 
-```{r}
+```{r dtm}
 library(tidyverse)
 library(tidytext)
 
@@ -67,7 +70,7 @@ Spatially, we can think of words as being in a 4-dimensional space as each word 
 If we could draw in 4d we could plot this directly, but we can also group the first and second pair of documents together
 and then display the words as vectors in a two-dimensional space:
 
-```{r}
+```{r dtmvectors}
 dtm_long |> 
   filter(word %in% c("election", "party", "conservative", "fantastic")) |>
   mutate(label=if_else(doc_id <= 2, "P", "C")) |>
@@ -88,7 +91,7 @@ Moreover, we often use `cosine` as a measure of similarity, since the cosine of 
 
 To calculate cosine, we can use the fact that the inner product between two vectors of length one is the same as the cosine. In other words, if we first *normalize* the vectors so they have length one, we can sum the product of each dimension to get the cosine:
 
-```{r}
+```{r cosine}
 election = c(1,2)
 party = c(2,2)
 # per Pythagoras, the length of a vector is the square root of the sum of its squared values:
@@ -102,7 +105,7 @@ sum(election_normalized * party_normalized)
 
 We can use the logic above to find similarities between words in the "four-dimensional" space, i.e. which words occur in similar documents?
 
-```{r}
+```{r dtmcosine}
 #' Function to calculate cosine similarity between rows of a matrix
 cosine_sim_rows <- function(M) {
   # Step 1: normalize by dividing each row by its Euclidean length
@@ -129,7 +132,7 @@ For the sake of this example we use a simple built-in hierarchical cluster model
 If we would use SVD here this would be a latent semantic analysis, and LDA topic modeling does something similar with a more sophisticated model.
 
 
-```{r}
+```{r dtmcluster}
 clustering <- hclust(as.dist(1 - similarities), 
                      method = "average") 
 
@@ -175,7 +178,7 @@ This vector is called an **embedding** as it embeds a word in a relatively low-d
 
 The nice thing of these embedding vectors is that the training is non-trivial, the result is a simple matrix of (e.g. 300-dimensional) vectors for the most frequent words in the English (or another) language, and we can just download these vectors:
 
-```{r}
+```{r loadglove}
 library(fastTextR)
 if (!file.exists(here::here("cc.en.300.bin"))) {
   url = "https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.bin.gz"
@@ -188,7 +191,7 @@ model <- ft_load(here::here("cc.en.300.bin"))
 
 Let's look at the vectors for some words related to political and celebratory parties:
 
-```{r}
+```{r glove}
 words <- c("party", "election", "ballot", "parliament", "government",
            "minister", "candidate", "campaign", "coalition", "opposition",
            "conservative", "labour", "liberal", "republican", "democrat",
@@ -204,7 +207,7 @@ As you can see, each word is represented by a 300-length vector that (to some de
 So, we would expect the vector of election to be closer to parliament than to cake.
 Since party can be used in both contexts, it should be somewhat close to both election/ballot and cake:
 
-```{r}
+```{r glovecosine}
 embeddings |> 
   filter(word %in% c("election", "ballot", "party", "cake")) |>
   column_to_rownames("word") |>
@@ -219,7 +222,7 @@ Then, we place all words in a two-dimensional space using multidimensional scali
 We then extract the two dimensions for each word from the `mds` object,
 and plot it using ggplot:
 
-```{r}
+```{r glovevector}
 similarities <- embeddings |> 
     column_to_rownames("word") |>
   as.matrix() |> 
@@ -279,7 +282,7 @@ which makes especially installing them more complicated.
 
 The most used package is probably the `text` package, which you can install with the following commands:
 
-```{r eval=F}
+```{r textinstall, eval=F}
  install.packages("text")
 text::textrpp_install()
 ```
@@ -287,14 +290,14 @@ text::textrpp_install()
 Then, initialize the library with:
 
 
-```{r}
+```{r textinit}
 library(text)
 textrpp_initialize()
 ```
 
 Now, let's use a basic BERT model to embed the four sentences we used earlier:
 
-```{r}
+```{r bertembed}
 doc_emb <- textEmbed(
   texts,
   model = "bert-base-uncased"
@@ -307,7 +310,7 @@ representing the overall meaning of that text.
 
 We can now use similar code to before to see which documents are most similar:
 
-```{r}
+```{r bertsim}
 doc_emb$texts$texts |>
   column_to_rownames("id_texts") |>
   as.matrix() |>
@@ -323,7 +326,7 @@ with document three (which talks about a celebratory party after a political vic
 Instead of document embeddings, we can also extract contextual word embeddings directly. 
 To make the representation of 'party' clearer, let's add a fifth sentence to the set:
 
-```{r}
+```{r bertwordembed}
 texts2 <- c(texts,
   "The political organization held a celebration"
 )
@@ -341,7 +344,7 @@ and in fact the representation of the whole sentence in the first example is the
 Now, let's extract the representation of *party*  in sentences one and four,
 as well as the representation fo the words *organization* and *celebration* in the newly added fifth sentence:
 
-```{r}
+```{r bertpartyemb}
 party_emb <- list_rbind(word_emb$tokens$texts) |>
   filter(tokens == "party" & id %in% c(1,4) | 
          tokens %in% c("organization", "celebration") & id==5)
@@ -353,7 +356,7 @@ a political party is not (always) a celebration!
 
 Now, let's see how each usage of party relates to the meaning of the words organization and celebration:
 
-```{r}
+```{r bertcosine}
 party_sim <- party_emb |>
   unite("word", id, tokens) |>
   column_to_rownames("word") |>
@@ -370,7 +373,7 @@ while party in the fourth sentence most closely resembles *celebration*
 
 Finally, we can represent this graphically, e.g. using the same multidimensional scaling employed above:
 
-```{r}
+```{r bertvectors}
 as.dist(1 - party_sim) |>
   cmdscale(k = 2) |> 
   as_tibble(rownames="word", .name_repair=~c("d1", "d2")) |>

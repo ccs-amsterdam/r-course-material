@@ -81,7 +81,7 @@ dtm_long |>
   ylim(0, 2.1) + theme_minimal()+theme(legend.position="none")
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-2-1.png)
+![](img/embedding-dtmvectors-1.png)
 
 In this space, *election* and *party* are clearly closer to each other
 than *conservative* and *fantastic*. Since the absolute frequency of a
@@ -135,7 +135,7 @@ library(ggcorrplot)
 ggcorrplot(similarities, show.diag = F, lab=T)
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-4-1.png)
+![](img/embedding-dtmcosine-1.png)
 
 (note that instead of ggocrrplot, we could also transform to a tibble,
 pivot_longer, and use geom_tile plus geom_text)
@@ -173,7 +173,7 @@ ggplot() +
   )
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-5-1.png)
+![](img/embedding-dtmcluster-1.png)
 
 # Fits like a GloVe: Static pre-trained word embeddings
 
@@ -306,7 +306,7 @@ ggplot(words_2d, aes(dim1, dim2, label = word,
   theme(legend.position="none") 
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-9-1.png)
+![](img/embedding-glovevector-1.png)
 
 As you can see, all the political words are on the left, while the
 celebratory words are on the right - with party right in the middle. I
@@ -512,7 +512,7 @@ party_sim <- party_emb |>
 ggcorrplot::ggcorrplot(party_sim, show.diag = FALSE, lab=TRUE, show.legend = FALSE) 
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-16-1.png)
+![](img/embedding-bertcosine-1.png)
 
 This shows very clearly that the two uses of ‘party’ have quite
 different meanings, with a relatively low similarity between `1_party`
@@ -534,7 +534,7 @@ as.dist(1 - party_sim) |>
   ylim(c(-.4, .4))
 ```
 
-![](embeddings_files/figure-commonmark/unnamed-chunk-17-1.png)
+![](img/embedding-bertvectors-1.png)
 
 This neatly shows a primary dimension on the x-axis which celebrates the
 political from the celebratory, with the vector from celebration to
