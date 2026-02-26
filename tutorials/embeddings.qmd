@@ -32,7 +32,7 @@ First, we will have a look at the Document-Term-Matrix (DTM) as a representation
 and show how this DTM can be directly clustered to provide a form of topic modeling.
 Next, we look at **static embeddings**, i.e. embeddings where one word (e.g. *party*) always has the same embedding,
 regardless of context.
-The final section uses transformer-based models (BERT and GPT) to derive **contextual embeddings**,
+The final section uses transformer-based models (specifically BERT) to derive **contextual embeddings**,
 i.e. where 'party' has a different embedding when used in the meaning of political parties than as celebration. 
 
 
@@ -386,6 +386,5 @@ as.dist(1 - party_sim) |>
 
 This neatly shows a primary dimension on the x-axis which celebrates the political from the celebratory,
 with the vector from celebration to organization being quite similar to the vector between the two usages of party.
-
 
 
