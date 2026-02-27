@@ -28,7 +28,11 @@ images <- tribble(
     "merkel", "female", "https://upload.wikimedia.org/wikipedia/commons/d/d7/Angela_Merkel_11.jpg",
     "obama", "male", "https://upload.wikimedia.org/wikipedia/commons/d/d1/Barack_Obama_Fold.jpg",
     "rutte", "male", "https://upload.wikimedia.org/wikipedia/commons/c/cd/Mark_Rutte.jpg",  
-    "meloni", "female", "https://upload.wikimedia.org/wikipedia/commons/7/78/Giorgia_meloni.jpg"
+    "meloni", "female", "https://upload.wikimedia.org/wikipedia/commons/7/78/Giorgia_meloni.jpg",
+    "klaebo", "male", "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Johannes_H%C3%B8sflot_Kl%C3%A6bo_0736.jpg/500px-Johannes_H%C3%B8sflot_Kl%C3%A6bo_0736.jpg", 
+    "vitozzi", "female", "https://upload.wikimedia.org/wikipedia/commons/0/08/Vittozzi_L._%E2%80%93_Biathlon_2023_Nove_Mesto_8374.jpg",
+    "schouten", "female", "https://upload.wikimedia.org/wikipedia/commons/0/0d/Irene_schouten-1457901652.jpeg",
+    "krol", "male", "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/2016_World_Single_Distance_Speed_Skating_Championships_-_1500m_M_-_Thomas_Krol.jpg/656px-2016_World_Single_Distance_Speed_Skating_Championships_-_1500m_M_-_Thomas_Krol.jpg"
   )
 ```
 
@@ -229,3 +233,123 @@ pmap(images, analyse_picture) |> list_rbind()
 If you play around with this you will find out that moondream often makes seemingly stupid mistakes. You might get better results with a more powerful model (such as `llava`, `qwen3-vl:8b` or `llama3.2-vision:11b`) but note that it depends on your computer whether you will be able to run them: the bigger models require a lot of GPU memory, which not all computers will support. See https://ollama.com/library for an overview of existing models. 
 
 You can also use proprietary models such as `chatgpt` as used above, but these might hit the brake more often where it comes to talking about existing persons, so you might have to massage the prompt to ensure the AI of your good intentions as a researcher...
+
+## Embedding images
+
+We've discussed using word and document embeddings in our [text embeddings tutorial](embeddings.md).
+It is also quite easy to embed images, which allows us to cluster images similar to how a topic model clusters words and documents.
+
+While the contextual text embeddings were performed by calling python behind the scenes with reticulate,
+let's now use the R packages `torch` and `torchvision`, which are built directly in R*
+
+(*) Well, actually, the R packages call C++ libraries to do most of the work -- but python's torch package also just calls the same C++ library, so in that sense the R package is more 'native' than the packages that use reticulate to call python. And in fact many of the packages we use daily in R (and python!) actually call libraries written in more efficient languages such as C behind the scene, including many of our beloved tidyverse packages!
+
+```{r}
+library(torch)
+library(torchvision)
+library(magick) # Useful for image loading
+```
+
+
+```{r}
+transform <- function(img) {
+  img |>
+    transform_resize(size = c(224, 224)) |>
+    transform_to_tensor() |>
+    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225))
+}
+```
+
+```{r}
+model <- model_resnet50(pretrained = TRUE)
+```
+
+```{r}
+model$eval()
+autograd_set_grad_mode(FALSE)
+```
+
+```{r}
+preprocess_image <- function(name) {
+  tensor <- str_glue("tutorial_images/{name}.jpg") |>
+    image_read() |>
+    transform_to_tensor() |>
+    transform_resize(size = c(224, 224)) |>
+    transform_normalize(
+      mean = c(0.485, 0.456, 0.406), 
+      std = c(0.229, 0.224, 0.225)
+    )
+}
+
+embeddings <- map(images$name, preprocess_image) |>
+  torch_stack() |>
+  model() |>
+  as.matrix() |>
+  magrittr::set_rownames(images$name)
+
+#' Function to calculate cosine similarity between rows of a matrix
+cosine_sim_rows <- function(M) {
+  # Step 1: normalize by dividing each row by its Euclidean length
+  M_norm <- M / sqrt(rowSums(M^2))
+  # Step 2: cosine = inner products of normalized vector pairs = matrix times transposed matrix
+  M_norm %*% t(M_norm)
+}
+
+similarities <- cosine_sim_rows(embeddings)
+ggcorrplot::ggcorrplot(similarities, show.diag=F, lab=T)
+```
+
+We can make this look nicer by including the actual images, but that means we need to build the image ourselves rather than relying on ggplot.
+
+Unfortunately, 
+
+```{r}
+library(ggimage)
+similarities_long <- similarities |>
+  as.data.frame() |>
+  rownames_to_column("name1") |>
+  pivot_longer(-name1, names_to="name2") |>
+  filter(name1 != name2) 
+
+diagonal <- images |> 
+  select(name1=name, name2=name) |>
+  mutate(img_path=str_glue("tutorial_images/{name}.jpg"))
+
+ggplot(similarities_long, aes(x=name1, y=name2)) +
+  geom_tile(aes(fill=value)) +
+  geom_text(aes(label=round(value,2))) +
+  geom_image(data=diagonal, aes(image=img_path)) + 
+  scale_fill_gradient(low="white", high="darkgreen") + 
+  coord_equal() + 
+  theme_minimal()
+  
+```
+
+```{r}
+clustering <- hclust(as.dist(1 - similarities), 
+                     method = "average") 
+
+d <- ggdendro::dendro_data(clustering)
+
+clusters <- cutree(clustering, k=2)
+clusters <- tibble(label = names(clusters), cluster = as.factor(clusters) )
+
+ggplot() +
+  geom_segment(data = d$segments,
+               aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_text(data = inner_join(d$labels, clusters),
+            aes(x = x, y = y - 0.02, label = label, 
+                color=cluster),
+            angle = 45, hjust = 1) +
+  coord_cartesian(clip = "off") +
+  ylab("Cosine distance") + 
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.margin = margin(20, 20, 40, 20),
+        legend.position = "none"
+  )
+
+
+```
