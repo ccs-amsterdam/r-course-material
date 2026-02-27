@@ -19,7 +19,6 @@ As a first step to image analysis, you need to acquire the source material.
 For now, let's assume we have a data frame with image URLs and other relevant information,
 for example politicians and gender:
 
-
 ```{r download}
 library(tidyverse)
 
@@ -42,8 +41,10 @@ To make it easy to run this for each politician, let's define a helper function 
 ```{r dlfunction}
 download_image <- function(name, url, ...) {
   destfile = paste0("tutorial_images/", name, ".jpg")
-  if (!file.exists(destfile)) 
+  if (!file.exists(destfile))  {
     download.file(url, destfile, mode = "wb", headers=c("User-Agent" = "RTutorial/1.0"))
+    Sys.sleep(1)
+  }
 } 
 ```
 
@@ -144,7 +145,7 @@ We could of course also write all the preprocessed images to disk rather than ke
 ```{r describe}
 library(tidyllm)
 
-describe_politician <- function(name, img, ...) {
+describe_image <- function(name, img, ...) {
   tmp <- tempfile(fileext = ".png")
   image_write(img, path = tmp, format = "png")
   description <- llm_message(
@@ -157,7 +158,7 @@ describe_politician <- function(name, img, ...) {
   tibble(name=name, description=description)
 }
 
-pmap(images, describe_politician) |> list_rbind()
+pmap(images, describe_image) |> list_rbind()
 ```
 
 We can also run this example on a remote LLM like OpenAI's chatGPT. For this, you would need to 
@@ -173,7 +174,7 @@ Interestingly, I did have to change the prompt to avoid triggering a guard rail 
 ```{r describechat}
 #| cache: true
 #| dependson: "images"
-describe_politician_chat <- function(name, img, ...) {
+describe_person_chat <- function(name, img, ...) {
   tmp <- tempfile(fileext = ".png")
   image_write(img, path = tmp, format = "png")
   description <- llm_message(
@@ -186,7 +187,7 @@ describe_politician_chat <- function(name, img, ...) {
   tibble(name=name, description=description)
 }
 
-pmap(images, describe_politician_chat) |> list_rbind()
+pmap(images, describe_person_chat, .progress=TRUE) |> list_rbind()
 ```
 
 ## Using structured output
@@ -205,13 +206,12 @@ face_schema <- tidyllm_schema(
   gender = field_fct(.description = "What is the apparent gender of the main person (M for male, F for female)", .levels = c("F", "M")),
   emotion = field_chr(.description = "Single word for the main emotion shown by the person, e.g. happy, sad or angry")
 )
-
 ```
 
 Now, we can rewrite the function above to include the `.json_schema` (and include the desired output in the prompt).
 We also replace `get_reply` by `get_reply_data`, which returns a named list that we can easily turn into a tibble to return:
 
-```{r}
+```{r analyse}
 #| cache: true
 #| dependson: ["images", "schema"]
 analyse_picture <- function(name, img, ...) {
@@ -227,14 +227,15 @@ analyse_picture <- function(name, img, ...) {
     add_column(name=name)
 }
 
-pmap(images, analyse_picture) |> list_rbind()
+pmap(images, analyse_picture, .progress=TRUE) |> list_rbind()
 ```
 
-If you play around with this you will find out that moondream often makes seemingly stupid mistakes. You might get better results with a more powerful model (such as `llava`, `qwen3-vl:8b` or `llama3.2-vision:11b`) but note that it depends on your computer whether you will be able to run them: the bigger models require a lot of GPU memory, which not all computers will support. See https://ollama.com/library for an overview of existing models. 
+If you look at the output you will probably see that moondream often makes seemingly stupid mistakes or even fails to answer the question altogether.
+You might get better results with a more powerful model (such as `llava`, `qwen3-vl:8b` or `llama3.2-vision:11b`) but note that it depends on your computer whether you will be able to run them: the bigger models require a lot of GPU memory, which not all computers will support. See https://ollama.com/library for an overview of existing models. 
 
 You can also use proprietary models such as `chatgpt` as used above, but these might hit the brake more often where it comes to talking about existing persons, so you might have to massage the prompt to ensure the AI of your good intentions as a researcher...
 
-## Embedding images
+# Embedding images
 
 We've discussed using word and document embeddings in our [text embeddings tutorial](embeddings.md).
 It is also quite easy to embed images, which allows us to cluster images similar to how a topic model clusters words and documents.
@@ -242,34 +243,42 @@ It is also quite easy to embed images, which allows us to cluster images similar
 While the contextual text embeddings were performed by calling python behind the scenes with reticulate,
 let's now use the R packages `torch` and `torchvision`, which are built directly in R*
 
-(*) Well, actually, the R packages call C++ libraries to do most of the work -- but python's torch package also just calls the same C++ library, so in that sense the R package is more 'native' than the packages that use reticulate to call python. And in fact many of the packages we use daily in R (and python!) actually call libraries written in more efficient languages such as C behind the scene, including many of our beloved tidyverse packages!
-
-```{r}
+```{r torch}
 library(torch)
 library(torchvision)
 library(magick) # Useful for image loading
 ```
 
+(*) Well, actually, the R packages call C++ libraries to do most of the work -- but python's torch package also just calls the same C++ library, so in that sense the R package is more 'native' than the packages that use reticulate to call python. And in fact many of the packages we use daily in R (and python!) actually call libraries written in more efficient languages such as C behind the scene, including many of our beloved tidyverse packages!
 
-```{r}
-transform <- function(img) {
-  img |>
-    transform_resize(size = c(224, 224)) |>
-    transform_to_tensor() |>
-    transform_normalize(mean = c(0.485, 0.456, 0.406), std = c(0.229, 0.224, 0.225))
-}
-```
+## Loading an image recognition model
 
-```{r}
+Torchvision includes a number of built-in (pretrained) image classification models. 
+Resnet-50 is a frequently used model described by [He et al. (2015)](https://arxiv.org/abs/1512.03385) that is trained for image classification.
+
+Let's load the model and then set it into 'evaluation' mode and disable gradient updating, as we simply want to use the existing model and not train or fine tune it.
+
+```{r model}
 model <- model_resnet50(pretrained = TRUE)
-```
-
-```{r}
 model$eval()
 autograd_set_grad_mode(FALSE)
+model$fc <- nn_identity()
 ```
 
-```{r}
+The final line in the code above replaces the last layer of resnet by an 'identity' layer (ie a layer that does nothing but just returns the input).
+The reason for this is that we are interested in the final internal representation of the images, and not in the classification.
+So, we want to take the output of the layer before the last one. 
+
+## Preprocessing images
+
+Before we can proceed to use the model, we need to adapt our images. 
+Convolutional neural networks like `resnet50` expect images with a fixed size (224x224)
+and specific normalization of the colors. 
+Torchvision has built in functions to do these preprocessing steps, 
+which we can combine into a single function that reads the image, converts it into a torch *tensor* (multi-dimensional vector),
+and performs the preprocessing:
+
+```{r prp}
 preprocess_image <- function(name) {
   tensor <- str_glue("tutorial_images/{name}.jpg") |>
     image_read() |>
@@ -280,14 +289,26 @@ preprocess_image <- function(name) {
       std = c(0.229, 0.224, 0.225)
     )
 }
+```
 
+Now, we can use the `map` function to call this function on each image, transform it into a torch `stack` 
+(the expected format for torch models), and call the actual `model` on it that we loaded earlier. 
+Then, we convert the result into a native R matrix and re-add the rownames:
+
+```{r embed}
 embeddings <- map(images$name, preprocess_image) |>
   torch_stack() |>
   model() |>
   as.matrix() |>
   magrittr::set_rownames(images$name)
+embeddings[,1:10]
+```
 
-#' Function to calculate cosine similarity between rows of a matrix
+As you can see, each image is not represented or *embedded* as a (2,048-dimensional) vector. 
+We can use calculate the cosine similarities with the same function we used in the embeddings tutorial,
+and plot the similarities between the images
+
+```{r corplot}
 cosine_sim_rows <- function(M) {
   # Step 1: normalize by dividing each row by its Euclidean length
   M_norm <- M / sqrt(rowSums(M^2))
@@ -296,44 +317,37 @@ cosine_sim_rows <- function(M) {
 }
 
 similarities <- cosine_sim_rows(embeddings)
-ggcorrplot::ggcorrplot(similarities, show.diag=F, lab=T)
+ggcorrplot::ggcorrplot(similarities, show.diag=F, lab=T, show.legend = F)
 ```
 
-We can make this look nicer by including the actual images, but that means we need to build the image ourselves rather than relying on ggplot.
+As you can see from the result, the (female skater) Schouten is actually most similar to the (female skier) Vitozzi, which makes sense. 
+Similarly, Meloni and Obama look more like the other politicians than like the sporters. 
 
-Unfortunately, 
+(Note that we could also have used the `torch_cosine_similarity` function on the model output directly. 
+I chose ot convert to a matrix and compute the cosine in R because this makes it explicit what we're doing,
+and is consistent with the earlier embeddings tutorial)
 
-```{r}
-library(ggimage)
-similarities_long <- similarities |>
-  as.data.frame() |>
-  rownames_to_column("name1") |>
-  pivot_longer(-name1, names_to="name2") |>
-  filter(name1 != name2) 
+## Clustering images
 
-diagonal <- images |> 
-  select(name1=name, name2=name) |>
-  mutate(img_path=str_glue("tutorial_images/{name}.jpg"))
+We can also do a cluster analysis of the images: which 'clusters' can the computer find in the images based on their embeddings?
 
-ggplot(similarities_long, aes(x=name1, y=name2)) +
-  geom_tile(aes(fill=value)) +
-  geom_text(aes(label=round(value,2))) +
-  geom_image(data=diagonal, aes(image=img_path)) + 
-  scale_fill_gradient(low="white", high="darkgreen") + 
-  coord_equal() + 
-  theme_minimal()
-  
-```
+For this, we can use a variety of different clustering methods, but the simplest is probably just a hierarchical clustering with the built-in `hclust` function, which works directly on the similarity (or actually distance) matrix. This results in a full hierarchical clustering, 
+which we can 'cut' at a certain depth to get e.g. 2 clusters:
 
-```{r}
+```{r clustering}
+library(ggdendro)
 clustering <- hclust(as.dist(1 - similarities), 
                      method = "average") 
 
-d <- ggdendro::dendro_data(clustering)
-
-clusters <- cutree(clustering, k=2)
+clusters <- cutree(clustering, k=4)
 clusters <- tibble(label = names(clusters), cluster = as.factor(clusters) )
+clusters
+```
 
+Now, let's plot the full hierarchy, using the `k=4` for coloring the labels:
+
+```{r dendro}
+d <- dendro_data(clustering)
 ggplot() +
   geom_segment(data = d$segments,
                aes(x = x, y = y, xend = xend, yend = yend)) +
@@ -350,6 +364,65 @@ ggplot() +
         plot.margin = margin(20, 20, 40, 20),
         legend.position = "none"
   )
-
-
 ```
+
+As you can see, the politicians are in two pairs of clusters, the formal portraits of Merkel and Obama and the more campaign-like images of Rutte and Meloni. Three of the sporters are also clustered together, with the fourth (Krol) probably falling out because his face is no longer visible in the cropped image
+ 
+Since this already works on clustering different groups of portraits, you can imagine it will also work really well on e.g.
+differentiating between different types of news photos or different kinds of instagram posts 
+(cats, parties and plates of food are all quite distinct!)
+
+
+## Saving and plotting images
+
+As a final demonstration, let's use images within an existing ggplot to enrich the correlation plot above by plotting the portraits on the diagonal.
+
+To do this, let's first make a 'long' version of the similarities matrix (as ggplot generally prefers long data), and exclude the diagonal.
+Let's also sort the names by cluster by converting them to a factor using the `cluster` data frame from above
+
+```{r simlong}
+names = clusters |> arrange(cluster) |> pull(label)
+similarities_long <- similarities |>
+  as.data.frame() |>
+  rownames_to_column("name1") |>
+  pivot_longer(-name1, names_to="name2") |>
+  filter(name1 != name2)|>
+  mutate(name1=factor(name1, levels=names),
+         name2=factor(name2, levels=names))
+```
+
+Next, we need to prepare the images to plot. Since we already have squared and resized images in the `images` data frame,
+we can use those nicely for the diagonal. 
+However, we need to convert it to a `grob` (**gr**aphical **ob**ject) to be able to plot them:
+
+```{r grobs}
+library(grid)
+get_grob <- function(img) rasterGrob(as.raster(img), interpolate = TRUE)
+grobs <- images |> 
+  mutate(grob = map(img, get_grob),
+         name = factor(name, levels=names))
+```
+
+Now, we're ready to make the plot. We use the `ggpmisc` package which has a `geom_grob` function
+that can place the images (grobs) directly in the graph. 
+We set the width and height to 1/8 of the total canvas as there are 8 tiles in total:
+
+```{r clusterimg}
+library(ggpmisc)
+ggplot(similarities_long, aes(x=name1, y=name2)) +
+  geom_tile(aes(fill=value)) +
+  geom_text(aes(label=round(value,2))) +
+  geom_grob(data=grobs, aes(x=name, y=name, label=grob), vp.width=1/8, vp.height=1/8) + 
+  scale_fill_gradient(low="white", high="darkgreen") + 
+  coord_equal() + 
+  theme_minimal() + theme(legend.position = "none") + xlab("") + ylab("") +
+  ggtitle("Similarity between portraits according to resnet-50")
+```
+
+Which makes it much clearer what the images are that we are clustering - and also shows that the cropping process 
+did not really do justice to Thomas Krol...)
+
+An alternative approach would be the `geom_image` function from `ggimages`, which is also a good solution
+but requires the images to be on the disk.
+Since we don't want to use the original images (which are too large and not square), we would then first save the resized images to disk
+using the `image_write` function, and use the new file name as the aesthetic for the `geom_image`. 
