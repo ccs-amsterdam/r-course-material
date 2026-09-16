@@ -1,7 +1,7 @@
 ---
 title: "Generalized linear models"
 author: "Kasper Welbers & Wouter van Atteveldt"
-date: "January 2020"
+date: "January 2025"
 output:
   html_document:
     toc: yes
